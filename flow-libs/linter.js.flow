@@ -1,0 +1,61 @@
+// @flow
+
+export type linter$StandardLinter = {
+  name: string,
+  scope: 'file' | 'project',
+  lintOnFly: boolean,
+  grammarScopes: Array<string>,
+  lint(textEditor: atom$TextEditor): ?Array<Message> | Promise<?Array<Message>>,
+}
+
+export type linter$Message = {
+  type: string,
+  text?: string,
+  html?: string,
+  name?: string,
+  // ^ Only specify this if you want the name to be something other than your linterProvider.name
+  // WARNING: There is NO replacement for this in v2
+  filePath?: string,
+  // ^ MUST be an absolute path (relative paths are not supported)
+  range?: atom$RangeLike,
+  trace?: Array<linter$Trace>,
+  fix?: linter$Fix,
+  severity?: 'error' | 'warning' | 'info',
+  selected?: Function
+  // ^ WARNING: There is NO replacement for this in v2
+};
+
+export type linter$Trace = {
+  type: 'Trace',
+  text?: string,
+  html?: string,
+  name?: string,
+  // ^ Only specify this if you want the name to be something other than your linterProvider.name
+  // WARNING: There is NO replacement for this in v2
+  filePath?: string,
+  // ^ MUST be an absolute path (relative paths are not supported)
+  range?: Range,
+  class?: string,
+  severity?: 'error' | 'warning' | 'info'
+};
+
+export type linter$Fix = {
+  range: Range,
+  newText: string,
+  oldText?: string
+};
+
+export type linter$Config = {
+  name: string
+}
+
+export type linter$IndieRegistry = {
+  register(config: linter$Config): linter$Indie
+}
+
+
+export type linter$Indie = {
+  deleteMessages(): void,
+  setMessages(messages: Array<linter$Message>): void,
+  dispose(): void
+}

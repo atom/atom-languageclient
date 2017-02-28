@@ -1,0 +1,42 @@
+export type nuclide$OutlineProvider = {
+  name: string,
+  // If there are multiple providers for a given grammar, the one with the highest priority will be
+  // used.
+  priority: number,
+  grammarScopes: Array<string>,
+  updateOnEdit?: boolean,
+  getOutline: (editor: TextEditor) => Promise<?Outline>,
+};
+
+export type nuclide$OutlineTree = {
+  // Must be one or the other. If both are present, tokenizedText is preferred.
+  plainText?: string,
+  tokenizedText?: TokenizedText,
+  representativeName?: string,
+
+  startPosition: atom$Point,
+  endPosition?: atom$Point,
+  children: Array<nuclide$OutlineTree>,
+};
+
+export type nuclide$Outline = {
+  outlineTrees: Array<nuclide$OutlineTree>,
+};
+
+export type nuclide$TokenKind = 'keyword'
+  | 'class-name'
+  | 'constructor'
+  | 'method'
+  | 'param'
+  | 'string'
+  | 'whitespace'
+  | 'plain'
+  | 'type'
+  ;
+
+export type nuclide$TextToken = {
+  kind: nuclide$TokenKind,
+  value: string,
+};
+
+export type nuclide$TokenizedText = Array<nuclide$TextToken>;

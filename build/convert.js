@@ -1,0 +1,56 @@
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = undefined;
+
+var _path = require('path');
+
+var _path2 = _interopRequireDefault(_path);
+
+var _atom = require('atom');
+
+var _languageclientV = require('./protocol/languageclient-v2');
+
+var ls = _interopRequireWildcard(_languageclientV);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+let Convert = class Convert {
+  static pathToUri(pathName) {
+    pathName = pathName.replace(/\\/g, '/');
+    if (pathName[0] !== '/') pathName = `/${pathName}`;
+    return encodeURI(`file://${pathName}`).replace(/[?#]/g, encodeURIComponent);
+  }
+
+  static uriToPath(uri) {
+    uri = decodeURIComponent(uri);
+    if (uri.startsWith('file:///')) uri = uri.substr(8);
+    if (uri.startsWith('file://')) uri = uri.substr(7);
+    return uri.replace(/\//g, '\\');
+  }
+
+  static pointToPosition(point) {
+    return { line: point.row, character: point.column };
+  }
+
+  static positionToPoint(position) {
+    return new _atom.Point(position.line, position.character);
+  }
+
+  static lsRangeToAtomRange(range) {
+    return new _atom.Range(Convert.positionToPoint(range.start), Convert.positionToPoint(range.end));
+  }
+
+  static atomRangeToLSRange(range) {
+    return { start: Convert.pointToPosition(range.start), end: Convert.pointToPosition(range.end) };
+  }
+
+  static editorToTextDocumentIdentifier(editor) {
+    return { uri: Convert.pathToUri(editor.getURI() || '') };
+  }
+};
+exports.default = Convert;
+module.exports = exports['default'];
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL2xpYi9jb252ZXJ0LmpzIl0sIm5hbWVzIjpbImxzIiwiQ29udmVydCIsInBhdGhUb1VyaSIsInBhdGhOYW1lIiwicmVwbGFjZSIsImVuY29kZVVSSSIsImVuY29kZVVSSUNvbXBvbmVudCIsInVyaVRvUGF0aCIsInVyaSIsImRlY29kZVVSSUNvbXBvbmVudCIsInN0YXJ0c1dpdGgiLCJzdWJzdHIiLCJwb2ludFRvUG9zaXRpb24iLCJwb2ludCIsImxpbmUiLCJyb3ciLCJjaGFyYWN0ZXIiLCJjb2x1bW4iLCJwb3NpdGlvblRvUG9pbnQiLCJwb3NpdGlvbiIsImxzUmFuZ2VUb0F0b21SYW5nZSIsInJhbmdlIiwic3RhcnQiLCJlbmQiLCJhdG9tUmFuZ2VUb0xTUmFuZ2UiLCJlZGl0b3JUb1RleHREb2N1bWVudElkZW50aWZpZXIiLCJlZGl0b3IiLCJnZXRVUkkiXSwibWFwcGluZ3MiOiI7Ozs7O0FBRUE7Ozs7QUFDQTs7QUFDQTs7SUFBWUEsRTs7Ozs7O0lBRVNDLE8sR0FBTixNQUFNQSxPQUFOLENBQ2Y7QUFDRSxTQUFPQyxTQUFQLENBQWlCQyxRQUFqQixFQUEyQztBQUMxQ0EsZUFBV0EsU0FBU0MsT0FBVCxDQUFpQixLQUFqQixFQUF3QixHQUF4QixDQUFYO0FBQ0EsUUFBSUQsU0FBUyxDQUFULE1BQWdCLEdBQXBCLEVBQXlCQSxXQUFZLElBQUdBLFFBQVMsRUFBeEI7QUFDekIsV0FBT0UsVUFBVyxVQUFTRixRQUFTLEVBQTdCLEVBQWdDQyxPQUFoQyxDQUF3QyxPQUF4QyxFQUFpREUsa0JBQWpELENBQVA7QUFDQTs7QUFFRCxTQUFPQyxTQUFQLENBQWlCQyxHQUFqQixFQUFzQztBQUNwQ0EsVUFBTUMsbUJBQW1CRCxHQUFuQixDQUFOO0FBQ0EsUUFBSUEsSUFBSUUsVUFBSixDQUFlLFVBQWYsQ0FBSixFQUFnQ0YsTUFBTUEsSUFBSUcsTUFBSixDQUFXLENBQVgsQ0FBTjtBQUNoQyxRQUFJSCxJQUFJRSxVQUFKLENBQWUsU0FBZixDQUFKLEVBQStCRixNQUFNQSxJQUFJRyxNQUFKLENBQVcsQ0FBWCxDQUFOO0FBQy9CLFdBQU9ILElBQUlKLE9BQUosQ0FBWSxLQUFaLEVBQW1CLElBQW5CLENBQVA7QUFDRDs7QUFFRCxTQUFPUSxlQUFQLENBQXVCQyxLQUF2QixFQUF1RDtBQUNyRCxXQUFPLEVBQUVDLE1BQU1ELE1BQU1FLEdBQWQsRUFBbUJDLFdBQVdILE1BQU1JLE1BQXBDLEVBQVA7QUFDRDs7QUFFRCxTQUFPQyxlQUFQLENBQXVCQyxRQUF2QixFQUEwRDtBQUN4RCxXQUFPLGdCQUFVQSxTQUFTTCxJQUFuQixFQUF5QkssU0FBU0gsU0FBbEMsQ0FBUDtBQUNEOztBQUVELFNBQU9JLGtCQUFQLENBQTBCQyxLQUExQixFQUF1RDtBQUNyRCxXQUFPLGdCQUFVcEIsUUFBUWlCLGVBQVIsQ0FBd0JHLE1BQU1DLEtBQTlCLENBQVYsRUFBZ0RyQixRQUFRaUIsZUFBUixDQUF3QkcsTUFBTUUsR0FBOUIsQ0FBaEQsQ0FBUDtBQUNEOztBQUVELFNBQU9DLGtCQUFQLENBQTBCSCxLQUExQixFQUF1RDtBQUNyRCxXQUFPLEVBQUVDLE9BQU9yQixRQUFRVyxlQUFSLENBQXdCUyxNQUFNQyxLQUE5QixDQUFULEVBQStDQyxLQUFLdEIsUUFBUVcsZUFBUixDQUF3QlMsTUFBTUUsR0FBOUIsQ0FBcEQsRUFBUDtBQUNEOztBQUVELFNBQU9FLDhCQUFQLENBQXNDQyxNQUF0QyxFQUEwRjtBQUN4RixXQUFPLEVBQUVsQixLQUFLUCxRQUFRQyxTQUFSLENBQWtCd0IsT0FBT0MsTUFBUCxNQUFtQixFQUFyQyxDQUFQLEVBQVA7QUFDRDtBQWhDSCxDO2tCQURxQjFCLE8iLCJmaWxlIjoiY29udmVydC5qcyIsInNvdXJjZXNDb250ZW50IjpbIi8vIEBmbG93XHJcblxyXG5pbXBvcnQgcGF0aCBmcm9tICdwYXRoJztcclxuaW1wb3J0IHtSYW5nZSwgUG9pbnR9IGZyb20gJ2F0b20nO1xyXG5pbXBvcnQgKiBhcyBscyBmcm9tICcuL3Byb3RvY29sL2xhbmd1YWdlY2xpZW50LXYyJztcclxuXHJcbmV4cG9ydCBkZWZhdWx0IGNsYXNzIENvbnZlcnRcclxue1xyXG4gIHN0YXRpYyBwYXRoVG9VcmkocGF0aE5hbWU6IHN0cmluZyk6IHN0cmluZyB7XHJcblx0ICBwYXRoTmFtZSA9IHBhdGhOYW1lLnJlcGxhY2UoL1xcXFwvZywgJy8nKTtcclxuXHQgIGlmIChwYXRoTmFtZVswXSAhPT0gJy8nKSBwYXRoTmFtZSA9IGAvJHtwYXRoTmFtZX1gO1xyXG5cdCAgcmV0dXJuIGVuY29kZVVSSShgZmlsZTovLyR7cGF0aE5hbWV9YCkucmVwbGFjZSgvWz8jXS9nLCBlbmNvZGVVUklDb21wb25lbnQpO1xyXG4gIH1cclxuXHJcbiAgc3RhdGljIHVyaVRvUGF0aCh1cmk6IHN0cmluZyk6IHN0cmluZyB7XHJcbiAgICB1cmkgPSBkZWNvZGVVUklDb21wb25lbnQodXJpKTtcclxuICAgIGlmICh1cmkuc3RhcnRzV2l0aCgnZmlsZTovLy8nKSkgdXJpID0gdXJpLnN1YnN0cig4KTtcclxuICAgIGlmICh1cmkuc3RhcnRzV2l0aCgnZmlsZTovLycpKSB1cmkgPSB1cmkuc3Vic3RyKDcpO1xyXG4gICAgcmV0dXJuIHVyaS5yZXBsYWNlKC9cXC8vZywgJ1xcXFwnKTtcclxuICB9XHJcblxyXG4gIHN0YXRpYyBwb2ludFRvUG9zaXRpb24ocG9pbnQ6IGF0b20kUG9pbnQpOiBscy5Qb3NpdGlvbiB7XHJcbiAgICByZXR1cm4geyBsaW5lOiBwb2ludC5yb3csIGNoYXJhY3RlcjogcG9pbnQuY29sdW1uIH07XHJcbiAgfVxyXG5cclxuICBzdGF0aWMgcG9zaXRpb25Ub1BvaW50KHBvc2l0aW9uOiBscy5Qb3NpdGlvbik6IGF0b20kUG9pbnQge1xyXG4gICAgcmV0dXJuIG5ldyBQb2ludChwb3NpdGlvbi5saW5lLCBwb3NpdGlvbi5jaGFyYWN0ZXIpO1xyXG4gIH1cclxuXHJcbiAgc3RhdGljIGxzUmFuZ2VUb0F0b21SYW5nZShyYW5nZTogbHMuUmFuZ2UpOiBhdG9tJFJhbmdlIHtcclxuICAgIHJldHVybiBuZXcgUmFuZ2UoQ29udmVydC5wb3NpdGlvblRvUG9pbnQocmFuZ2Uuc3RhcnQpLCBDb252ZXJ0LnBvc2l0aW9uVG9Qb2ludChyYW5nZS5lbmQpKTtcclxuICB9XHJcblxyXG4gIHN0YXRpYyBhdG9tUmFuZ2VUb0xTUmFuZ2UocmFuZ2U6IGF0b20kUmFuZ2UpOiBscy5SYW5nZSB7XHJcbiAgICByZXR1cm4geyBzdGFydDogQ29udmVydC5wb2ludFRvUG9zaXRpb24ocmFuZ2Uuc3RhcnQpLCBlbmQ6IENvbnZlcnQucG9pbnRUb1Bvc2l0aW9uKHJhbmdlLmVuZCkgfTtcclxuICB9XHJcblxyXG4gIHN0YXRpYyBlZGl0b3JUb1RleHREb2N1bWVudElkZW50aWZpZXIoZWRpdG9yOiBhdG9tJFRleHRFZGl0b3IpOiBscy5UZXh0RG9jdW1lbnRJZGVudGlmaWVyIHtcclxuICAgIHJldHVybiB7IHVyaTogQ29udmVydC5wYXRoVG9VcmkoZWRpdG9yLmdldFVSSSgpIHx8ICcnKSB9O1xyXG4gIH1cclxufVxyXG4iXX0=
