@@ -40,3 +40,52 @@ export type nuclide$TextToken = {
 };
 
 export type nuclide$TokenizedText = Array<nuclide$TextToken>;
+
+export type nuclide$DefinitionProvider = {
+  name: string,
+  priority: number,
+  grammarScopes: Array<string>,
+  getDefinition: (editor: atom$TextEditor, position: atom$Point) => Promise<?nuclide$DefinitionQueryResult>,
+  // filename is any file/path in the project containing id.
+  getDefinitionById: (filename: NuclideUri, id: string) => Promise<?nuclide$Definition>,
+};
+
+export type NuclideUri = string;
+
+export type nuclide$Definition = {
+  path: NuclideUri,
+  position: atom$Point,
+  range?: atom$Range,
+  id?: string,
+  name?: string,
+  language: string,
+  projectRoot?: NuclideUri,
+};
+
+export type nuclide$DefinitionQueryResult = {
+  queryRange: Array<atom$Range>,
+  definitions: Array<nuclide$Definition>,
+};
+
+export type nuclide$HyperclickProvider = {
+  // Use this to provide a suggestion for single-word matches.
+  // Optionally set `wordRegExp` to adjust word-matching.
+  getSuggestionForWord?: (textEditor: atom$TextEditor, text: string, range: atom$Range) => Promise<?nuclide$HyperclickSuggestion>,
+  wordRegExp?: RegExp,
+
+  // Use this to provide a suggestion if it can have non-contiguous ranges.
+  // A primary use-case for this is Objective-C methods.
+  getSuggestion?: (textEditor: atom$TextEditor, position: atom$Point) => Promise<?nuclide$HyperclickSuggestion>,
+
+  // The higher this is, the more precedence the provider gets. Defaults to 0.
+  priority?: number,
+  providerName?: string,
+};
+
+export type nuclide$HyperclickSuggestion = {
+  // The range(s) to underline to provide as a visual cue for clicking.
+  range: ?atom$Range | ?Array<atom$Range>,
+
+  // The function to call when the underlined text is clicked.
+  callback: (() => mixed) | Array<{rightLabel?: string, title: string, callback: () => mixed}>,
+};
