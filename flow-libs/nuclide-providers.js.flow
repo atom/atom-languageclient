@@ -89,3 +89,32 @@ export type nuclide$HyperclickSuggestion = {
   // The function to call when the underlined text is clicked.
   callback: (() => mixed) | Array<{rightLabel?: string, title: string, callback: () => mixed}>,
 };
+
+export type nuclide$FindReferencesProvider = {
+  // Return true if your provider supports finding references for the provided TextEditor.
+  isEditorSupported(editor: atom$TextEditor): Promise<boolean>,
+
+  // `findReferences` will only be called if `isEditorSupported` previously returned true
+  // for the given TextEditor.
+  findReferences(editor: atom$TextEditor, position: atom$Point): Promise<?nuclide$FindReferencesReturn>,
+};
+
+export type nuclide$Reference = {
+  uri: NuclideUri,      // Nuclide URI of the file path
+  name: ?string,    // name of calling method/function/symbol
+  range: atom$Range,
+};
+
+export type nuclide$FindReferencesData = {
+  type: 'data',
+  baseUri: NuclideUri,
+  referencedSymbolName: string,
+  references: Array<nuclide$Reference>,
+};
+
+export type nuclide$FindReferencesError = {
+  type: 'error',
+  message: string,
+};
+
+export type nuclide$FindReferencesReturn = nuclide$FindReferencesData | nuclide$FindReferencesError;
