@@ -53,7 +53,6 @@ export type linter$IndieRegistry = {
   register(config: linter$Config): linter$Indie
 }
 
-
 export type linter$Indie = {
   deleteMessages(): void,
   setMessages(messages: Array<linter$Message>): void,
