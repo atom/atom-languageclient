@@ -1,0 +1,13 @@
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+let NullLogger = class NullLogger {
+  warn(args) {}
+  error(args) {}
+  info(args) {}
+  log(args) {}
+  debug(args) {}
+};
+exports.default = NullLogger;
+module.exports = exports["default"];
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uL2xpYi9sb2dnZXJzL251bGwtbG9nZ2VyLmpzIl0sIm5hbWVzIjpbIk51bGxMb2dnZXIiLCJ3YXJuIiwiYXJncyIsImVycm9yIiwiaW5mbyIsImxvZyIsImRlYnVnIl0sIm1hcHBpbmdzIjoiOzs7SUFFcUJBLFUsR0FBTixNQUFNQSxVQUFOLENBQWlCO0FBQzlCQyxPQUFLQyxJQUFMLEVBQXNCLENBQUc7QUFDekJDLFFBQU1ELElBQU4sRUFBdUIsQ0FBRztBQUMxQkUsT0FBS0YsSUFBTCxFQUFzQixDQUFHO0FBQ3pCRyxNQUFJSCxJQUFKLEVBQXFCLENBQUc7QUFDeEJJLFFBQU1KLElBQU4sRUFBdUIsQ0FBRztBQUxJLEM7a0JBQVhGLFUiLCJmaWxlIjoibnVsbC1sb2dnZXIuanMiLCJzb3VyY2VzQ29udGVudCI6WyIvLyBAZmxvd1xyXG5cclxuZXhwb3J0IGRlZmF1bHQgY2xhc3MgTnVsbExvZ2dlciB7XHJcbiAgd2FybihhcmdzOiBhbnkpOiB2b2lkIHsgfVxyXG4gIGVycm9yKGFyZ3M6IGFueSk6IHZvaWQgeyB9XHJcbiAgaW5mbyhhcmdzOiBhbnkpOiB2b2lkIHsgfVxyXG4gIGxvZyhhcmdzOiBhbnkpOiB2b2lkIHsgfVxyXG4gIGRlYnVnKGFyZ3M6IGFueSk6IHZvaWQgeyB9XHJcbn1cclxuIl19
