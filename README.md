@@ -82,11 +82,11 @@ const cp = require('child_process')
 const {AutoLanguageClient} = require('atom-languageclient')
 
 class OmnisharpLanguageServer extends AutoLanguageClient {
-  getGrammarScopes() { return [ 'source.cs' ] }
-  getLanguageName() { return 'C#' }
-  getServerName() { return 'OmniSharp' }
+  getGrammarScopes () { return [ 'source.cs' ] }
+  getLanguageName () { return 'C#' }
+  getServerName () { return 'OmniSharp' }
 
-  startServerProcess() {
+  startServerProcess () {
     return cp.spawn('node', [ require.resolve('omnisharp-client/languageserver/server') ])
   }
 }
