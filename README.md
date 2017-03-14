@@ -78,20 +78,20 @@ Some notes:
 An absolute minimal implementation can be illustrated by the Omnisharp package which has only npm-managed dependencies:
 
 ```javascript
-const cp = require('child_process');
-const {AutoLanguageClient} = require('atom-languageclient');
+const cp = require('child_process')
+const {AutoLanguageClient} = require('atom-languageclient')
 
 class OmnisharpLanguageServer extends AutoLanguageClient {
-  getGrammarScopes() { return [ 'source.cs' ]; }
-  getLanguageName() { return 'C#'; }
-  getServerName() { return 'OmniSharp';
+  getGrammarScopes() { return [ 'source.cs' ] }
+  getLanguageName() { return 'C#' }
+  getServerName() { return 'OmniSharp' }
 
   startServerProcess() {
-    return cp.spawn('node', [ require.resolve('omnisharp-client/languageserver/server') ]);
+    return cp.spawn('node', [ require.resolve('omnisharp-client/languageserver/server') ])
   }
 }
 
-module.exports = new OmnisharpLanguageServer();
+module.exports = new OmnisharpLanguageServer()
 ```
 
 Some more elaborate scenarios can be found in the Java LSP package which includes:
