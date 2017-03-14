@@ -5,10 +5,17 @@
   "repository": "https://github.com/atom/languageclient",
   "license": "MIT",
   "main": "./build/main",
+  "scripts": {
+    "prepublish": "npm run clean && npm run compile",
+    "clean": "rm -rf build",
+    "compile": "babel lib --out-dir build",
+    "watch": "npm run compile -- -w"
+  },
   "dependencies": {
     "vscode-jsonrpc": "^3.0.3"
   },
   "devDependencies": {
+    "babel-cli": "^6.24.0",
     "babel-core": "6.22.1",
     "babel-plugin-add-module-exports": "0.2.1",
     "babel-plugin-transform-async-to-generator": "6.22.0",
