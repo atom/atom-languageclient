@@ -2,7 +2,7 @@
 [![macOS Build Status](https://travis-ci.org/atom/atom-languageclient.svg?branch=master)](https://travis-ci.org/atom/atom-languageclient) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/xibqpw9h3lya87xs/branch/master?svg=true
 )](https://ci.appveyor.com/project/Atom/atom-languageclient/branch/master) [![Dependency Status](https://david-dm.org/atom/atom-languageclient.svg)](https://david-dm.org/atom/atom-languageclient)
 
-Provide integration of Language Server Protocol servers to Atom.
+Provide integration support for adding Language Server Protocol servers to Atom.
 
 ## Background
 
