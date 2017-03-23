@@ -1,7 +1,17 @@
 import * as ls from '../build/languageclient';
 import NullLogger from '../build/loggers/null-logger';
+import sinon from 'sinon';
 
 describe('LanguageClientConnection', () => {
+  beforeEach(function() {
+    global.sinon = sinon.sandbox.create();
+  });
+
+  // eslint-disable-next-line jasmine/no-global-setup
+  afterEach(function() {
+    global.sinon.restore();
+  });
+
   createSpyConnection = () => {
     return {
       listen: sinon.spy(),

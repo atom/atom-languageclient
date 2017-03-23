@@ -7,16 +7,17 @@
   "main": "./build/main",
   "scripts": {
     "clean": "rm -rf build",
-    "compile": "babel lib --out-dir build",
-    "mocha": "mocha --renderer --recursive ./test/helpers/register-babel test",
+    "compile": "babel lib --out-dir build && babel test --out-dir build/test",
     "prepublish": "npm run clean && npm run compile",
-    "test": "npm run compile && npm run mocha",
+    "test": "npm run compile && atom --test build/test",
     "watch": "npm run compile -- -w"
   },
   "dependencies": {
     "vscode-jsonrpc": "^3.2.0"
   },
+  "atomTestRunner": "./test/runner",
   "devDependencies": {
+    "atom-mocha-test-runner": "^1.0.0",
     "babel-cli": "^6.24.0",
     "babel-core": "6.22.1",
     "babel-plugin-add-module-exports": "0.2.1",
@@ -31,7 +32,6 @@
     "babel-plugin-transform-object-rest-spread": "6.23.0",
     "babel-plugin-transform-react-jsx": "6.23.0",
     "chai": "^3.5.0",
-    "mocha": "^3.1.2",
     "sinon": "^2.0.0"
   }
 }
