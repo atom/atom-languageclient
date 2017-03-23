@@ -14,7 +14,6 @@
     "watch": "npm run compile -- -w"
   },
   "dependencies": {
-    "event-kit": "^2.1.0",
     "vscode-jsonrpc": "^3.2.0"
   },
   "devDependencies": {
