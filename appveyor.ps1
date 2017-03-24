@@ -68,10 +68,15 @@ function SetElectronEnvironmentVariables
   [Environment]::SetEnvironmentVariable("ELECTRON_NO_ATTACH_CONSOLE", "true", "User")
   $env:ELECTRON_ENABLE_LOGGING = "YES"
   [Environment]::SetEnvironmentVariable("ELECTRON_ENABLE_LOGGING", "YES", "User")
+}
 
+function AddAtomToPath
+{
+  $env:PATH += ";$script:PACKAGE_FOLDER\$script:ATOM_DIRECTORY_NAME\"
 }
 
 DownloadAtom
 ExtractAtom
 SetElectronEnvironmentVariables
 PrintVersions
+AddAtomToPath
