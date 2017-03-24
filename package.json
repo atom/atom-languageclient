@@ -4,10 +4,10 @@
   "description": "Integrate Language Servers with Atom",
   "repository": "https://github.com/atom/languageclient",
   "license": "MIT",
-  "main": "./build/main",
+  "main": "./build/lib/main",
   "scripts": {
     "clean": "rm -rf build",
-    "compile": "babel lib --out-dir build && babel test --out-dir build/test",
+    "compile": "babel lib --out-dir build/lib && babel test --out-dir build/test",
     "prepublish": "npm run clean && npm run compile",
     "test": "npm run compile && atom --test build/test",
     "watch": "npm run compile -- -w"

@@ -1,5 +1,5 @@
-import * as ls from '../build/languageclient';
-import NullLogger from '../build/loggers/null-logger';
+import * as ls from '../lib/languageclient';
+import NullLogger from '../lib/loggers/null-logger';
 import sinon from 'sinon';
 
 describe('LanguageClientConnection', () => {

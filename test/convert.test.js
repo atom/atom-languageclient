@@ -1,4 +1,4 @@
-import Convert from '../build/convert';
+import Convert from '../lib/convert';
 
 let originalPlatform;
 setProcessPlatform = platform => {
