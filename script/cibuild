@@ -1,76 +1,103 @@
-#!/bin/bash
+#!/bin/sh
 
-function runTests {
-  echo "Downloading latest Atom release..."
-  ATOM_CHANNEL="${ATOM_CHANNEL:=stable}"
-  ACCESS_TOKEN_CHECK="${ATOM_ACCESS_TOKEN:=unset}"
-  if [ "$ACCESS_TOKEN_CHECK" = "unset" ]; then
-    export ATOM_ACCESS_TOKEN="da809a6077bb1b0aa7c5623f7b2d5f1fec2faae4"
-  fi
+echo "Downloading latest Atom release..."
+ATOM_CHANNEL="${ATOM_CHANNEL:=stable}"
 
-  if [ "$TRAVIS_OS_NAME" = "osx" ]; then
-      curl -s -L "https://atom.io/download/mac?channel=$ATOM_CHANNEL" \
-        -H 'Accept: application/octet-stream' \
-        -o "atom.zip"
-      mkdir atom
-      unzip -q atom.zip -d atom
-      if [ "$ATOM_CHANNEL" = "stable" ]; then
-        export ATOM_APP_NAME="Atom.app"
-        export ATOM_SCRIPT_NAME="atom.sh"
-        export ATOM_SCRIPT_PATH="./atom/${ATOM_APP_NAME}/Contents/Resources/app/atom.sh"
-      else
-        export ATOM_APP_NAME="Atom ${ATOM_CHANNEL}.app"
-        export ATOM_SCRIPT_NAME="atom-${ATOM_CHANNEL}"
-        export ATOM_SCRIPT_PATH="./atom-${ATOM_CHANNEL}"
-        ln -s "./atom/${ATOM_APP_NAME}/Contents/Resources/app/atom.sh" "${ATOM_SCRIPT_PATH}"
-      fi
-      export ATOM_PATH="./atom"
-      export APM_SCRIPT_PATH="./atom/${ATOM_APP_NAME}/Contents/Resources/app/apm/node_modules/.bin/apm"
+if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
+  curl -s -L "https://atom.io/download/mac?channel=${ATOM_CHANNEL}" \
+    -H 'Accept: application/octet-stream' \
+    -o "atom.zip"
+  mkdir atom
+  unzip -q atom.zip -d atom
+  if [ "${ATOM_CHANNEL}" = "stable" ]; then
+    export ATOM_APP_NAME="Atom.app"
+    export ATOM_SCRIPT_NAME="atom.sh"
+    export ATOM_SCRIPT_PATH="./atom/${ATOM_APP_NAME}/Contents/Resources/app/atom.sh"
   else
-      curl -s -L "https://atom.io/download/deb?channel=$ATOM_CHANNEL" \
-        -H 'Accept: application/octet-stream' \
-        -o "atom.deb"
-      /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16
-      export DISPLAY=":99"
-      dpkg-deb -x atom.deb "$HOME/atom"
-      if [ "$ATOM_CHANNEL" = "stable" ]; then
-        export ATOM_SCRIPT_NAME="atom"
-        export APM_SCRIPT_NAME="apm"
-      else
-        export ATOM_SCRIPT_NAME="atom-$ATOM_CHANNEL"
-        export APM_SCRIPT_NAME="apm-$ATOM_CHANNEL"
-      fi
-      export ATOM_SCRIPT_PATH="$HOME/atom/usr/bin/$ATOM_SCRIPT_NAME"
-      export APM_SCRIPT_PATH="$HOME/atom/usr/bin/$APM_SCRIPT_NAME"
+    export ATOM_APP_NAME="Atom ${ATOM_CHANNEL}.app"
+    export ATOM_SCRIPT_NAME="atom-${ATOM_CHANNEL}"
+    export ATOM_SCRIPT_PATH="./atom-${ATOM_CHANNEL}"
+    ln -s "./atom/${ATOM_APP_NAME}/Contents/Resources/app/atom.sh" "${ATOM_SCRIPT_PATH}"
   fi
+  export ATOM_PATH="./atom"
+  export APM_SCRIPT_PATH="./atom/${ATOM_APP_NAME}/Contents/Resources/app/apm/node_modules/.bin/apm"
+  export NPM_SCRIPT_PATH="./atom/${ATOM_APP_NAME}/Contents/Resources/app/apm/node_modules/.bin/npm"
+elif [ "${TRAVIS_OS_NAME}" = "linux" ]; then
+  curl -s -L "https://atom.io/download/deb?channel=${ATOM_CHANNEL}" \
+    -H 'Accept: application/octet-stream' \
+    -o "atom-amd64.deb"
+  /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16
+  export DISPLAY=":99"
+  dpkg-deb -x atom-amd64.deb "${HOME}/atom"
+  if [ "${ATOM_CHANNEL}" = "stable" ]; then
+    export ATOM_SCRIPT_NAME="atom"
+    export APM_SCRIPT_NAME="apm"
+  else
+    export ATOM_SCRIPT_NAME="atom-${ATOM_CHANNEL}"
+    export APM_SCRIPT_NAME="apm-${ATOM_CHANNEL}"
+  fi
+  export ATOM_SCRIPT_PATH="${HOME}/atom/usr/bin/${ATOM_SCRIPT_NAME}"
+  export APM_SCRIPT_PATH="${HOME}/atom/usr/bin/${APM_SCRIPT_NAME}"
+  export NPM_SCRIPT_PATH="${HOME}/atom/usr/share/${ATOM_SCRIPT_NAME}/resources/app/apm/node_modules/.bin/npm"
+elif [ "${CIRCLECI}" = "true" ]; then
+  curl -s -L "https://atom.io/download/deb?channel=${ATOM_CHANNEL}" \
+    -H 'Accept: application/octet-stream' \
+    -o "atom-amd64.deb"
+  sudo dpkg --install atom-amd64.deb || true
+  sudo apt-get update
+  sudo apt-get -f install
+  export ATOM_SCRIPT_PATH="atom"
+  export APM_SCRIPT_PATH="apm"
+  export NPM_SCRIPT_PATH="/usr/share/atom/resources/app/apm/node_modules/.bin/npm"
+else
+  echo "Unknown CI environment, exiting!"
+  exit 1
+fi
 
-  echo "Using Atom version:"
-  "$ATOM_SCRIPT_PATH" --version
-  echo "Using apm version:"
-  "$APM_SCRIPT_PATH" --version
-  echo "Using node version:"
+echo "Using Atom version:"
+"${ATOM_SCRIPT_PATH}" -v
+echo "Using APM version:"
+"${APM_SCRIPT_PATH}" -v
+
+echo "Downloading package dependencies..."
+"${APM_SCRIPT_PATH}" clean
+
+if [ "${ATOM_LINT_WITH_BUNDLED_NODE:=true}" = "true" ]; then
+  "${APM_SCRIPT_PATH}" install
+
+  # Override the PATH to put the Node bundled with APM first
+  if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
+    export PATH="./atom/${ATOM_APP_NAME}/Contents/Resources/app/apm/bin:${PATH}"
+  elif [ "${CIRCLECI}" = "true" ]; then
+    # Since CircleCI is a fully installed environment, we use the system path to apm
+    export PATH="/usr/share/atom/resources/app/apm/bin:${PATH}"
+  else
+    export PATH="${HOME}/atom/usr/share/${ATOM_SCRIPT_NAME}/resources/app/apm/bin:${PATH}"
+  fi
+else
+  export NPM_SCRIPT_PATH="npm"
+  "${APM_SCRIPT_PATH}" install --production
+
+  # Use the system NPM to install the devDependencies
+  echo "Using Node version:"
   node --version
-  echo "Using npm version:"
+  echo "Using NPM version:"
   npm --version
+  echo "Installing remaining dependencies..."
+  npm install
+fi
 
-  echo "Downloading package dependencies..."
-  "$APM_SCRIPT_PATH" install
+if [ -n "${APM_TEST_PACKAGES}" ]; then
+  echo "Installing atom package dependencies..."
+  for pack in ${APM_TEST_PACKAGES}; do
+    "${APM_SCRIPT_PATH}" install "${pack}"
+  done
+fi
 
-  echo "Running lint..."
-  npm run lint
-  LINT_RESULT=$?
-  if [ $LINT_RESULT -ne 0 ]; then echo ">>> LINTING FAILED! <<< Continuing on to tests..."; fi
+echo "Running specs..."
+"$ATOM_SCRIPT_PATH" --test build/test
+TEST_RESULT=$?
 
-  echo "Running specs..."
-  "$ATOM_SCRIPT_PATH" --test test
-  TEST_RESULT=$?
-
-  echo "=================="
-  echo "Linting exit code: $LINT_RESULT"
-  echo "Test exit code: $TEST_RESULT"
-  if [ $LINT_RESULT -ne 0 ]; then exit $LINT_RESULT; fi
-  if [ $TEST_RESULT -ne 0 ]; then exit $TEST_RESULT; fi
-  exit
-}
-
-runTests
+echo "=================="
+echo "Test exit code: $TEST_RESULT"
+if [ $TEST_RESULT -ne 0 ]; then exit $TEST_RESULT; fi

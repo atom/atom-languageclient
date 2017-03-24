@@ -1,12 +1,30 @@
 language: node_js
+node_js: '6.9.4'
+sudo: false
+os: osx
 
-node_js:
-  - "node"
+branches:
+  only:
+  - master
+
+matrix:
+  include:
+  - os: linux
+    dist: trusty
+
+env:
+  global:
+  - MOCHA_TIMEOUT=60000
+  - UNTIL_TIMEOUT=30000
+  - ATOM_CHANNEL=stable
 
 notifications:
   email:
     on_success: never
     on_failure: change
 
+install:
+- npm install -g npm
+
 script:
-  - npm test
+- sh ./script/cibuild
