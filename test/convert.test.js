@@ -1,11 +1,15 @@
 import Convert from '../lib/convert';
+import {Point} from 'atom';
 
 let originalPlatform;
 setProcessPlatform = platform => {
   Object.defineProperty(process, 'platform', { value: platform });
 }
 
-createFakeEditor = (uri) => ({ getURI: () => uri });
+createFakeEditor = (uri: string, cursorPosition: ?atom$Point) => ({
+  getURI: () => uri,
+  getCursorBufferPosition: () => cursorPosition
+});
 
 describe('Convert', () => {
   beforeEach(() => { originalPlatform = process.platform; })
@@ -102,11 +106,29 @@ describe('Convert', () => {
   })
 
   describe('editorToTextDocumentIdentifier', () => {
-    it('Uses getURI which returns a path to create the uri', () => {
+    it('Uses getURI which returns a path to create the URI', () => {
       const uri = '/c/d/e/f/g/h/i/j.txt';
-      const editor = createFakeEditor(uri);
-      const tdi = Convert.editorToTextDocumentIdentifier(editor);
-      expect(tdi.uri).equals('file://' + uri);
+      const identifier = Convert.editorToTextDocumentIdentifier(createFakeEditor(uri));
+      expect(identifier.uri).equals('file://' + uri);
+    })
+  })
+
+  describe('editorToTextDocumentPositionParams', () => {
+    it('Uses the editor cursor position when none specified', () => {
+      const uri = '/c/d/e/f/g/h/i/j.txt';
+      const position = new Point(101, 323);
+      const params = Convert.editorToTextDocumentPositionParams(createFakeEditor(uri, position));
+      expect(params.textDocument.uri).equals('file://' + uri);
+      expect(params.position).deep.equals({ line: 101, character: 323 });
+    })
+
+    it('Uses the cursor position parameter when specified', () => {
+      const uri = '/c/d/e/f/g/h/i/j.txt';
+      const editorPosition = new Point(101, 323);
+      const specifiedPoint = new Point(911, 112);
+      const params = Convert.editorToTextDocumentPositionParams(createFakeEditor(uri, editorPosition), specifiedPoint);
+      expect(params.textDocument.uri).equals('file://' + uri);
+      expect(params.position).deep.equals({ line: 911, character: 112 });
     })
   })
 })
