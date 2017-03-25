@@ -8,13 +8,8 @@ setProcessPlatform = platform => {
 createFakeEditor = (uri) => ({ getURI: () => uri });
 
 describe('Convert', () => {
-  before(() => {
-    originalPlatform = process.platform;
-  })
-
-  after(() => {
-    Object.defineProperty(process, 'platform', { value: originalPlatform });
-  })
+  beforeEach(() => { originalPlatform = process.platform; })
+  afterEach(() => { Object.defineProperty(process, 'platform', { value: originalPlatform }); })
 
   describe('pathToUri', () => {
     it('prefixes an absolute path with file://', () => {

@@ -3,14 +3,8 @@ import NullLogger from '../lib/loggers/null-logger';
 import sinon from 'sinon';
 
 describe('LanguageClientConnection', () => {
-  beforeEach(function() {
-    global.sinon = sinon.sandbox.create();
-  });
-
-  // eslint-disable-next-line jasmine/no-global-setup
-  afterEach(function() {
-    global.sinon.restore();
-  });
+  beforeEach(() => { global.sinon = sinon.sandbox.create(); });
+  afterEach(() => { global.sinon.restore(); });
 
   createSpyConnection = () => {
     return {
