@@ -30,12 +30,12 @@ describe('AutoCompleteAdapter', () => {
 
   describe('getSuggestions', () => {
     const fakeLanguageClient = {
-      completion: sinon.stub().returns(new Promise((resolve, reject) => resolve(completionItems)))
+      completion: sinon.stub().resolves(completionItems)
     };
 
     it('gets AutoComplete suggestions via LSP given an AutoCompleteRequest', async () => {
       const request = {
-        editor: { getURI: () => '/a/b/c/d.txt' },
+        editor: { getPath: () => '/a/b/c/d.txt' },
         bufferPosition: new Point(123, 456)
       };
       const autoCompleteAdapter = new AutoCompleteAdapter(fakeLanguageClient);
@@ -46,20 +46,20 @@ describe('AutoCompleteAdapter', () => {
       expect(suggestions[0].text).equals('label1');
       expect(suggestions[1].descriptionMoreURL).equals('https://atom.io/2');
       expect(suggestions[2].type).equals('variable');
-    })
-  })
+    });
+  });
 
   describe('requestToTextDocumentPositionParams', () => {
     it('creates a TextDocumentPositionParams from an AutocompleteRequest', () => {
       const request = {
-        editor: { getURI: () => '/a/b/c/d.txt' },
+        editor: { getPath: () => '/a/b/c/d.txt' },
         bufferPosition: new Point(123, 456)
       };
       const result = AutoCompleteAdapter.requestToTextDocumentPositionParams(request);
       expect(result.textDocument.uri).equals('file:///a/b/c/d.txt');
       expect(result.position).deep.equals({ line: 123, character: 456 });
-    })
-  })
+    });
+  });
 
   describe('completionItemsToSuggestions', () => {
     const request = { };
@@ -70,7 +70,7 @@ describe('AutoCompleteAdapter', () => {
       expect(results[0].text).equals('label1');
       expect(results[1].descriptionMoreURL).equals('https://atom.io/2');
       expect(results[2].type).equals('variable');
-    })
+    });
 
     it('converts LSP CompletionList to AutoComplete Suggestions array', () => {
       const completionList = { items: completionItems };
@@ -78,14 +78,13 @@ describe('AutoCompleteAdapter', () => {
       expect(results.length).equals(3);
       expect(results[0].descriptionMoreURL).equals('https://atom.io/1');
       expect(results[1].text).equals('label2');
-    })
+    });
 
     it('converts empty object into an empty AutoComplete Suggestions array', () => {
       const results = AutoCompleteAdapter.completionItemsToSuggestions({ }, request);
       expect(results.length).equals(0);
-    })
-
-  })
+    });
+  });
 
   describe('completionItemToSuggestion', () => {
     it('converts LSP CompletionItem to AutoComplete Suggestion without textEdit', () => {
@@ -104,7 +103,7 @@ describe('AutoCompleteAdapter', () => {
       expect(result.type).equals('keyword');
       expect(result.description).equals('description');
       expect(result.descriptionMoreURL).equals('https://atom.io/something-more');
-    })
+    });
 
     it('converts LSP CompletionItem to AutoComplete Suggestion with textEdit', () => {
       const completionItem = {
@@ -119,9 +118,7 @@ describe('AutoCompleteAdapter', () => {
           newText: 'newText'
         }
       };
-      const editor = {
-        getTextInBufferRange: sinon.stub().returns('replacementPrefix')
-      };
+      const editor = { getTextInBufferRange: sinon.stub().returns('replacementPrefix') };
       const result = AutoCompleteAdapter.completionItemToSuggestion(completionItem, { editor: editor });
       expect(result.displayText).equals('label');
       expect(result.filterText).equals('filter');
@@ -132,8 +129,8 @@ describe('AutoCompleteAdapter', () => {
       expect(result.text).equals('newText');
       expect(editor.getTextInBufferRange.calledOnce).equals(true);
       expect(editor.getTextInBufferRange.getCall(0).args).deep.equals([ new Range(new Point(10, 20), new Point(30, 40)) ]);
-    })
-  })
+    });
+  });
 
   describe('basicCompletionItemToSuggestion', () => {
     it('converts LSP CompletionItem with insertText and filterText to AutoComplete Suggestion', () => {
@@ -152,7 +149,7 @@ describe('AutoCompleteAdapter', () => {
       expect(result.type).equals('keyword');
       expect(result.description).equals('description');
       expect(result.descriptionMoreURL).equals('https://atom.io/something-more');
-    })
+    });
 
     it('converts LSP CompletionItem without insertText or filterText to AutoComplete Suggestion', () => {
       const completionItem = {
@@ -168,8 +165,8 @@ describe('AutoCompleteAdapter', () => {
       expect(result.type).equals('keyword');
       expect(result.description).equals('description');
       expect(result.descriptionMoreURL).equals('https://atom.io/something-more');
-    })
-  })
+    });
+  });
 
   describe('applyTextEditToSuggestion', () => {
     const basicCompletionItem = {
@@ -183,7 +180,7 @@ describe('AutoCompleteAdapter', () => {
       const completionItem = Object.assign({}, basicCompletionItem);
       AutoCompleteAdapter.applyTextEditToSuggestion(null, null, completionItem);
       expect(completionItem).deep.equals(basicCompletionItem);
-    })
+    });
 
     it('applies changes from TextEdit to replacementPrefix and text', () => {
       const textEdit = {
@@ -200,8 +197,8 @@ describe('AutoCompleteAdapter', () => {
       expect(completionItem.text).equals('newText');
       expect(editor.getTextInBufferRange.calledOnce).equals(true);
       expect(editor.getTextInBufferRange.getCall(0).args).deep.equals([ new Range(new Point(1, 2), new Point(3, 4)) ]);
-    })
-  })
+    });
+  });
 
   describe('completionKindToSuggestionType', () => {
     it('converts LSP CompletionKinds to AutoComplete SuggestionTypes', () => {
@@ -211,11 +208,11 @@ describe('AutoCompleteAdapter', () => {
       expect(variable).equals('variable');
       expect(constructor).equals('function');
       expect(module).equals('module');
-    })
+    });
 
     it('defaults to "value"', () => {
       const result = AutoCompleteAdapter.completionKindToSuggestionType(null);
       expect(result).equals('value');
-    })
-  })
-})
+    });
+  });
+});

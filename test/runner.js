@@ -7,6 +7,7 @@ global.expect = chai.expect;
 module.exports = createRunner({
   htmlTitle: `atom-languageclient Tests - pid ${process.pid}`,
   reporter: process.env.MOCHA_REPORTER || 'spec',
+  colors: false,
   overrideTestPaths: [/spec$/, /test/],
 }, mocha => {
   mocha.timeout(parseInt(process.env.MOCHA_TIMEOUT || '5000', 10));
