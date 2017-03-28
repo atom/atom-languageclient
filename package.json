@@ -16,6 +16,18 @@
     "vscode-jsonrpc": "^3.2.0"
   },
   "atomTestRunner": "./test/runner",
+  "atomTranspilers": [
+    {
+      "glob": "{lib,test}/**/*.js",
+      "transpiler": "atom-babel6-transpiler",
+      "options": {
+        "cacheKeyFiles": [
+          "package.json",
+          ".babelrc"
+        ]
+      }
+    }
+  ],
   "devDependencies": {
     "atom-mocha-test-runner": "^1.0.0",
     "babel-cli": "^6.24.0",
