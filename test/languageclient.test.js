@@ -1,18 +1,22 @@
+// @flow
+
 import * as ls from '../lib/languageclient';
 import NullLogger from '../lib/loggers/null-logger';
 import sinon from 'sinon';
+import {expect} from 'chai';
 
 describe('LanguageClientConnection', () => {
   beforeEach(() => { global.sinon = sinon.sandbox.create(); });
   afterEach(() => { global.sinon.restore(); });
 
-  createSpyConnection = () => {
+  const createSpyConnection = () => {
     return {
       listen: sinon.spy(),
       onError: sinon.spy(),
       onUnhandledNotification: sinon.spy(),
       onNotification: sinon.spy(),
-      dispose: sinon.spy()
+      dispose: sinon.spy(),
+      sendRequest: sinon.spy()
     };
   };
 
@@ -31,23 +35,25 @@ describe('LanguageClientConnection', () => {
     expect(rpc.dispose.called).equals(true);
   });
 
-  describe('send requests', async () => {
+  describe('send requests', () => {
+    const textDocumentPositionParams: ls.TextDocumentPositionParams = {
+      textDocument: { uri: 'file:///1/z80.asm' },
+      position: { line: 24, character: 32 },
+    };
     let lc;
-    let dummyPayload;
 
     beforeEach(() => {
       lc = new ls.LanguageClientConnection(createSpyConnection(), new NullLogger());
-      dummyPayload = { 'send': Math.random() };
-      sinon.stub(lc, '_sendRequest').returns(dummyPayload);
+      sinon.spy(lc, '_sendRequest');
     });
 
     it('sends a request for initialize', async () => {
-      const result = await lc.initialize(dummyPayload);
+      const params: ls.InitializeParams = { capabilities: { } };
+      const result = await lc.initialize(params);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('initialize');
-      expect(lc._sendRequest.getCall(0).args[1]).equals(dummyPayload);
-      expect(result).equals(dummyPayload);
+      expect(lc._sendRequest.getCall(0).args[1]).equals(params);
     });
 
     it('sends a request for shutdown', async () => {
@@ -58,219 +64,270 @@ describe('LanguageClientConnection', () => {
     });
 
     it('sends a request for completion', async () => {
-      const result = await lc.completion(dummyPayload);
+      const result = await lc.completion(textDocumentPositionParams);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/completion');
-      expect(lc._sendRequest.getCall(0).args[1]).equals(dummyPayload);
-      expect(result).equals(dummyPayload);
+      expect(lc._sendRequest.getCall(0).args[1]).equals(textDocumentPositionParams);
     });
 
     it('sends a request for completionItemResolve', async () => {
-      const result = await lc.completionItemResolve(dummyPayload);
+      const completionItem: ls.CompletionItem = { label: 'abc' };
+      const result = await lc.completionItemResolve(completionItem);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('completionItem/resolve');
-      expect(lc._sendRequest.getCall(0).args[1]).equals(dummyPayload);
-      expect(result).equals(dummyPayload);
+      expect(lc._sendRequest.getCall(0).args[1]).equals(completionItem);
     });
 
     it('sends a request for hover', async () => {
-      const result = await lc.hover(dummyPayload);
+      const result = await lc.hover(textDocumentPositionParams);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/hover');
-      expect(lc._sendRequest.getCall(0).args[1]).equals(dummyPayload);
-      expect(result).equals(dummyPayload);
+      expect(lc._sendRequest.getCall(0).args[1]).equals(textDocumentPositionParams);
     })
 
     it('sends a request for signatureHelp', async () => {
-      const result = await lc.signatureHelp(dummyPayload);
+      const result = await lc.signatureHelp(textDocumentPositionParams);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/signatureHelp');
-      expect(lc._sendRequest.getCall(0).args[1]).equals(dummyPayload);
-      expect(result).equals(dummyPayload);
+      expect(lc._sendRequest.getCall(0).args[1]).equals(textDocumentPositionParams);
     });
 
     it('sends a request for gotoDefinition', async () => {
-      const result = await lc.gotoDefinition(dummyPayload);
+      const result = await lc.gotoDefinition(textDocumentPositionParams);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/definition');
-      expect(lc._sendRequest.getCall(0).args[1]).equals(dummyPayload);
-      expect(result).equals(dummyPayload);
+      expect(lc._sendRequest.getCall(0).args[1]).equals(textDocumentPositionParams);
     });
 
     it('sends a request for findReferences', async () => {
-      const result = await lc.findReferences(dummyPayload);
+      const result = await lc.findReferences(textDocumentPositionParams);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/references');
-      expect(lc._sendRequest.getCall(0).args[1]).equals(dummyPayload);
-      expect(result).equals(dummyPayload);
+      expect(lc._sendRequest.getCall(0).args[1]).equals(textDocumentPositionParams);
     });
 
     it('sends a request for documentHighlight', async () => {
-      const result = await lc.documentHighlight(dummyPayload);
+      const result = await lc.documentHighlight(textDocumentPositionParams);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/documentHighlight');
-      expect(lc._sendRequest.getCall(0).args[1]).equals(dummyPayload);
-      expect(result).equals(dummyPayload);
+      expect(lc._sendRequest.getCall(0).args[1]).equals(textDocumentPositionParams);
     });
 
     it('sends a request for documentSymbol', async () => {
-      const result = await lc.documentSymbol(dummyPayload);
+      const result = await lc.documentSymbol(textDocumentPositionParams);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/documentSymbol');
-      expect(lc._sendRequest.getCall(0).args[1]).equals(dummyPayload);
-      expect(result).equals(dummyPayload);
+      expect(lc._sendRequest.getCall(0).args[1]).equals(textDocumentPositionParams);
     });
 
     it('sends a request for workspaceSymbol', async () => {
-      const result = await lc.workspaceSymbol(dummyPayload);
+      const params: ls.WorkspaceSymbolParams = { query: 'something' };
+      const result = await lc.workspaceSymbol(params);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('workspace/symbol');
-      expect(lc._sendRequest.getCall(0).args[1]).equals(dummyPayload);
-      expect(result).equals(dummyPayload);
+      expect(lc._sendRequest.getCall(0).args[1]).equals(params);
+    });
+
+    it('sends a request for codeAction', async () => {
+      const params: ls.CodeActionParams = {
+        textDocument: textDocumentPositionParams.textDocument,
+        range: { start: { line: 1, character: 1}, end: { line: 24, character: 32 } },
+        context: { diagnostics: [] }
+      };
+      const result = await lc.codeAction(params);
+
+      expect(lc._sendRequest.called).equals(true);
+      expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/codeAction');
+      expect(lc._sendRequest.getCall(0).args[1]).equals(params);
     });
 
     it('sends a request for codeLens', async () => {
-      const result = await lc.codeLens(dummyPayload);
+      const params: ls.CodeLensParams = {
+        textDocument: textDocumentPositionParams.textDocument
+      };
+      const result = await lc.codeLens(params);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/codeLens');
-      expect(lc._sendRequest.getCall(0).args[1]).equals(dummyPayload);
-      expect(result).equals(dummyPayload);
+      expect(lc._sendRequest.getCall(0).args[1]).equals(params);
     });
 
     it('sends a request for codeLensResolve', async () => {
-      const result = await lc.codeLensResolve(dummyPayload);
+      const params: ls.CodeLens = {
+        range: { start: { line: 1, character: 1}, end: { line: 24, character: 32 } }
+      };
+      const result = await lc.codeLensResolve(params);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('codeLens/resolve');
-      expect(lc._sendRequest.getCall(0).args[1]).equals(dummyPayload);
-      expect(result).equals(dummyPayload);
+      expect(lc._sendRequest.getCall(0).args[1]).equals(params);
     });
 
     it('sends a request for documentLink', async () => {
-      const result = await lc.documentLink(dummyPayload);
+      const params: ls.DocumentLinkParams = {
+        textDocument: textDocumentPositionParams.textDocument
+      };
+      const result = await lc.documentLink(params);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/documentLink');
-      expect(lc._sendRequest.getCall(0).args[1]).equals(dummyPayload);
-      expect(result).equals(dummyPayload);
+      expect(lc._sendRequest.getCall(0).args[1]).equals(params);
     });
 
     it('sends a request for documentLinkResolve', async () => {
-      const result = await lc.documentLinkResolve(dummyPayload);
+      const params: ls.DocumentLink = {
+        range: { start: { line: 1, character: 1}, end: { line: 24, character: 32 } },
+        target: 'abc.def.ghi'
+      };
+      const result = await lc.documentLinkResolve(params);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('documentLink/resolve');
-      expect(lc._sendRequest.getCall(0).args[1]).equals(dummyPayload);
-      expect(result).equals(dummyPayload);
+      expect(lc._sendRequest.getCall(0).args[1]).equals(params);
     });
 
     it('sends a request for documentFormatting', async () => {
-      const result = await lc.documentFormatting(dummyPayload);
+      const params: ls.DocumentFormattingParams = {
+        textDocument: textDocumentPositionParams.textDocument,
+        options: { tabSize: 6, insertSpaces: true, someValue: 'optional' }
+      };
+      const result = await lc.documentFormatting(params);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/formatting');
-      expect(lc._sendRequest.getCall(0).args[1]).equals(dummyPayload);
-      expect(result).equals(dummyPayload);
+      expect(lc._sendRequest.getCall(0).args[1]).equals(params);
     });
 
     it('sends a request for documentRangeFormatting', async () => {
-      const result = await lc.documentRangeFormatting(dummyPayload);
+      const params: ls.DocumentRangeFormattingParams = {
+        textDocument: textDocumentPositionParams.textDocument,
+        range: { start: { line: 1, character: 1 }, end: { line: 24, character: 32 } },
+        options: { tabSize: 6, insertSpaces: true, someValue: 'optional' }
+      };
+      const result = await lc.documentRangeFormatting(params);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/rangeFormatting');
-      expect(lc._sendRequest.getCall(0).args[1]).equals(dummyPayload);
-      expect(result).equals(dummyPayload);
+      expect(lc._sendRequest.getCall(0).args[1]).equals(params);
     });
 
     it('sends a request for documentOnTypeFormatting', async () => {
-      const result = await lc.documentOnTypeFormatting(dummyPayload);
+      const params: ls.DocumentOnTypeFormattingParams = {
+        textDocument: textDocumentPositionParams.textDocument,
+        position: { line: 1, character: 1 },
+        ch: '}',
+        options: { tabSize: 6, insertSpaces: true, someValue: 'optional' }
+      };
+      const result = await lc.documentOnTypeFormatting(params);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/onTypeFormatting');
-      expect(lc._sendRequest.getCall(0).args[1]).equals(dummyPayload);
-      expect(result).equals(dummyPayload);
+      expect(lc._sendRequest.getCall(0).args[1]).equals(params);
     });
 
     it('sends a request for rename', async () => {
-      const result = await lc.rename(dummyPayload);
-
+      const params: ls.RenameParams = {
+        textDocument: { uri: 'file:///a/b.txt'},
+        position: { line: 1, character: 2},
+        newName: 'abstractConstructorFactory'
+      };
+      const result = await lc.rename(params);
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/rename');
-      expect(lc._sendRequest.getCall(0).args[1]).equals(dummyPayload);
-      expect(result).equals(dummyPayload);
+      expect(lc._sendRequest.getCall(0).args[1]).equals(params);
     });
   });
 
-  describe('send notifications', async () => {
+  describe('send notifications', () => {
+    const textDocumentItem : ls.TextDocumentItem = {
+      uri: 'file:///best/bits.js',
+      languageId: 'javascript',
+      version: 1.0,
+      text: 'function a() { return "b"; };'
+    };
+    const versionedTextDocumentItem : ls.TextDocumentItem = {
+      uri: 'file:///best/bits.js',
+      languageId: 'javascript',
+      version: 1.0,
+      text: 'function a() { return "b"; };',
+      version: 1
+    };
+
     let lc;
-    let dummyPayload;
 
     beforeEach(() => {
       lc = new ls.LanguageClientConnection(createSpyConnection(), new NullLogger());
-      dummyPayload = { 'send': Math.random() };
       sinon.stub(lc, '_sendNotification');
     });
 
     it('didChangeConfiguration sends notification', async () => {
-      lc.didChangeConfiguration(dummyPayload);
+      const params: ls.DidChangeConfigurationParams = { settings: { a: { b: 'c' } } };
+      lc.didChangeConfiguration(params);
 
       expect(lc._sendNotification.called).equals(true);
       expect(lc._sendNotification.getCall(0).args[0]).equals('workspace/didChangeConfiguration');
-      expect(lc._sendNotification.getCall(0).args[1]).equals(dummyPayload);
+      expect(lc._sendNotification.getCall(0).args[1]).equals(params);
     });
 
     it('didOpenTextDocument sends notification', async () => {
-      lc.didOpenTextDocument(dummyPayload);
+      const params: ls.DidOpenTextDocumentParams = { textDocument: textDocumentItem };
+      lc.didOpenTextDocument(params);
 
       expect(lc._sendNotification.called).equals(true);
       expect(lc._sendNotification.getCall(0).args[0]).equals('textDocument/didOpen');
-      expect(lc._sendNotification.getCall(0).args[1]).equals(dummyPayload);
+      expect(lc._sendNotification.getCall(0).args[1]).equals(params);
     });
 
     it('didChangeTextDocument sends notification', async () => {
-      lc.didChangeTextDocument(dummyPayload);
+      const params: ls.DidChangeTextDocumentParams = {
+        textDocument: versionedTextDocumentItem,
+        contentChanges: []
+      };
+      lc.didChangeTextDocument(params);
 
       expect(lc._sendNotification.called).equals(true);
       expect(lc._sendNotification.getCall(0).args[0]).equals('textDocument/didChange');
-      expect(lc._sendNotification.getCall(0).args[1]).equals(dummyPayload);
+      expect(lc._sendNotification.getCall(0).args[1]).equals(params);
     });
 
     it('didCloseTextDocument sends notification', async () => {
-      lc.didCloseTextDocument(dummyPayload);
+      const params: ls.DidCloseTextDocumentParams = { textDocument: textDocumentItem };
+      lc.didCloseTextDocument(params);
 
       expect(lc._sendNotification.called).equals(true);
       expect(lc._sendNotification.getCall(0).args[0]).equals('textDocument/didClose');
-      expect(lc._sendNotification.getCall(0).args[1]).equals(dummyPayload);
+      expect(lc._sendNotification.getCall(0).args[1]).equals(params);
     });
 
     it('didSaveTextDocument sends notification', async () => {
-      lc.didSaveTextDocument(dummyPayload);
+      const params: ls.DidSaveTextDocumentParams = { textDocument: textDocumentItem };
+      lc.didSaveTextDocument(params);
 
       expect(lc._sendNotification.called).equals(true);
       expect(lc._sendNotification.getCall(0).args[0]).equals('textDocument/didSave');
-      expect(lc._sendNotification.getCall(0).args[1]).equals(dummyPayload);
+      expect(lc._sendNotification.getCall(0).args[1]).equals(params);
     });
 
     it('didChangeWatchedFiles sends notification', async () => {
-      lc.didChangeWatchedFiles(dummyPayload);
+      const params: ls.DidChangeWatchedFilesParams = { changes: [] };
+      lc.didChangeWatchedFiles(params);
 
       expect(lc._sendNotification.called).equals(true);
       expect(lc._sendNotification.getCall(0).args[0]).equals('workspace/didChangeWatchedFiles');
-      expect(lc._sendNotification.getCall(0).args[1]).equals(dummyPayload);
+      expect(lc._sendNotification.getCall(0).args[1]).equals(params);
     });
   });
 
-  describe('notification methods', async () => {
+  describe('notification methods', () => {
     let lc;
     let dummyPayload;
     const eventMap = { };

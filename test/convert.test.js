@@ -1,15 +1,23 @@
+// @flow
+
 import Convert from '../lib/convert';
-import {Point} from 'atom';
+import {Point, Range, TextEditor} from 'atom';
+import {expect} from 'chai';
+import sinon from 'sinon';
 
 let originalPlatform;
-setProcessPlatform = platform => {
+const setProcessPlatform = platform => {
   Object.defineProperty(process, 'platform', { value: platform });
 };
 
-createFakeEditor = (path: string, cursorPosition: ?atom$Point) => ({
-  getPath: () => path,
-  getCursorBufferPosition: () => cursorPosition
-});
+const createFakeEditor = (path: string, text: ?string): atom$TextEditor => {
+  const editor = new TextEditor();
+  editor.getBuffer().setPath(path);
+  if (text != null) {
+    editor.setText(text);
+  }
+  return editor;
+};
 
 describe('Convert', () => {
   beforeEach(() => { originalPlatform = process.platform; })
@@ -93,10 +101,7 @@ describe('Convert', () => {
 
   describe('atomRangeToLSRange', () => {
     it('converts an Atom range to a LSP Range-array', () => {
-      const atomRange = {
-        start: { column: 9, row: 10 },
-        end: { row: 11, column: 12 }
-      };
+      const atomRange = new Range(new Point(9, 10), new Point(11, 12));
       const lspRange = Convert.atomRangeToLSRange(atomRange);
       expect(lspRange.start.line).equals(atomRange.start.row);
       expect(lspRange.start.character).equals(atomRange.start.column);
@@ -116,17 +121,19 @@ describe('Convert', () => {
   describe('editorToTextDocumentPositionParams', () => {
     it('uses the editor cursor position when none specified', () => {
       const path = '/c/d/e/f/g/h/i/j.txt';
-      const position = new Point(101, 323);
-      const params = Convert.editorToTextDocumentPositionParams(createFakeEditor(path, position));
+      const editor = createFakeEditor(path, 'abc\ndefgh\nijkl');
+      editor.setCursorBufferPosition(new Point(1, 2));
+      const params = Convert.editorToTextDocumentPositionParams(editor);
       expect(params.textDocument.uri).equals('file://' + path);
-      expect(params.position).deep.equals({ line: 101, character: 323 });
+      expect(params.position).deep.equals({ line: 1, character: 2 });
     });
 
     it('uses the cursor position parameter when specified', () => {
       const path = '/c/d/e/f/g/h/i/j.txt';
-      const editorPosition = new Point(101, 323);
       const specifiedPoint = new Point(911, 112);
-      const params = Convert.editorToTextDocumentPositionParams(createFakeEditor(path, editorPosition), specifiedPoint);
+      const editor = createFakeEditor(path, 'abcdef\nghijkl\nmnopq');
+      editor.setCursorBufferPosition(new Point(1, 1));
+      const params = Convert.editorToTextDocumentPositionParams(editor, specifiedPoint);
       expect(params.textDocument.uri).equals('file://' + path);
       expect(params.position).deep.equals({ line: 911, character: 112 });
     });

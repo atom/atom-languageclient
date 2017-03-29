@@ -1,13 +1,11 @@
-const {createRunner} = require('atom-mocha-test-runner');
+// @flow
 
-const chai = require('chai');
-const sinon = require('sinon');
-global.expect = chai.expect;
+const {createRunner} = require('atom-mocha-test-runner');
 
 module.exports = createRunner({
   htmlTitle: `atom-languageclient Tests - pid ${process.pid}`,
   reporter: process.env.MOCHA_REPORTER || 'spec',
-  colors: false,
+  colors: process.platform != 'win32',
   overrideTestPaths: [/spec$/, /test/],
 }, mocha => {
   mocha.timeout(parseInt(process.env.MOCHA_TIMEOUT || '5000', 10));
