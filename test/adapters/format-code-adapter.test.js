@@ -6,27 +6,9 @@ import Convert from '../../lib/convert';
 import sinon from 'sinon';
 import {expect} from 'chai';
 import {Point, Range, TextEditor} from 'atom';
+import {createSpyConnection, createFakeEditor} from '../helpers.js';
 
 describe('FormatCodeAdapter', () => {
-  const createSpyConnection = () => {
-    return {
-      listen: sinon.spy(),
-      onError: sinon.spy(),
-      onUnhandledNotification: sinon.spy(),
-      onNotification: sinon.spy(),
-      dispose: sinon.spy()
-    };
-  };
-  const createFakeEditor = (): TextEditor => {
-    const editor = new TextEditor();
-    sinon.stub(editor, 'getSelectedBufferRange');
-    sinon.spy(editor, 'setTextInBufferRange');
-    editor.setTabLength(4);
-    editor.setSoftTabs(true);
-    editor.getBuffer().setPath('/a/b/c/d.js');
-    return editor;
-  };
-
   let originalAtom = global.atom;
   const defaultLanguageClient = new ls.LanguageClientConnection(createSpyConnection());
   const defaultGrammarScopes = [ 'javascript.source' ];

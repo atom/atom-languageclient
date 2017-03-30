@@ -5,32 +5,14 @@ import * as ls from '../../lib/languageclient';
 import sinon from 'sinon';
 import {Point, Range, TextEditor} from 'atom';
 import {expect} from 'chai';
+import {createSpyConnection, createFakeEditor} from '../helpers.js';
 
 describe('AutoCompleteAdapter', () => {
-  const createSpyConnection = () => {
-    return {
-      listen: sinon.spy(),
-      onError: sinon.spy(),
-      onUnhandledNotification: sinon.spy(),
-      onNotification: sinon.spy(),
-      dispose: sinon.spy()
-    };
-  };
-
   beforeEach(() => { global.sinon = sinon.sandbox.create(); });
   afterEach(() => { global.sinon.restore(); });
 
-  const createFakeEditor = (path: string, cursorPosition: ?atom$Point): atom$TextEditor => {
-    const editor = new TextEditor();
-    editor.getBuffer().setPath(path);
-    if (cursorPosition != null) {
-      editor.setCursorBufferPosition(cursorPosition);
-    }
-    return editor;
-  };
-
   const request: atom$AutocompleteRequest = {
-    editor: createFakeEditor('/a/b/c/d.txt'),
+    editor: createFakeEditor(),
     bufferPosition: new Point(123, 456),
     prefix: 'def',
     scopeDescriptor: 'some.scope'
@@ -74,7 +56,7 @@ describe('AutoCompleteAdapter', () => {
   describe('requestToTextDocumentPositionParams', () => {
     it('creates a TextDocumentPositionParams from an AutocompleteRequest', () => {
       const result = AutoCompleteAdapter.requestToTextDocumentPositionParams(request);
-      expect(result.textDocument.uri).equals('file:///a/b/c/d.txt');
+      expect(result.textDocument.uri).equals('file:///a/b/c/d.js');
       expect(result.position).deep.equals({ line: 123, character: 456 });
     });
   });
@@ -134,7 +116,7 @@ describe('AutoCompleteAdapter', () => {
         }
       };
       const request: atom$AutocompleteRequest = {
-        editor: createFakeEditor('/a/b/c/d.txt'),
+        editor: createFakeEditor(),
         bufferPosition: new Point(123, 456),
         prefix: 'def',
         scopeDescriptor: 'some.scope'

@@ -4,21 +4,11 @@ import * as ls from '../lib/languageclient';
 import NullLogger from '../lib/loggers/null-logger';
 import sinon from 'sinon';
 import {expect} from 'chai';
+import {createSpyConnection} from './helpers.js';
 
 describe('LanguageClientConnection', () => {
   beforeEach(() => { global.sinon = sinon.sandbox.create(); });
   afterEach(() => { global.sinon.restore(); });
-
-  const createSpyConnection = () => {
-    return {
-      listen: sinon.spy(),
-      onError: sinon.spy(),
-      onUnhandledNotification: sinon.spy(),
-      onNotification: sinon.spy(),
-      dispose: sinon.spy(),
-      sendRequest: sinon.spy()
-    };
-  };
 
   it('listens to the RPC connection it is given', () => {
     const rpc = createSpyConnection();
