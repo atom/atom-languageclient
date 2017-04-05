@@ -11,6 +11,5 @@
     ["transform-function-bind", {}],
     ["transform-object-rest-spread", {}],
     ["transform-flow-strip-types", {}],
-    ["transform-react-jsx", {}]
   ]
 }
