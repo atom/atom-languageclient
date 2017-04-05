@@ -1,6 +1,5 @@
 // @flow
 
-import path from 'path';
 import LinterAdapter from '../../lib/adapters/linter-adapter';
 import * as ls from '../../lib/languageclient';
 import sinon from 'sinon';
@@ -12,20 +11,20 @@ import {createSpyConnection} from '../helpers.js';
 describe('LinterAdapter', () => {
   const defaultLanguageClient = new ls.LanguageClientConnection(createSpyConnection());
   const compareLinter = (a: linter$Message, b: linter$Message): number => {
-    if (a == null) return 1;
-    if (b == null) return -1;
-    if ((a.filePath || '') < (b.filePath || '')) return -1;
-    if ((a.filePath || '') > (b.filePath || '')) return 1;
-    if ((a.name || '') < (b.name || '')) return -1;
-    if ((a.name || '') > (b.name || '')) return 1;
+    if (a == null) { return 1; }
+    if (b == null) { return -1; }
+    if ((a.filePath || '') < (b.filePath || '')) { return -1; }
+    if ((a.filePath || '') > (b.filePath || '')) { return 1; }
+    if ((a.name || '') < (b.name || '')) { return -1; }
+    if ((a.name || '') > (b.name || '')) { return 1; }
     return 0;
-  }
+  };
 
   describe('constructor', () => {
     it('subscribes to onPublishDiagnostics', () => {
       const languageClient = new ls.LanguageClientConnection(createSpyConnection());
       sinon.spy(languageClient, 'onPublishDiagnostics');
-      const linterAdapter = new LinterAdapter(languageClient);
+      new LinterAdapter(languageClient);
       expect(languageClient.onPublishDiagnostics.called).equals(true);
     });
   });
@@ -33,26 +32,27 @@ describe('LinterAdapter', () => {
   describe('captureDiagnostics', () => {
     const diagnostics = [
       {
-        range: { start: { line: 1, character: 2 }, end: { line: 3, character: 4 } },
+        range: {start: {line: 1, character: 2}, end: {line: 3, character: 4}},
         severity: ls.DiagnosticSeverity.Error,
         code: 101,
         source: 'Unit Test',
-        message: 'Obscure syntax error'
+        message: 'Obscure syntax error',
       },
       {
-        range: { start: { line: 5, character: 6 }, end: { line: 7, character: 8 } },
+        range: {start: {line: 5, character: 6}, end: {line: 7, character: 8}},
         severity: ls.DiagnosticSeverity.Information,
         code: 202,
         source: 'Unit Test 2',
-        message: 'Nice and friendly informational'
-      }
+        message: 'Nice and friendly informational',
+      },
     ];
-    const makePath = (relative: string) => process.platform === 'win32' ? 'c:' + relative.replace(/\//g, '\\') : relative;
+
+    const makePath = relative => (process.platform === 'win32' ? 'c:' + relative.replace(/\//g, '\\') : relative);
 
     it('captures diagnostics per path', () => {
       const linterAdapter = new LinterAdapter(defaultLanguageClient);
       const filePath = makePath('/a/b.txt');
-      linterAdapter.captureDiagnostics({ uri: Convert.pathToUri(filePath), diagnostics: diagnostics });
+      linterAdapter.captureDiagnostics({uri: Convert.pathToUri(filePath), diagnostics});
       const results = linterAdapter.provideDiagnostics();
       expect(results.length).equals(2);
       results.sort(compareLinter);
@@ -63,28 +63,28 @@ describe('LinterAdapter', () => {
 
     it('clears previous diagnostics for a path given an empty array of diagnostics', () => {
       const linterAdapter = new LinterAdapter(defaultLanguageClient);
-      linterAdapter.captureDiagnostics({ uri: Convert.pathToUri(makePath('/a/1.txt')), diagnostics: diagnostics });
-      linterAdapter.captureDiagnostics({ uri: Convert.pathToUri(makePath('/a/2.txt')), diagnostics: diagnostics });
+      linterAdapter.captureDiagnostics({uri: Convert.pathToUri(makePath('/a/1.txt')), diagnostics});
+      linterAdapter.captureDiagnostics({uri: Convert.pathToUri(makePath('/a/2.txt')), diagnostics});
       const firstResults = linterAdapter.provideDiagnostics();
       expect(firstResults.length).equals(4);
-      linterAdapter.captureDiagnostics({ uri: Convert.pathToUri(makePath('/a/2.txt')), diagnostics: [] });
+      linterAdapter.captureDiagnostics({uri: Convert.pathToUri(makePath('/a/2.txt')), diagnostics: []});
       const secondResults = linterAdapter.provideDiagnostics();
       expect(secondResults.length).equals(2);
     });
 
     it('replaces previous diagnostics for a path given an empty array of diagnostics', () => {
       const linterAdapter = new LinterAdapter(defaultLanguageClient);
-      linterAdapter.captureDiagnostics({ uri: Convert.pathToUri(makePath('/a/1.txt')), diagnostics: diagnostics });
-      linterAdapter.captureDiagnostics({ uri: Convert.pathToUri(makePath('/a/2.txt')), diagnostics: diagnostics });
-      linterAdapter.captureDiagnostics({ uri: Convert.pathToUri(makePath('/a/2.txt')), diagnostics: [
+      linterAdapter.captureDiagnostics({uri: Convert.pathToUri(makePath('/a/1.txt')), diagnostics});
+      linterAdapter.captureDiagnostics({uri: Convert.pathToUri(makePath('/a/2.txt')), diagnostics});
+      linterAdapter.captureDiagnostics({uri: Convert.pathToUri(makePath('/a/2.txt')), diagnostics: [
         {
-          range: { start: { line: 10, character: 11 }, end: { line: 12, character: 13 } },
+          range: {start: {line: 10, character: 11}, end: {line: 12, character: 13}},
           severity: ls.DiagnosticSeverity.Warning,
           code: 303,
           source: 'Unit Test 3',
-          message: 'Danger, Will Robinson'
-        }
-      ] });
+          message: 'Danger, Will Robinson',
+        },
+      ]});
       const results = linterAdapter.provideDiagnostics();
       expect(results.length).equals(3);
     });
@@ -95,11 +95,11 @@ describe('LinterAdapter', () => {
       const filePath = '/a/b/c/d';
       const diagnostic: ls.Diagnostic = {
         message: 'This is a message',
-        range: { start: { line: 1, character: 2 }, end: { line: 3, character: 4 } },
+        range: {start: {line: 1, character: 2}, end: {line: 3, character: 4}},
         source: 'source',
         code: 'code',
         severity: ls.DiagnosticSeverity.Information,
-        type: ls.DiagnosticSeverity.Information
+        type: ls.DiagnosticSeverity.Information,
       };
       const result = LinterAdapter.diagnosticToMessage(filePath, diagnostic);
       expect(result.type).equals('Information');

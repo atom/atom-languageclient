@@ -3,11 +3,10 @@
 import Convert from '../lib/convert';
 import {Point, Range, TextEditor} from 'atom';
 import {expect} from 'chai';
-import sinon from 'sinon';
 
 let originalPlatform;
 const setProcessPlatform = platform => {
-  Object.defineProperty(process, 'platform', { value: platform });
+  Object.defineProperty(process, 'platform', {value: platform});
 };
 
 const createFakeEditor = (path: string, text: ?string): atom$TextEditor => {
@@ -20,8 +19,8 @@ const createFakeEditor = (path: string, text: ?string): atom$TextEditor => {
 };
 
 describe('Convert', () => {
-  beforeEach(() => { originalPlatform = process.platform; })
-  afterEach(() => { Object.defineProperty(process, 'platform', { value: originalPlatform }); })
+  beforeEach(() => { originalPlatform = process.platform; });
+  afterEach(() => { Object.defineProperty(process, 'platform', {value: originalPlatform}); });
 
   describe('pathToUri', () => {
     it('prefixes an absolute path with file://', () => {
@@ -69,16 +68,16 @@ describe('Convert', () => {
 
   describe('pointToPosition', () => {
     it('converts an Atom Point to a LSP position', () => {
-      const point = { row: 1, column: 2 };
+      const point = {row: 1, column: 2};
       const position = Convert.pointToPosition(point);
       expect(position.line).equals(point.row);
       expect(position.character).equals(point.column);
-    })
-  })
+    });
+  });
 
   describe('positionToPoint', () => {
     it('converts a LSP position to an Atom Point-array', () => {
-      const position = { line: 3, character: 4 };
+      const position = {line: 3, character: 4};
       const point = Convert.positionToPoint(position);
       expect(point.row).equals(position.line);
       expect(point.column).equals(position.character);
@@ -88,8 +87,8 @@ describe('Convert', () => {
   describe('lsRangeToAtomRange', () => {
     it('converts a LSP range to an Atom Range-array', () => {
       const lspRange = {
-        start: { character: 5, line: 6 },
-        end: { line: 7, character: 8 }
+        start: {character: 5, line: 6},
+        end: {line: 7, character: 8},
       };
       const atomRange = Convert.lsRangeToAtomRange(lspRange);
       expect(atomRange.start.row).equals(lspRange.start.line);
@@ -125,7 +124,7 @@ describe('Convert', () => {
       editor.setCursorBufferPosition(new Point(1, 2));
       const params = Convert.editorToTextDocumentPositionParams(editor);
       expect(params.textDocument.uri).equals('file://' + path);
-      expect(params.position).deep.equals({ line: 1, character: 2 });
+      expect(params.position).deep.equals({line: 1, character: 2});
     });
 
     it('uses the cursor position parameter when specified', () => {
@@ -135,27 +134,29 @@ describe('Convert', () => {
       editor.setCursorBufferPosition(new Point(1, 1));
       const params = Convert.editorToTextDocumentPositionParams(editor, specifiedPoint);
       expect(params.textDocument.uri).equals('file://' + path);
-      expect(params.position).deep.equals({ line: 911, character: 112 });
+      expect(params.position).deep.equals({line: 911, character: 112});
     });
   });
 
   describe('grammarScopesToTextEditorScopes', () => {
     it('converts a single grammarScope to an atom-text-editor scope', () => {
-      const grammarScopes = [ 'abc.def' ];
+      const grammarScopes = ['abc.def'];
       const textEditorScopes = Convert.grammarScopesToTextEditorScopes(grammarScopes);
       expect(textEditorScopes).equals('atom-text-editor[data-grammar="abc def"]');
     });
 
     it('converts a multiple grammarScopes to a comma-seperated list of atom-text-editor scopes', () => {
-      const grammarScopes = [ 'abc.def', 'ghi.jkl' ];
+      const grammarScopes = ['abc.def', 'ghi.jkl'];
       const textEditorScopes = Convert.grammarScopesToTextEditorScopes(grammarScopes);
-      expect(textEditorScopes).equals('atom-text-editor[data-grammar="abc def"], atom-text-editor[data-grammar="ghi jkl"]');
+      expect(textEditorScopes)
+        .equals('atom-text-editor[data-grammar="abc def"], atom-text-editor[data-grammar="ghi jkl"]');
     });
 
     it('converts grammarScopes containing HTML sensitive characters to escaped sequences', () => {
-      const grammarScopes = [ 'abc<def', 'ghi"jkl' ];
+      const grammarScopes = ['abc<def', 'ghi"jkl'];
       const textEditorScopes = Convert.grammarScopesToTextEditorScopes(grammarScopes);
-      expect(textEditorScopes).equals('atom-text-editor[data-grammar="abc&lt;def"], atom-text-editor[data-grammar="ghi&quot;jkl"]');
+      expect(textEditorScopes)
+        .equals('atom-text-editor[data-grammar="abc&lt;def"], atom-text-editor[data-grammar="ghi&quot;jkl"]');
     });
   });
 

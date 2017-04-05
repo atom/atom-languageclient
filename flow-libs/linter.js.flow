@@ -6,7 +6,7 @@ export type linter$StandardLinter = {
   lintOnFly: boolean,
   grammarScopes: Array<string>,
   lint(textEditor: atom$TextEditor): ?Array<Message> | Promise<?Array<Message>>,
-}
+};
 
 export type linter$Message = {
   type: string,
@@ -21,7 +21,7 @@ export type linter$Message = {
   trace?: Array<linter$Trace>,
   fix?: linter$Fix,
   severity?: 'error' | 'warning' | 'info',
-  selected?: Function
+  selected?: Function,
   // ^ WARNING: There is NO replacement for this in v2
 };
 
@@ -36,25 +36,25 @@ export type linter$Trace = {
   // ^ MUST be an absolute path (relative paths are not supported)
   range?: Range,
   class?: string,
-  severity?: 'error' | 'warning' | 'info'
+  severity?: 'error' | 'warning' | 'info',
 };
 
 export type linter$Fix = {
   range: Range,
   newText: string,
-  oldText?: string
+  oldText?: string,
 };
 
 export type linter$Config = {
-  name: string
-}
+  name: string,
+};
 
 export type linter$IndieRegistry = {
-  register(config: linter$Config): linter$Indie
-}
+  register(config: linter$Config): linter$Indie,
+};
 
 export type linter$Indie = {
   deleteMessages(): void,
   setMessages(messages: Array<linter$Message>): void,
-  dispose(): void
-}
+  dispose(): void,
+};

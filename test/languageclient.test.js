@@ -15,11 +15,11 @@ describe('LanguageClientConnection', () => {
 
     new ls.LanguageClientConnection(rpc, new NullLogger());
     expect(rpc.listen.called).equals(true);
-  })
+  });
 
   it('disposes of the connection when it is disposed', () => {
     const rpc = createSpyConnection();
-    const lc = new ls.LanguageClientConnection(rpc, new NullLogger())
+    const lc = new ls.LanguageClientConnection(rpc, new NullLogger());
     expect(rpc.dispose.called).equals(false);
     lc.dispose();
     expect(rpc.dispose.called).equals(true);
@@ -27,8 +27,8 @@ describe('LanguageClientConnection', () => {
 
   describe('send requests', () => {
     const textDocumentPositionParams: ls.TextDocumentPositionParams = {
-      textDocument: { uri: 'file:///1/z80.asm' },
-      position: { line: 24, character: 32 },
+      textDocument: {uri: 'file:///1/z80.asm'},
+      position: {line: 24, character: 32},
     };
     let lc;
 
@@ -38,8 +38,8 @@ describe('LanguageClientConnection', () => {
     });
 
     it('sends a request for initialize', async () => {
-      const params: ls.InitializeParams = { capabilities: { } };
-      const result = await lc.initialize(params);
+      const params: ls.InitializeParams = {capabilities: { }};
+      await lc.initialize(params);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('initialize');
@@ -54,7 +54,7 @@ describe('LanguageClientConnection', () => {
     });
 
     it('sends a request for completion', async () => {
-      const result = await lc.completion(textDocumentPositionParams);
+      await lc.completion(textDocumentPositionParams);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/completion');
@@ -62,8 +62,8 @@ describe('LanguageClientConnection', () => {
     });
 
     it('sends a request for completionItemResolve', async () => {
-      const completionItem: ls.CompletionItem = { label: 'abc' };
-      const result = await lc.completionItemResolve(completionItem);
+      const completionItem: ls.CompletionItem = {label: 'abc'};
+      await lc.completionItemResolve(completionItem);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('completionItem/resolve');
@@ -71,15 +71,15 @@ describe('LanguageClientConnection', () => {
     });
 
     it('sends a request for hover', async () => {
-      const result = await lc.hover(textDocumentPositionParams);
+      await lc.hover(textDocumentPositionParams);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/hover');
       expect(lc._sendRequest.getCall(0).args[1]).equals(textDocumentPositionParams);
-    })
+    });
 
     it('sends a request for signatureHelp', async () => {
-      const result = await lc.signatureHelp(textDocumentPositionParams);
+      await lc.signatureHelp(textDocumentPositionParams);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/signatureHelp');
@@ -87,7 +87,7 @@ describe('LanguageClientConnection', () => {
     });
 
     it('sends a request for gotoDefinition', async () => {
-      const result = await lc.gotoDefinition(textDocumentPositionParams);
+      await lc.gotoDefinition(textDocumentPositionParams);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/definition');
@@ -95,7 +95,7 @@ describe('LanguageClientConnection', () => {
     });
 
     it('sends a request for findReferences', async () => {
-      const result = await lc.findReferences(textDocumentPositionParams);
+      await lc.findReferences(textDocumentPositionParams);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/references');
@@ -103,7 +103,7 @@ describe('LanguageClientConnection', () => {
     });
 
     it('sends a request for documentHighlight', async () => {
-      const result = await lc.documentHighlight(textDocumentPositionParams);
+      await lc.documentHighlight(textDocumentPositionParams);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/documentHighlight');
@@ -111,7 +111,7 @@ describe('LanguageClientConnection', () => {
     });
 
     it('sends a request for documentSymbol', async () => {
-      const result = await lc.documentSymbol(textDocumentPositionParams);
+      await lc.documentSymbol(textDocumentPositionParams);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/documentSymbol');
@@ -119,8 +119,8 @@ describe('LanguageClientConnection', () => {
     });
 
     it('sends a request for workspaceSymbol', async () => {
-      const params: ls.WorkspaceSymbolParams = { query: 'something' };
-      const result = await lc.workspaceSymbol(params);
+      const params: ls.WorkspaceSymbolParams = {query: 'something'};
+      await lc.workspaceSymbol(params);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('workspace/symbol');
@@ -130,10 +130,10 @@ describe('LanguageClientConnection', () => {
     it('sends a request for codeAction', async () => {
       const params: ls.CodeActionParams = {
         textDocument: textDocumentPositionParams.textDocument,
-        range: { start: { line: 1, character: 1}, end: { line: 24, character: 32 } },
-        context: { diagnostics: [] }
+        range: {start: {line: 1, character: 1}, end: {line: 24, character: 32}},
+        context: {diagnostics: []},
       };
-      const result = await lc.codeAction(params);
+      await lc.codeAction(params);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/codeAction');
@@ -142,9 +142,9 @@ describe('LanguageClientConnection', () => {
 
     it('sends a request for codeLens', async () => {
       const params: ls.CodeLensParams = {
-        textDocument: textDocumentPositionParams.textDocument
+        textDocument: textDocumentPositionParams.textDocument,
       };
-      const result = await lc.codeLens(params);
+      await lc.codeLens(params);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/codeLens');
@@ -153,9 +153,9 @@ describe('LanguageClientConnection', () => {
 
     it('sends a request for codeLensResolve', async () => {
       const params: ls.CodeLens = {
-        range: { start: { line: 1, character: 1}, end: { line: 24, character: 32 } }
+        range: {start: {line: 1, character: 1}, end: {line: 24, character: 32}},
       };
-      const result = await lc.codeLensResolve(params);
+      await lc.codeLensResolve(params);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('codeLens/resolve');
@@ -164,9 +164,9 @@ describe('LanguageClientConnection', () => {
 
     it('sends a request for documentLink', async () => {
       const params: ls.DocumentLinkParams = {
-        textDocument: textDocumentPositionParams.textDocument
+        textDocument: textDocumentPositionParams.textDocument,
       };
-      const result = await lc.documentLink(params);
+      await lc.documentLink(params);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/documentLink');
@@ -175,10 +175,10 @@ describe('LanguageClientConnection', () => {
 
     it('sends a request for documentLinkResolve', async () => {
       const params: ls.DocumentLink = {
-        range: { start: { line: 1, character: 1}, end: { line: 24, character: 32 } },
-        target: 'abc.def.ghi'
+        range: {start: {line: 1, character: 1}, end: {line: 24, character: 32}},
+        target: 'abc.def.ghi',
       };
-      const result = await lc.documentLinkResolve(params);
+      await lc.documentLinkResolve(params);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('documentLink/resolve');
@@ -188,9 +188,9 @@ describe('LanguageClientConnection', () => {
     it('sends a request for documentFormatting', async () => {
       const params: ls.DocumentFormattingParams = {
         textDocument: textDocumentPositionParams.textDocument,
-        options: { tabSize: 6, insertSpaces: true, someValue: 'optional' }
+        options: {tabSize: 6, insertSpaces: true, someValue: 'optional'},
       };
-      const result = await lc.documentFormatting(params);
+      await lc.documentFormatting(params);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/formatting');
@@ -200,10 +200,10 @@ describe('LanguageClientConnection', () => {
     it('sends a request for documentRangeFormatting', async () => {
       const params: ls.DocumentRangeFormattingParams = {
         textDocument: textDocumentPositionParams.textDocument,
-        range: { start: { line: 1, character: 1 }, end: { line: 24, character: 32 } },
-        options: { tabSize: 6, insertSpaces: true, someValue: 'optional' }
+        range: {start: {line: 1, character: 1}, end: {line: 24, character: 32}},
+        options: {tabSize: 6, insertSpaces: true, someValue: 'optional'},
       };
-      const result = await lc.documentRangeFormatting(params);
+      await lc.documentRangeFormatting(params);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/rangeFormatting');
@@ -213,11 +213,11 @@ describe('LanguageClientConnection', () => {
     it('sends a request for documentOnTypeFormatting', async () => {
       const params: ls.DocumentOnTypeFormattingParams = {
         textDocument: textDocumentPositionParams.textDocument,
-        position: { line: 1, character: 1 },
+        position: {line: 1, character: 1},
         ch: '}',
-        options: { tabSize: 6, insertSpaces: true, someValue: 'optional' }
+        options: {tabSize: 6, insertSpaces: true, someValue: 'optional'},
       };
-      const result = await lc.documentOnTypeFormatting(params);
+      await lc.documentOnTypeFormatting(params);
 
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/onTypeFormatting');
@@ -226,11 +226,12 @@ describe('LanguageClientConnection', () => {
 
     it('sends a request for rename', async () => {
       const params: ls.RenameParams = {
-        textDocument: { uri: 'file:///a/b.txt'},
-        position: { line: 1, character: 2},
-        newName: 'abstractConstructorFactory'
+        textDocument: {uri: 'file:///a/b.txt'},
+        position: {line: 1, character: 2},
+        newName: 'abstractConstructorFactory',
       };
-      const result = await lc.rename(params);
+      await lc.rename(params);
+
       expect(lc._sendRequest.called).equals(true);
       expect(lc._sendRequest.getCall(0).args[0]).equals('textDocument/rename');
       expect(lc._sendRequest.getCall(0).args[1]).equals(params);
@@ -241,15 +242,13 @@ describe('LanguageClientConnection', () => {
     const textDocumentItem : ls.TextDocumentItem = {
       uri: 'file:///best/bits.js',
       languageId: 'javascript',
-      version: 1.0,
-      text: 'function a() { return "b"; };'
+      text: 'function a() { return "b"; };',
     };
-    const versionedTextDocumentItem : ls.TextDocumentItem = {
+    const versionedTextDocumentItem: ls.VersionedTextDocumentItem = {
       uri: 'file:///best/bits.js',
       languageId: 'javascript',
-      version: 1.0,
       text: 'function a() { return "b"; };',
-      version: 1
+      version: 1,
     };
 
     let lc;
@@ -259,8 +258,8 @@ describe('LanguageClientConnection', () => {
       sinon.stub(lc, '_sendNotification');
     });
 
-    it('didChangeConfiguration sends notification', async () => {
-      const params: ls.DidChangeConfigurationParams = { settings: { a: { b: 'c' } } };
+    it('didChangeConfiguration sends notification', () => {
+      const params: ls.DidChangeConfigurationParams = {settings: {a: {b: 'c'}}};
       lc.didChangeConfiguration(params);
 
       expect(lc._sendNotification.called).equals(true);
@@ -268,8 +267,8 @@ describe('LanguageClientConnection', () => {
       expect(lc._sendNotification.getCall(0).args[1]).equals(params);
     });
 
-    it('didOpenTextDocument sends notification', async () => {
-      const params: ls.DidOpenTextDocumentParams = { textDocument: textDocumentItem };
+    it('didOpenTextDocument sends notification', () => {
+      const params: ls.DidOpenTextDocumentParams = {textDocument: textDocumentItem};
       lc.didOpenTextDocument(params);
 
       expect(lc._sendNotification.called).equals(true);
@@ -277,7 +276,7 @@ describe('LanguageClientConnection', () => {
       expect(lc._sendNotification.getCall(0).args[1]).equals(params);
     });
 
-    it('didChangeTextDocument sends notification', async () => {
+    it('didChangeTextDocument sends notification', () => {
       const params: ls.DidChangeTextDocumentParams = {
         textDocument: versionedTextDocumentItem,
         contentChanges: []
@@ -289,8 +288,8 @@ describe('LanguageClientConnection', () => {
       expect(lc._sendNotification.getCall(0).args[1]).equals(params);
     });
 
-    it('didCloseTextDocument sends notification', async () => {
-      const params: ls.DidCloseTextDocumentParams = { textDocument: textDocumentItem };
+    it('didCloseTextDocument sends notification', () => {
+      const params: ls.DidCloseTextDocumentParams = {textDocument: textDocumentItem};
       lc.didCloseTextDocument(params);
 
       expect(lc._sendNotification.called).equals(true);
@@ -298,8 +297,8 @@ describe('LanguageClientConnection', () => {
       expect(lc._sendNotification.getCall(0).args[1]).equals(params);
     });
 
-    it('didSaveTextDocument sends notification', async () => {
-      const params: ls.DidSaveTextDocumentParams = { textDocument: textDocumentItem };
+    it('didSaveTextDocument sends notification', () => {
+      const params: ls.DidSaveTextDocumentParams = {textDocument: textDocumentItem};
       lc.didSaveTextDocument(params);
 
       expect(lc._sendNotification.called).equals(true);
@@ -307,8 +306,8 @@ describe('LanguageClientConnection', () => {
       expect(lc._sendNotification.getCall(0).args[1]).equals(params);
     });
 
-    it('didChangeWatchedFiles sends notification', async () => {
-      const params: ls.DidChangeWatchedFilesParams = { changes: [] };
+    it('didChangeWatchedFiles sends notification', () => {
+      const params: ls.DidChangeWatchedFilesParams = {changes: []};
       lc.didChangeWatchedFiles(params);
 
       expect(lc._sendNotification.called).equals(true);
@@ -319,25 +318,23 @@ describe('LanguageClientConnection', () => {
 
   describe('notification methods', () => {
     let lc;
-    let dummyPayload;
     const eventMap = { };
 
     beforeEach(() => {
       lc = new ls.LanguageClientConnection(createSpyConnection(), new NullLogger());
-      dummyPayload = { 'send': Math.random() };
       sinon.stub(lc, '_onNotification').callsFake((message, callback) => {
         eventMap[message.method] = callback;
       });
     });
 
-    it('onExit calls back on exit', async () => {
+    it('onExit calls back on exit', () => {
       let called = false;
       lc.onExit(() => { called = true; });
-      eventMap['exit']();
+      eventMap.exit();
       expect(called).equals(true);
     });
 
-    it('onShowMessage calls back on window/showMessage', async () => {
+    it('onShowMessage calls back on window/showMessage', () => {
       let called = false;
       lc.onShowMessage(() => { called = true; });
       eventMap['window/showMessage']();
