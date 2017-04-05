@@ -10,7 +10,7 @@
     "compile": "babel lib --out-dir build/lib && babel test --out-dir build/test",
     "prepublish": "npm run clean && npm run compile",
     "test": "npm run compile && atom --test build/test",
-    "watch": "npm run compile -- -w"
+    "watch": "babel lib --out-dir build/lib -w"
   },
   "dependencies": {
     "vscode-jsonrpc": "^3.2.0"
