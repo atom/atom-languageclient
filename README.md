@@ -95,6 +95,8 @@ class OmnisharpLanguageServer extends AutoLanguageClient {
 module.exports = new OmnisharpLanguageServer()
 ```
 
+You can get this code packaged up with the necessary package.json etc. from the [languageserver-csharp](https://github.com/atom/languageserver-csharp) provides C# support via [Omnisharp (node-omnisharp)](https://github.com/OmniSharp/omnisharp-node-client) repo.
+
 Some more elaborate scenarios can be found in the Java LSP package which includes:
 
 * Downloading and unpacking non-npm dependencies (in this case a .tar.gz containing JAR files)
@@ -105,8 +107,8 @@ Some more elaborate scenarios can be found in the Java LSP package which include
 
 Right now we have the following experimental Atom LSP packages in development. They are mostly usable baring missing some features that either the LSP doesn't support or that we don't yet expose in the capabilities table above.
 
-* [languageserver-java](https://github.com/atom/languageserver-java) provides Java support via [Java Eclipse JDT](https://github.com/eclipse/eclipse.jdt.ls)
 * [languageserver-csharp](https://github.com/atom/languageserver-csharp) provides C# support via [Omnisharp (node-omnisharp)](https://github.com/OmniSharp/omnisharp-node-client)
+* [languageserver-java](https://github.com/atom/languageserver-java) provides Java support via [Java Eclipse JDT](https://github.com/eclipse/eclipse.jdt.ls)
 
 Additional LSP servers for consideration can be found at http://langserver.org/
 
