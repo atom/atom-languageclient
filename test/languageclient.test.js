@@ -243,8 +243,9 @@ describe('LanguageClientConnection', () => {
       uri: 'file:///best/bits.js',
       languageId: 'javascript',
       text: 'function a() { return "b"; };',
+      version: 1,
     };
-    const versionedTextDocumentItem: ls.VersionedTextDocumentItem = {
+    const versionedTextDocumentIdentifier: ls.VersionedTextDocumentIdentifier = {
       uri: 'file:///best/bits.js',
       languageId: 'javascript',
       text: 'function a() { return "b"; };',
@@ -278,7 +279,7 @@ describe('LanguageClientConnection', () => {
 
     it('didChangeTextDocument sends notification', () => {
       const params: ls.DidChangeTextDocumentParams = {
-        textDocument: versionedTextDocumentItem,
+        textDocument: versionedTextDocumentIdentifier,
         contentChanges: []
       };
       lc.didChangeTextDocument(params);
