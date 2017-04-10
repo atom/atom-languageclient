@@ -1397,16 +1397,12 @@ type atom$TextEditEvent = {
   newText: string,
 };
 
-// TODO: Either make the API onDidChangeText public or remove this before sharing as official flowtype.
-type atom$ChangeText = {
-  newExtent: atom$Point,
-  newText: string,
-  oldExtent: atom$Point,
-  start: atom$Point,
+type atom$DidChangeTextEvent = {
+  changes: Array<atom$TextEditEvent>,
 };
 
-type atom$ChangeTextEvent = {
-  changes: Array<atom$ChangeText>,
+type atom$DidStopChangingEvent = {
+  changes: Array<atom$TextEditEvent>,
 };
 
 declare class atom$TextBuffer {
@@ -1418,8 +1414,8 @@ declare class atom$TextBuffer {
   // Events
   onWillChange(callback: (event: atom$TextEditEvent) => mixed): IDisposable,
   onDidChange(callback: (event: atom$TextEditEvent) => mixed): IDisposable,
-  onDidChangeText(callback: (event: atom$ChangeTextEvent) => void): IDisposable,
-  onDidStopChanging(callback: () => mixed): IDisposable,
+  onDidChangeText(callback: (event: atom$DidChangeTextEvent) => void): IDisposable,
+  onDidStopChanging(callback: (event: atom$DidStopChangingEvent) => mixed): IDisposable,
   onDidConflict(callback: () => mixed): IDisposable,
   onDidChangeModified(callback: () => mixed): IDisposable,
   onDidUpdateMarkers(callback: () => mixed): IDisposable,
