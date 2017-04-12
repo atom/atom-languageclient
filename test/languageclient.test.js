@@ -1,7 +1,7 @@
 // @flow
 
 import * as ls from '../lib/languageclient';
-import NullLogger from '../lib/loggers/null-logger';
+import {NullLogger} from '../lib/logger';
 import sinon from 'sinon';
 import {expect} from 'chai';
 import {createSpyConnection} from './helpers.js';
