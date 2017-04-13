@@ -44,8 +44,8 @@ describe('AutoCompleteAdapter', () => {
     sinon.stub(fakeLanguageClient, 'completion').resolves(completionItems);
 
     it('gets AutoComplete suggestions via LSP given an AutoCompleteRequest', async () => {
-      const autoCompleteAdapter = new AutoCompleteAdapter(fakeLanguageClient);
-      const suggestions = await autoCompleteAdapter.getSuggestions(request);
+      const autoCompleteAdapter = new AutoCompleteAdapter();
+      const suggestions = await autoCompleteAdapter.getSuggestions(fakeLanguageClient, request);
       expect(suggestions.length).equals(3);
       expect(suggestions[0].text).equals('label1');
       expect(suggestions[1].descriptionMoreURL).equals('https://atom.io/2');
