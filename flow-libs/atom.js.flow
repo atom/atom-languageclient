@@ -118,13 +118,13 @@ declare class atom$Config {
   observe(
     keyPath: string,
     optionsOrCallback?: Object | (value: any) => void,
-    callback?: (value: any) => void
+    callback?: (value: any) => mixed
   ): IDisposable,
 
   onDidChange(
     keyPathOrCallback: string | (event: Object) => void,
     optionsOrCallback?: Object | (event: Object) => void,
-    callback?: (event: Object) => void
+    callback?: (event: Object) => mixed
   ): IDisposable,
 
   // Managing Settings
