@@ -120,3 +120,40 @@ export type nuclide$FindReferencesError = {
 };
 
 export type nuclide$FindReferencesReturn = nuclide$FindReferencesData | nuclide$FindReferencesError;
+
+export type nuclide$MarkedString =
+  | {
+      type: 'markdown',
+      value: string,
+    }
+  | {
+      type: 'snippet',
+      grammar: atom$Grammar,
+      value: string,
+    };
+
+// This omits the React variant.
+export type nuclide$Datatip = {|
+  markedStrings: Array<nuclide$MarkedString>,
+  range: atom$Range,
+  pinnable?: boolean,
+|};
+
+export type nuclide$DatatipProvider = {
+  datatip(
+    editor: atom$TextEditor,
+    bufferPosition: atom$Point,
+    // The mouse event that triggered the datatip.
+    // This is null for manually toggled datatips.
+    mouseEvent: ?MouseEvent,
+  ): Promise<?Datatip>,
+  inclusionPriority: number,
+  validForScope(scopeName: string): boolean,
+  // A unique name for the provider to be used for analytics.
+  // It is recommended that it be the name of the provider's package.
+  providerName: string,
+};
+
+export type nuclide$DatatipService = {
+  addProvider(provider: nuclide$DatatipProvider): IDisposable,
+};
