@@ -1,6 +1,6 @@
 // @flow
 
-import LinterAdapter from '../../lib/adapters/linter-adapter';
+import LinterV1PullAdapter from '../../lib/adapters/linter-pull-v1-adapter';
 import * as ls from '../../lib/languageclient';
 import sinon from 'sinon';
 import {expect} from 'chai';
@@ -8,7 +8,7 @@ import Convert from '../../lib/convert';
 import {Point, Range} from 'atom';
 import {createSpyConnection} from '../helpers.js';
 
-describe('LinterAdapter', () => {
+describe('LinterV1PullAdapter', () => {
   const defaultLanguageClient = new ls.LanguageClientConnection(createSpyConnection());
   const compareLinter = (a: linter$Message, b: linter$Message): number => {
     if (a == null) { return 1; }
@@ -24,7 +24,7 @@ describe('LinterAdapter', () => {
     it('subscribes to onPublishDiagnostics', () => {
       const languageClient = new ls.LanguageClientConnection(createSpyConnection());
       sinon.spy(languageClient, 'onPublishDiagnostics');
-      new LinterAdapter(languageClient);
+      new LinterV1PullAdapter(languageClient);
       expect(languageClient.onPublishDiagnostics.called).equals(true);
     });
   });
@@ -50,7 +50,7 @@ describe('LinterAdapter', () => {
     const makePath = relative => (process.platform === 'win32' ? 'c:' + relative.replace(/\//g, '\\') : relative);
 
     it('captures diagnostics per path', () => {
-      const linterAdapter = new LinterAdapter(defaultLanguageClient);
+      const linterAdapter = new LinterV1PullAdapter(defaultLanguageClient);
       const filePath = makePath('/a/b.txt');
       linterAdapter.captureDiagnostics({uri: Convert.pathToUri(filePath), diagnostics});
       const results = linterAdapter.provideDiagnostics();
@@ -62,7 +62,7 @@ describe('LinterAdapter', () => {
     });
 
     it('clears previous diagnostics for a path given an empty array of diagnostics', () => {
-      const linterAdapter = new LinterAdapter(defaultLanguageClient);
+      const linterAdapter = new LinterV1PullAdapter(defaultLanguageClient);
       linterAdapter.captureDiagnostics({uri: Convert.pathToUri(makePath('/a/1.txt')), diagnostics});
       linterAdapter.captureDiagnostics({uri: Convert.pathToUri(makePath('/a/2.txt')), diagnostics});
       const firstResults = linterAdapter.provideDiagnostics();
@@ -73,7 +73,7 @@ describe('LinterAdapter', () => {
     });
 
     it('replaces previous diagnostics for a path given an empty array of diagnostics', () => {
-      const linterAdapter = new LinterAdapter(defaultLanguageClient);
+      const linterAdapter = new LinterV1PullAdapter(defaultLanguageClient);
       linterAdapter.captureDiagnostics({uri: Convert.pathToUri(makePath('/a/1.txt')), diagnostics});
       linterAdapter.captureDiagnostics({uri: Convert.pathToUri(makePath('/a/2.txt')), diagnostics});
       linterAdapter.captureDiagnostics({uri: Convert.pathToUri(makePath('/a/2.txt')), diagnostics: [
@@ -101,7 +101,7 @@ describe('LinterAdapter', () => {
         severity: ls.DiagnosticSeverity.Information,
         type: ls.DiagnosticSeverity.Information,
       };
-      const result = LinterAdapter.diagnosticToMessage(filePath, diagnostic);
+      const result = LinterV1PullAdapter.diagnosticToMessage(filePath, diagnostic);
       expect(result.type).equals('Information');
       expect(result.text).equals(diagnostic.message);
       expect(result.name).equals(diagnostic.source);
@@ -113,49 +113,49 @@ describe('LinterAdapter', () => {
 
   describe('diagnosticSeverityToType', () => {
     it('converts DiagnosticSeverity.Error to "Error"', () => {
-      const severity = LinterAdapter.diagnosticSeverityToType(ls.DiagnosticSeverity.Error);
+      const severity = LinterV1PullAdapter.diagnosticSeverityToType(ls.DiagnosticSeverity.Error);
       expect(severity).equals('Error');
     });
 
     it('converts DiagnosticSeverity.Warning to "Warning"', () => {
-      const severity = LinterAdapter.diagnosticSeverityToType(ls.DiagnosticSeverity.Warning);
+      const severity = LinterV1PullAdapter.diagnosticSeverityToType(ls.DiagnosticSeverity.Warning);
       expect(severity).equals('Warning');
     });
 
     it('converts DiagnosticSeverity.Information to "Information"', () => {
-      const severity = LinterAdapter.diagnosticSeverityToType(ls.DiagnosticSeverity.Information);
+      const severity = LinterV1PullAdapter.diagnosticSeverityToType(ls.DiagnosticSeverity.Information);
       expect(severity).equals('Information');
     });
 
     it('converts DiagnosticSeverity.Hint to "Hint"', () => {
-      const severity = LinterAdapter.diagnosticSeverityToType(ls.DiagnosticSeverity.Hint);
+      const severity = LinterV1PullAdapter.diagnosticSeverityToType(ls.DiagnosticSeverity.Hint);
       expect(severity).equals('Hint');
     });
 
     it('converts invalid severity to empty string', () => {
-      const severity = LinterAdapter.diagnosticSeverityToType(-1);
+      const severity = LinterV1PullAdapter.diagnosticSeverityToType(-1);
       expect(severity).equals('');
     });
   });
 
   describe('diagnosticSeverityToSeverity', () => {
     it('converts DiagnosticSeverity.Error to "error"', () => {
-      const severity = LinterAdapter.diagnosticSeverityToSeverity(ls.DiagnosticSeverity.Error);
+      const severity = LinterV1PullAdapter.diagnosticSeverityToSeverity(ls.DiagnosticSeverity.Error);
       expect(severity).equals('error');
     });
 
     it('converts DiagnosticSeverity.Warning to "warning"', () => {
-      const severity = LinterAdapter.diagnosticSeverityToSeverity(ls.DiagnosticSeverity.Warning);
+      const severity = LinterV1PullAdapter.diagnosticSeverityToSeverity(ls.DiagnosticSeverity.Warning);
       expect(severity).equals('warning');
     });
 
     it('converts DiagnosticSeverity.Information to "info"', () => {
-      const severity = LinterAdapter.diagnosticSeverityToSeverity(ls.DiagnosticSeverity.Information);
+      const severity = LinterV1PullAdapter.diagnosticSeverityToSeverity(ls.DiagnosticSeverity.Information);
       expect(severity).equals('info');
     });
 
     it('converts DiagnosticSeverity.Hint to "info"', () => {
-      const severity = LinterAdapter.diagnosticSeverityToSeverity(ls.DiagnosticSeverity.Hint);
+      const severity = LinterV1PullAdapter.diagnosticSeverityToSeverity(ls.DiagnosticSeverity.Hint);
       expect(severity).equals('info');
     });
   });

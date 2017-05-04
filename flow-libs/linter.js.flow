@@ -58,3 +58,54 @@ export type linter$Indie = {
   setMessages(messages: Array<linter$Message>): void,
   dispose(): void,
 };
+
+export type linter$V2IndieDelegate = {
+  name(): string,
+  getMesssages(): Array<linter$Message>,
+  clearMessages(): void,
+  setMessages(filePath: string, messages: Array<linter$V2Message>): void,
+  setAllMessages(messages: Array<linter$V2Message>): void,
+  onDidUpdate(callback: Function): Disposable,
+  onDidDestroy(callback: Function): Disposable,
+  dispose(): void,
+}
+
+type linter$V2Message = {
+  // NOTE: These are given by providers
+  location: {
+    file: string,
+    // ^ MUST be an absolute path (relative paths are not supported)
+    position: Range,
+  },
+  // ^ Location of the issue (aka where to highlight)
+  reference?: {
+    file: string,
+    // ^ MUST be an absolute path (relative paths are not supported)
+    position?: atom$PointLike,
+  },
+  // ^ Reference to a different location in the editor, useful for jumping to classes etc.
+  url?: string, // external HTTP link
+  // ^ HTTP link to a resource explaining the issue. Default is a google search
+  icon?: string,
+  // ^ Name of octicon to show in gutter
+  excerpt: string,
+  // ^ Error message
+  severity: 'error' | 'warning' | 'info',
+  // ^ Severity of error
+  solutions?: Array<{
+    title?: string,
+    position: Range,
+    priority?: number,
+    currentText?: string,
+    replaceWith: string,
+  } | {
+    title?: string,
+    position: Range,
+    priority?: number,
+    apply: (() => any),
+  }>,
+  // ^ Possible solutions to the error (user can invoke them at will)
+  description?: string | (() => Promise<string> | string),
+  // ^ Markdown long description of the error, accepts callback so you can do
+  // http requests etc.
+}
