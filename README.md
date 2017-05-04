@@ -45,15 +45,15 @@ The language server protocol consists of a number of capabilities. Some of these
 | window/logMessage               | Ignored                       |
 | telemetry/event                 | Ignored                       |
 | workspace/didChangeWatchedFiles | Need to expose Atom watcher?  |
-| textDocument/publishDiagnostics | Linter API                    |
+| textDocument/publishDiagnostics | Linter v1 push & v2 pull API  |
 | textDocument/completion         | AutoComplete+ API             |
 | completionItem/resolve          | AutoComplete+ API? (TBD)      |
-| textDocument/hover              | TBD <sup>1</sup>              |
+| textDocument/hover              | Nuclide data tips             |
 | textDocument/signatureHelp      | TBD                           |
 | textDocument/definition         | Nuclide hyperclick            |
 | textDocument/findReferences     | Nuclide findReferences        |
 | textDocument/documentHighlight  | Nuclide hyperclick            |
-| textDocument/documentSymbol     | Nuclide outline view (TBD)    |
+| textDocument/documentSymbol     | Nuclide outline view          |
 | workspace/symbol                | Atom symbols api rework?      |
 | textDocument/codeAction         | TBD                           |
 | textDocument/codeLens           | TBD                           |
