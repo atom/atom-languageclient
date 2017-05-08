@@ -61,7 +61,7 @@ export type linter$Indie = {
 
 export type linter$V2IndieDelegate = {
   name(): string,
-  getMesssages(): Array<linter$Message>,
+  getMessages(): Array<linter$Message>,
   clearMessages(): void,
   setMessages(filePath: string, messages: Array<linter$V2Message>): void,
   setAllMessages(messages: Array<linter$V2Message>): void,
