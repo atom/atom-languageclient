@@ -15,7 +15,7 @@ This npm package can be used by Atom package authors wanting to integrate their 
 * Conversion routines between Atom and LSP types
 * A FlowTyped wrapper around JSON-RPC for v2 of the LSP protocol (v3 to follow)
 * All necessary FlowTyped input and return structures for LSP, notifications etc.
-* A number of adapters to translate communication between Atom + popular packages and the LSP's capabilities
+* A number of adapters to translate communication between Atom and Nuclide and the LSP's capabilities
 * Automatic wiring up of adapters based on the negotiated capabilities of the language server
 * Helper functions for downloading additional non-npm dependencies
 
