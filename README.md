@@ -45,9 +45,9 @@ The language server protocol consists of a number of capabilities. Some of these
 | window/logMessage               | Ignored                       |
 | telemetry/event                 | Ignored                       |
 | workspace/didChangeWatchedFiles | Need to expose Atom watcher?  |
-| textDocument/publishDiagnostics | Linter v1 push & v2 pull API  |
-| textDocument/completion         | AutoComplete+ API             |
-| completionItem/resolve          | AutoComplete+ API? (TBD)      |
+| textDocument/publishDiagnostics | Linter v2 push                |
+| textDocument/completion         | AutoComplete+                 |
+| completionItem/resolve          | AutoComplete+      (TBD)      |
 | textDocument/hover              | Nuclide data tips             |
 | textDocument/signatureHelp      | TBD                           |
 | textDocument/definition         | Nuclide hyperclick            |
@@ -66,8 +66,6 @@ The language server protocol consists of a number of capabilities. Some of these
 | textDocument/didOpen            | Send on open                  |
 | textDocument/didSave            | Send on save                  |
 | textDocument/didClose           | Send on close                 |
-
-<sup>1</sup> Nuclide Datatips requires React which would force all LSP package authors to ship React. LSP actually exposes markdown. We should consider a pop-up UI that handles markdown and ship in core.
 
 ## Developing packages
 
