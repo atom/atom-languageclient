@@ -5,7 +5,7 @@ export type nuclide$OutlineProvider = {
   priority: number,
   grammarScopes: Array<string>,
   updateOnEdit?: boolean,
-  getOutline: (editor: TextEditor) => Promise<?Outline>,
+  getOutline: (editor: atom$TextEditor) => Promise<?Outline>,
 };
 
 export type nuclide$OutlineTree = {
@@ -157,3 +157,35 @@ export type nuclide$DatatipProvider = {
 export type nuclide$DatatipService = {
   addProvider(provider: nuclide$DatatipProvider): IDisposable,
 };
+
+export interface nuclide$CodeFormatProvider {
+  /**
+   * Providers should implement at least one of formatCode / formatEntireFile.
+   * If formatCode exists, it'll be used if the editor selection isn't empty, or
+   * if it's empty but formatEntireFile doesn't exist.
+   */
+
+  /**
+   * Formats the range specified, and returns a list of text edits to apply.
+   * Text edits must be non-overlapping and preferably in reverse-sorted order.
+   */
+  +formatCode?: (
+    editor: atom$TextEditor,
+    range: atom$Range,
+  ) => Promise<Array<TextEdit>>,
+
+  /**
+   * Formats the range specified, but returns the entire file (along with the new cursor position).
+   * Useful for less-flexible providers like clang-format.
+   */
+  +formatEntireFile?: (
+    editor: atom$TextEditor,
+    range: atom$Range,
+  ) => Promise<{
+    newCursor?: number,
+    formatted: string,
+  }>,
+
+  selector: string,
+  inclusionPriority: number,
+}
