@@ -95,7 +95,7 @@ module.exports = new OmnisharpLanguageServer()
 
 You can get this code packaged up with the necessary package.json etc. from the [languageserver-csharp](https://github.com/atom/languageserver-csharp) provides C# support via [Omnisharp (node-omnisharp)](https://github.com/OmniSharp/omnisharp-node-client) repo.
 
-If the Language Server is using IPC type transport, you need to implement `useIpc()` and return `true`.
+If the Language Server is using IPC connection type, you need to implement `getConnectionType()` and return `'ipc'`.
 
 ```javascript
 class ExampleLanguageServer extends AutoLanguageClient {
@@ -103,7 +103,7 @@ class ExampleLanguageServer extends AutoLanguageClient {
   getLanguageName () { return 'JavaScript' }
   getServerName () { return 'JavaScript Language Server' }
   
-  useIpc() { return true }
+  getConnectionType() { return 'ipc' }
 
   startServerProcess () {
     const startServer = require.resolve('@example/js-language-server')
