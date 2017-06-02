@@ -6,11 +6,11 @@ Provide integration support for adding Language Server Protocol servers to Atom.
 
 ## Background
 
-Language Server Protocol is a JSON-RPC based mechanism whereby a client (IDE) may connect to an out-of-process language server that can provide rich analysis, refactoring and interactive features for a given programming language.  The specification is available at https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
+[Language Server Protocol (LSP)](https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md) is a JSON-RPC based mechanism whereby a client (IDE) may connect to an out-of-process server that can provide rich analysis, refactoring and interactive features for a given programming language.
 
 ## Implementation
 
-This npm package can be used by Atom package authors wanting to integrate their language servers with Atom. It provides:
+This npm package can be used by Atom package authors wanting to integrate LSP-compatible language servers with Atom. It provides:
 
 * Conversion routines between Atom and LSP types
 * A FlowTyped wrapper around JSON-RPC for v2 of the LSP protocol (v3 to follow)
@@ -19,24 +19,9 @@ This npm package can be used by Atom package authors wanting to integrate their 
 * Automatic wiring up of adapters based on the negotiated capabilities of the language server
 * Helper functions for downloading additional non-npm dependencies
 
-## Considerations
-
-We went with the library approach for a number of reasons;
-
-1. Avoids developing a huge LSP-like interface in Atom for language server packages to then try and fill
-2. Language Server Protocol packages can be treated the same as any other Atom package
-3. The library can be revised without breaking existing LSP packages
-
-This modular-kit with a lot of automation means it is easy for people developing LSP packages for Atom to easily get up and running yet still provide a good level of customization.
-
-### Unresolved
-
-1. How to shut-down language servers when they are no longer required
-2. Should registration of providers be dynamic (code would be much nicer, less for package authors to maintain)
-
 ## Capabilities
 
-The language server protocol consists of a number of capabilities. Some of these already have a counterpoint we can connect up to today while others do not.  The following table shows each capability in v2 and how we intend to wire it up in Atom;
+The language server protocol consists of a number of capabilities. Some of these already have a counterpoint we can connect up to today while others do not.  The following table shows each capability in v2 and how it is exposed via Atom;
 
 | Capability                      | Atom interface                |
 |---------------------------------|-------------------------------|
@@ -44,37 +29,35 @@ The language server protocol consists of a number of capabilities. Some of these
 | window/showMessageRequest       | Notifications package (TODO)  |
 | window/logMessage               | Ignored                       |
 | telemetry/event                 | Ignored                       |
-| workspace/didChangeWatchedFiles | Need to expose Atom watcher?  |
-| textDocument/publishDiagnostics | Linter v2 push                |
+| workspace/didChangeWatchedFiles | Atom file watch api (TODO)    |
+| textDocument/publishDiagnostics | Linter v2 push/indie          |
 | textDocument/completion         | AutoComplete+                 |
 | completionItem/resolve          | AutoComplete+      (TBD)      |
 | textDocument/hover              | Nuclide data tips             |
 | textDocument/signatureHelp      | TBD                           |
-| textDocument/definition         | Nuclide hyperclick            |
+| textDocument/definition         | Nuclide definitions           |
 | textDocument/findReferences     | Nuclide findReferences        |
-| textDocument/documentHighlight  | Nuclide hyperclick            |
+| textDocument/documentHighlight  | Nuclide definitions           |
 | textDocument/documentSymbol     | Nuclide outline view          |
-| workspace/symbol                | Atom symbols api rework?      |
+| workspace/symbol                | TBD                           |
 | textDocument/codeAction         | TBD                           |
 | textDocument/codeLens           | TBD                           |
 | textDocument/formatting         | Format File command           |
 | textDocument/rangeFormatting    | Format Selection command      |
 | textDocument/onTypeFormatting   | TBD                           |
 | textDocument/rename             | TBD                           |
-| workspace/applyEdit             | TODO                          |
-| textDocument/didChange          | Send on save, watcher? (TBD)  |
+| textDocument/didChange          | Send on save                  |
 | textDocument/didOpen            | Send on open                  |
 | textDocument/didSave            | Send on save                  |
 | textDocument/didClose           | Send on close                 |
 
 ## Developing packages
 
-Some notes:
+The underlying JSON-RPC communication is handled by the [vscode-jsonrpc npm module](https://www.npmjs.com/package/vscode-jsonrpc).
 
-* The underlying JSON-RPC communication is handled by the vscode-jsonrpc npm module
-* Language packages should be activated using existing activation hooks for the associated grammar
+### Minimal example
 
-An absolute minimal implementation can be illustrated by the Omnisharp package which has only npm-managed dependencies:
+A minimal implementation can be illustrated by the Omnisharp package here which has only npm-managed dependencies.  You simply the scope name, language name and server name as well as start your process and AutoLanguageClient takes care of interrogating your language server capabilities and wiring up the appropriate services within Atom to expose them.
 
 ```javascript
 const cp = require('child_process')
@@ -95,14 +78,22 @@ module.exports = new OmnisharpLanguageServer()
 
 You can get this code packaged up with the necessary package.json etc. from the [languageserver-csharp](https://github.com/atom/languageserver-csharp) provides C# support via [Omnisharp (node-omnisharp)](https://github.com/OmniSharp/omnisharp-node-client) repo.
 
-If the Language Server is using IPC connection type, you need to implement `getConnectionType()` and return `'ipc'`.
+Note that you will also need to add various entries to the `providedServices` and `consumedServices` section of your package.json (for now).  You can [obtain these entries here](https://github.com/atom/languageserver-csharp/tree/master/package.json).
+
+### Using other connection types
+
+The default connection type is *stdio* however both *ipc* and *sockets* are also.  
+
+#### IPC
+
+To use ipc simply return *ipc* from getConnectionType(), e.g.
 
 ```javascript
 class ExampleLanguageServer extends AutoLanguageClient {
   getGrammarScopes () { return [ 'source.js' ] }
   getLanguageName () { return 'JavaScript' }
   getServerName () { return 'JavaScript Language Server' }
-  
+
   getConnectionType() { return 'ipc' }
 
   startServerProcess () {
@@ -114,7 +105,18 @@ class ExampleLanguageServer extends AutoLanguageClient {
 }
 ```
 
-Some more elaborate scenarios can be found in the Java LSP package which includes:
+#### Sockets
+
+Sockets are a little more complex bercause you need to allocate a free socket. The [languageserver-php package](https://github.com/atom/languageserver-php/blob/master/lib/main.js) contains an example of this.
+
+### Debugging
+
+Atom-LanguageClient can log all sent and received messages nicely formatted to the Developer Tools Console within Atom. To do so simply enable it with `atom.config.set('core.DebugLSP', true)`, e.g.
+
+
+### Tips
+
+Some more elaborate scenarios can be found in the [languageserver-java](https://github.com/atom/languageserver-java) package which includes:
 
 * Downloading and unpacking non-npm dependencies (in this case a .tar.gz containing JAR files)
 * Per-platform start-up configuration
@@ -122,12 +124,12 @@ Some more elaborate scenarios can be found in the Java LSP package which include
 
 ### Available packages
 
-Right now we have the following experimental Atom LSP packages in development. They are mostly usable baring missing some features that either the LSP doesn't support or that we don't yet expose in the capabilities table above.
+Right now we have the following experimental Atom LSP packages in development. They are mostly usable but are missing some features that either the LSP server doesn't support or expose functionality that is as yet unmapped to Atom (TODO and TBD in the capabilities table above).
 
 * [languageserver-csharp](https://github.com/atom/languageserver-csharp) provides C# support via [Omnisharp (node-omnisharp)](https://github.com/OmniSharp/omnisharp-node-client)
 * [languageserver-java](https://github.com/atom/languageserver-java) provides Java support via [Java Eclipse JDT](https://github.com/eclipse/eclipse.jdt.ls)
 
-Additional LSP servers for consideration can be found at http://langserver.org/
+Additional LSP servers for consideration can be found at [LangServer.org](http://langserver.org)
 
 ## Contributing
 Always feel free to help out!  Whether it's [filing bugs and feature requests](https://github.com/atom/atom-languageclient/issues/new) or working on some of the [open issues](https://github.com/atom/atom-languageclient/issues), Atom's [contributing guide](https://github.com/atom/atom/blob/master/CONTRIBUTING.md) will help get you started while the [guide for contributing to packages](https://github.com/atom/atom/blob/master/docs/contributing-to-packages.md) has some extra information.
