@@ -46,7 +46,7 @@ describe('LinterPushV2Adapter', () => {
       };
       const result = LinterPushV2Adapter.diagnosticToV2Message(filePath, diagnostic);
       expect(result.excerpt).equals(diagnostic.message);
-      expect(result.description).equals(diagnostic.source);
+      expect(result.linterName).equals(diagnostic.source);
       expect(result.location.file).equals(filePath);
       expect(result.location.position).deep.equals(new Range(new Point(1, 2), new Point(3, 4)));
       expect(result.severity).equals('info');
