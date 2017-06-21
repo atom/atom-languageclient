@@ -5,7 +5,7 @@ import {Point} from 'atom';
 import {expect} from 'chai';
 import sinon from 'sinon';
 import * as ls from '../../lib/languageclient';
-import NuclideDatatipAdapter from '../../lib/adapters/nuclide-datatip-adapter';
+import DatatipAdapter from '../../lib/adapters/datatip-adapter';
 import {createSpyConnection, createFakeEditor} from '../helpers.js';
 
 describe('NuclideDatatipAdapter', () => {
@@ -29,7 +29,7 @@ describe('NuclideDatatipAdapter', () => {
 
       const grammarSpy = sinon.spy(atom.grammars, 'grammarForScopeName');
 
-      const datatipAdapter = new NuclideDatatipAdapter();
+      const datatipAdapter = new DatatipAdapter();
       const datatip = await datatipAdapter.getDatatip(
         connection,
         fakeEditor,
