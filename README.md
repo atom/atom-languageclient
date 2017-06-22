@@ -1,4 +1,5 @@
 # Atom Language Server Protocol Client
+
 [![macOS Build Status](https://travis-ci.org/atom/atom-languageclient.svg?branch=master)](https://travis-ci.org/atom/atom-languageclient) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/xibqpw9h3lya87xs/branch/master?svg=true
 )](https://ci.appveyor.com/project/Atom/atom-languageclient/branch/master) [![Dependency Status](https://david-dm.org/atom/atom-languageclient.svg)](https://david-dm.org/atom/atom-languageclient)
 
@@ -57,7 +58,7 @@ The underlying JSON-RPC communication is handled by the [vscode-jsonrpc npm modu
 
 ### Minimal example
 
-A minimal implementation can be illustrated by the Omnisharp package here which has only npm-managed dependencies.  You simply the scope name, language name and server name as well as start your process and AutoLanguageClient takes care of interrogating your language server capabilities and wiring up the appropriate services within Atom to expose them.
+A minimal implementation can be illustrated by the Omnisharp package here which has only npm-managed dependencies.  You simply provide the scope name, language name and server name as well as start your process and AutoLanguageClient takes care of interrogating your language server capabilities and wiring up the appropriate services within Atom to expose them.
 
 ```javascript
 const cp = require('child_process')
@@ -82,7 +83,7 @@ Note that you will also need to add various entries to the `providedServices` an
 
 ### Using other connection types
 
-The default connection type is *stdio* however both *ipc* and *sockets* are also.  
+The default connection type is *stdio* however both *ipc* and *sockets* are also available.  
 
 #### IPC
 
@@ -107,7 +108,7 @@ class ExampleLanguageServer extends AutoLanguageClient {
 
 #### Sockets
 
-Sockets are a little more complex bercause you need to allocate a free socket. The [languageserver-php package](https://github.com/atom/languageserver-php/blob/master/lib/main.js) contains an example of this.
+Sockets are a little more complex because you need to allocate a free socket. The [languageserver-php package](https://github.com/atom/languageserver-php/blob/master/lib/main.js) contains an example of this.
 
 ### Debugging
 
@@ -132,7 +133,9 @@ Right now we have the following experimental Atom LSP packages in development. T
 Additional LSP servers for consideration can be found at [LangServer.org](http://langserver.org)
 
 ## Contributing
+
 Always feel free to help out!  Whether it's [filing bugs and feature requests](https://github.com/atom/atom-languageclient/issues/new) or working on some of the [open issues](https://github.com/atom/atom-languageclient/issues), Atom's [contributing guide](https://github.com/atom/atom/blob/master/CONTRIBUTING.md) will help get you started while the [guide for contributing to packages](https://github.com/atom/atom/blob/master/docs/contributing-to-packages.md) has some extra information.
 
 ## License
+
 MIT License.  See [the license](LICENSE.md) for more details.
