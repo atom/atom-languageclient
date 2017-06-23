@@ -17,6 +17,18 @@ describe('NuclideDatatipAdapter', () => {
     fakeEditor = createFakeEditor();
   });
 
+  describe('canAdapt', () => {
+    it('returns true if hoverProvider is supported', () => {
+      const result = DatatipAdapter.canAdapt({ hoverProvider: true });
+      expect(result).to.be.true;
+    });
+
+    it('returns false if hoverProvider not supported', () => {
+      const result = DatatipAdapter.canAdapt({ });
+      expect(result).to.be.false;
+    });
+  });
+
   describe('getDatatip', () => {
     it('calls LSP document/hover at the given position', async () => {
       sinon.stub(connection, 'hover').resolves({
