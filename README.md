@@ -112,7 +112,7 @@ Sockets are a little more complex because you need to allocate a free socket. Th
 
 ### Debugging
 
-Atom-LanguageClient can log all sent and received messages nicely formatted to the Developer Tools Console within Atom. To do so simply enable it with `atom.config.set('core.DebugLSP', true)`, e.g.
+Atom-LanguageClient can log all sent and received messages nicely formatted to the Developer Tools Console within Atom. To do so simply enable it with `atom.config.set('core.debugLSP', true)`, e.g.
 
 
 ### Tips
