@@ -36,4 +36,30 @@ describe('DocumentSyncAdapter', () => {
       expect(result).to.be.false;
     });
   });
+
+  describe('constructor', () => {
+    function create(textDocumentSync) {
+      return new DocumentSyncAdapter(null, textDocumentSync, null);
+    }
+
+    it('sets _documentSyncKind correctly Incremental for v2 capabilities', () => {
+      const result = create(TextDocumentSyncKind.Incremental)._documentSyncKind;
+      expect(result).equals(TextDocumentSyncKind.Incremental);
+    });
+
+    it('sets _documentSyncKind correctly Full for v2 capabilities', () => {
+      const result = create(TextDocumentSyncKind.Full)._documentSyncKind;
+      expect(result).equals(TextDocumentSyncKind.Full);
+    });
+
+    it('sets _documentSyncKind correctly Incremental for v3 capabilities', () => {
+      const result = create({ change: TextDocumentSyncKind.Incremental })._documentSyncKind;
+      expect(result).equals(TextDocumentSyncKind.Incremental);
+    });
+
+    it('sets _documentSyncKind correctly Full for v3 capabilities', () => {
+      const result = create({ change: TextDocumentSyncKind.Full })._documentSyncKind;
+      expect(result).equals(TextDocumentSyncKind.Full);
+    });
+  });
 });
