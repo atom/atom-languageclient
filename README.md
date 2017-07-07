@@ -14,9 +14,9 @@ Provide integration support for adding Language Server Protocol servers to Atom.
 This npm package can be used by Atom package authors wanting to integrate LSP-compatible language servers with Atom. It provides:
 
 * Conversion routines between Atom and LSP types
-* A FlowTyped wrapper around JSON-RPC for v2 of the LSP protocol (v3 to follow)
+* A FlowTyped wrapper around JSON-RPC for **v2** of the LSP protocol (v3 to follow)
 * All necessary FlowTyped input and return structures for LSP, notifications etc.
-* A number of adapters to translate communication between Atom and Nuclide and the LSP's capabilities
+* A number of adapters to translate communication between Atom/Atom-IDE and the LSP's capabilities
 * Automatic wiring up of adapters based on the negotiated capabilities of the language server
 * Helper functions for downloading additional non-npm dependencies
 
@@ -34,12 +34,12 @@ The language server protocol consists of a number of capabilities. Some of these
 | textDocument/publishDiagnostics | Linter v2 push/indie          |
 | textDocument/completion         | AutoComplete+                 |
 | completionItem/resolve          | AutoComplete+      (TBD)      |
-| textDocument/hover              | Nuclide data tips             |
+| textDocument/hover              | Atom-IDE data tips            |
 | textDocument/signatureHelp      | TBD                           |
-| textDocument/definition         | Nuclide definitions           |
-| textDocument/findReferences     | Nuclide findReferences        |
-| textDocument/documentHighlight  | Nuclide definitions           |
-| textDocument/documentSymbol     | Nuclide outline view          |
+| textDocument/definition         | Atom-IDE definitions          |
+| textDocument/findReferences     | Atom-IDE findReferences       |
+| textDocument/documentHighlight  | Atom-IDE definitions          |
+| textDocument/documentSymbol     | Atom-IDE outline view         |
 | workspace/symbol                | TBD                           |
 | textDocument/codeAction         | TBD                           |
 | textDocument/codeLens           | TBD                           |
@@ -64,7 +64,7 @@ A minimal implementation can be illustrated by the Omnisharp package here which 
 const cp = require('child_process')
 const {AutoLanguageClient} = require('atom-languageclient')
 
-class OmnisharpLanguageServer extends AutoLanguageClient {
+class CSharpLanguageClient extends AutoLanguageClient {
   getGrammarScopes () { return [ 'source.cs' ] }
   getLanguageName () { return 'C#' }
   getServerName () { return 'OmniSharp' }
@@ -74,12 +74,12 @@ class OmnisharpLanguageServer extends AutoLanguageClient {
   }
 }
 
-module.exports = new OmnisharpLanguageServer()
+module.exports = new CSharpLanguageClient()
 ```
 
-You can get this code packaged up with the necessary package.json etc. from the [languageserver-csharp](https://github.com/atom/languageserver-csharp) provides C# support via [Omnisharp (node-omnisharp)](https://github.com/OmniSharp/omnisharp-node-client) repo.
+You can get this code packaged up with the necessary package.json etc. from the [ide-csharp](https://github.com/atom/ide-csharp) provides C# support via [Omnisharp (node-omnisharp)](https://github.com/OmniSharp/omnisharp-node-client) repo.
 
-Note that you will also need to add various entries to the `providedServices` and `consumedServices` section of your package.json (for now).  You can [obtain these entries here](https://github.com/atom/languageserver-csharp/tree/master/package.json).
+Note that you will also need to add various entries to the `providedServices` and `consumedServices` section of your package.json (for now).  You can [obtain these entries here](https://github.com/atom/ide-csharp/tree/master/package.json).
 
 ### Using other connection types
 
@@ -90,7 +90,7 @@ The default connection type is *stdio* however both *ipc* and *sockets* are also
 To use ipc simply return *ipc* from getConnectionType(), e.g.
 
 ```javascript
-class ExampleLanguageServer extends AutoLanguageClient {
+class ExampleLanguageClient extends AutoLanguageClient {
   getGrammarScopes () { return [ 'source.js' ] }
   getLanguageName () { return 'JavaScript' }
   getServerName () { return 'JavaScript Language Server' }
@@ -108,7 +108,7 @@ class ExampleLanguageServer extends AutoLanguageClient {
 
 #### Sockets
 
-Sockets are a little more complex because you need to allocate a free socket. The [languageserver-php package](https://github.com/atom/languageserver-php/blob/master/lib/main.js) contains an example of this.
+Sockets are a little more complex because you need to allocate a free socket. The [ide-php package](https://github.com/atom/ide-php/blob/master/lib/main.js) contains an example of this.
 
 ### Debugging
 
@@ -117,7 +117,7 @@ Atom-LanguageClient can log all sent and received messages nicely formatted to t
 
 ### Tips
 
-Some more elaborate scenarios can be found in the [languageserver-java](https://github.com/atom/languageserver-java) package which includes:
+Some more elaborate scenarios can be found in the [ide-java](https://github.com/atom/ide-java) package which includes:
 
 * Downloading and unpacking non-npm dependencies (in this case a .tar.gz containing JAR files)
 * Per-platform start-up configuration
@@ -127,8 +127,10 @@ Some more elaborate scenarios can be found in the [languageserver-java](https://
 
 Right now we have the following experimental Atom LSP packages in development. They are mostly usable but are missing some features that either the LSP server doesn't support or expose functionality that is as yet unmapped to Atom (TODO and TBD in the capabilities table above).
 
-* [languageserver-csharp](https://github.com/atom/languageserver-csharp) provides C# support via [Omnisharp (node-omnisharp)](https://github.com/OmniSharp/omnisharp-node-client)
-* [languageserver-java](https://github.com/atom/languageserver-java) provides Java support via [Java Eclipse JDT](https://github.com/eclipse/eclipse.jdt.ls)
+* [ide-csharp](https://github.com/atom/ide-csharp) provides C# support via [Omnisharp (node-omnisharp)](https://github.com/OmniSharp/omnisharp-node-client)
+* [ide-java](https://github.com/atom/ide-java) provides Java support via [Java Eclipse JDT](https://github.com/eclipse/eclipse.jdt.ls)
+* [ide-php](https://github.com/atom/ide-php) provides PHP support via [FelixFBeckers PHP Language Server](https://github.com/felixfbecker/php-language-server)
+* [ide-typescript](https://github.com/atom/ide-typescript) provides TypeScript and Javascript support via [SourceGraph Typescript Language Server](https://github.com/sourcegraph/javascript-typescript-langserver)
 
 Additional LSP servers for consideration can be found at [LangServer.org](http://langserver.org)
 
