@@ -124,7 +124,6 @@ export type nuclide$DatatipProvider = {
     // This is null for manually toggled datatips.
     mouseEvent: ?MouseEvent,
   ): Promise<?Datatip>,
-  inclusionPriority: number,
   validForScope(scopeName: string): boolean,
   // A unique name for the provider to be used for analytics.
   // It is recommended that it be the name of the provider's package.
