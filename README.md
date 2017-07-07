@@ -27,7 +27,7 @@ The language server protocol consists of a number of capabilities. Some of these
 | Capability                      | Atom interface                |
 |---------------------------------|-------------------------------|
 | window/showMessage              | Notifications package         |
-| window/showMessageRequest       | Notifications package (TODO)  |
+| window/showMessageRequest       | Notifications package         |
 | window/logMessage               | Ignored                       |
 | telemetry/event                 | Ignored                       |
 | workspace/didChangeWatchedFiles | Atom file watch api (TODO)    |
