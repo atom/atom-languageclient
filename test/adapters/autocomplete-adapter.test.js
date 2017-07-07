@@ -23,19 +23,19 @@ describe('AutoCompleteAdapter', () => {
       label: 'label1',
       kind: ls.CompletionItemKind.Keyword,
       detail: 'description1',
-      documentation: 'https://atom.io/1',
+      documentation: 'a very exciting keyword',
     },
     {
       label: 'label2',
       kind: ls.CompletionItemKind.Field,
       detail: 'description2',
-      documentation: 'https://atom.io/2',
+      documentation: 'a very exciting field',
     },
     {
       label: 'label3',
       kind: ls.CompletionItemKind.Variable,
       detail: 'description3',
-      documentation: 'https://atom.io/3',
+      documentation: 'a very exciting variable',
     },
   ];
 
@@ -48,7 +48,7 @@ describe('AutoCompleteAdapter', () => {
       const suggestions = await autoCompleteAdapter.getSuggestions(fakeLanguageClient, request);
       expect(suggestions.length).equals(3);
       expect(suggestions[0].text).equals('label1');
-      expect(suggestions[1].descriptionMoreURL).equals('https://atom.io/2');
+      expect(suggestions[1].description).equals('a very exciting field');
       expect(suggestions[2].type).equals('variable');
     });
   });
@@ -66,7 +66,7 @@ describe('AutoCompleteAdapter', () => {
       const results = AutoCompleteAdapter.completionItemsToSuggestions(completionItems, request);
       expect(results.length).equals(3);
       expect(results[0].text).equals('label1');
-      expect(results[1].descriptionMoreURL).equals('https://atom.io/2');
+      expect(results[1].description).equals('a very exciting field');
       expect(results[2].type).equals('variable');
     });
 
@@ -74,7 +74,7 @@ describe('AutoCompleteAdapter', () => {
       const completionList = {items: completionItems, isIncomplete: false};
       const results = AutoCompleteAdapter.completionItemsToSuggestions(completionList, request);
       expect(results.length).equals(3);
-      expect(results[0].descriptionMoreURL).equals('https://atom.io/1');
+      expect(results[0].description).equals('a very exciting keyword');
       expect(results[1].text).equals('label2');
     });
 
@@ -91,15 +91,15 @@ describe('AutoCompleteAdapter', () => {
         label: 'label',
         filterText: 'filter',
         kind: ls.CompletionItemKind.Keyword,
-        detail: 'description',
-        documentation: 'https://atom.io/something-more',
+        detail: 'keyword',
+        documentation: 'a truly useful keyword',
       };
       const result = AutoCompleteAdapter.completionItemToSuggestion(completionItem, request);
       expect(result.text).equals('insert');
       expect(result.displayText).equals('label');
       expect(result.type).equals('keyword');
-      expect(result.description).equals('description');
-      expect(result.descriptionMoreURL).equals('https://atom.io/something-more');
+      expect(result.leftLabel).equals('keyword');
+      expect(result.description).equals('a truly useful keyword');
     });
 
     it('converts LSP CompletionItem to AutoComplete Suggestion with textEdit', () => {
@@ -108,8 +108,8 @@ describe('AutoCompleteAdapter', () => {
         label: 'label',
         filterText: 'filter',
         kind: ls.CompletionItemKind.Variable,
-        detail: 'description',
-        documentation: 'https://atom.io/something-more',
+        detail: 'number',
+        documentation: 'a truly useful variable',
         textEdit: {
           range: {start: {line: 10, character: 20}, end: {line: 30, character: 40}},
           newText: 'newText',
@@ -125,8 +125,8 @@ describe('AutoCompleteAdapter', () => {
       const result = AutoCompleteAdapter.completionItemToSuggestion(completionItem, autocompleteRequest);
       expect(result.displayText).equals('label');
       expect(result.type).equals('variable');
-      expect(result.description).equals('description');
-      expect(result.descriptionMoreURL).equals('https://atom.io/something-more');
+      expect(result.leftLabel).equals('number');
+      expect(result.description).equals('a truly useful variable');
       expect(result.replacementPrefix).equals('replacementPrefix');
       expect(result.text).equals('newText');
       expect(autocompleteRequest.editor.getTextInBufferRange.calledOnce).equals(true);
@@ -141,30 +141,30 @@ describe('AutoCompleteAdapter', () => {
         label: 'label',
         filterText: 'filter',
         kind: ls.CompletionItemKind.Keyword,
-        detail: 'description',
-        documentation: 'https://atom.io/something-more',
+        detail: 'detail',
+        documentation: 'a very exciting keyword',
       };
       const result = AutoCompleteAdapter.basicCompletionItemToSuggestion(completionItem);
       expect(result.text).equals('insert');
       expect(result.displayText).equals('label');
       expect(result.type).equals('keyword');
-      expect(result.description).equals('description');
-      expect(result.descriptionMoreURL).equals('https://atom.io/something-more');
+      expect(result.leftLabel).equals('detail');
+      expect(result.description).equals('a very exciting keyword');
     });
 
     it('converts LSP CompletionItem without insertText or filterText to AutoComplete Suggestion', () => {
       const completionItem: ls.CompletionItem = {
         label: 'label',
         kind: ls.CompletionItemKind.Keyword,
-        detail: 'description',
-        documentation: 'https://atom.io/something-more',
+        detail: 'detail',
+        documentation: 'A very useful keyword',
       };
       const result = AutoCompleteAdapter.basicCompletionItemToSuggestion(completionItem);
       expect(result.text).equals('label');
       expect(result.displayText).equals('label');
       expect(result.type).equals('keyword');
-      expect(result.description).equals('description');
-      expect(result.descriptionMoreURL).equals('https://atom.io/something-more');
+      expect(result.leftLabel).equals('detail');
+      expect(result.description).equals('A very useful keyword');
     });
   });
 
@@ -172,8 +172,8 @@ describe('AutoCompleteAdapter', () => {
     const basicCompletionItem: ls.CompletionItem = {
       label: 'label',
       kind: ls.CompletionItemKind.Keyword,
-      detail: 'description',
-      documentation: 'https://atom.io/something-more',
+      detail: 'detail',
+      documentation: 'An incredible keyword',
     };
 
     it('does not do anything if there is no textEdit', () => {
