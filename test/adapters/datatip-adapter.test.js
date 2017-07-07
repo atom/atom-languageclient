@@ -8,7 +8,7 @@ import * as ls from '../../lib/languageclient';
 import DatatipAdapter from '../../lib/adapters/datatip-adapter';
 import {createSpyConnection, createFakeEditor} from '../helpers.js';
 
-describe('NuclideDatatipAdapter', () => {
+describe('DatatipAdapter', () => {
   let fakeEditor;
   let connection;
 

@@ -886,7 +886,7 @@ declare class atom$TextEditor extends atom$Model {
   getPlaceholderText(): string,
   setPlaceholderText(placeholderText: string): void,
 
-  // This is undocumented, but Nuclide uses it in the AtomTextEditor wrapper.
+  // This is undocumented, but Atom-IDE uses it in the AtomTextEditor wrapper.
   setLineNumberGutterVisible(lineNumberGutterVisible: boolean): void,
 
   // Editor Options
