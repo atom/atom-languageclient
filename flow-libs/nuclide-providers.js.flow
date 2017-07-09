@@ -48,8 +48,6 @@ export type nuclide$DefinitionProvider = {
   priority: number,
   grammarScopes: Array<string>,
   getDefinition: (editor: atom$TextEditor, position: atom$Point) => Promise<?nuclide$DefinitionQueryResult>,
-  // filename is any file/path in the project containing id.
-  getDefinitionById: (filename: NuclideUri, id: string) => Promise<?nuclide$Definition>,
 };
 
 export type NuclideUri = string;

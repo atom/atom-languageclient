@@ -1,0 +1,4 @@
+declare function afterEach(func: () => mixed): void;
+declare function beforeEach(func: () => mixed): void;
+declare function describe(title: string, spec: () => mixed): void;
+declare function it(title: string, spec: () => mixed): void;
