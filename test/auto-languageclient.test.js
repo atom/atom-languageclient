@@ -4,7 +4,7 @@ import AutoLanguageClient from '../lib/auto-languageclient';
 import path from 'path';
 import {expect} from 'chai';
 
-describe('AutoLanguageClient.newEditorSelector', () => {
+describe('AutoLanguageClient.shouldSyncForEditor', () => {
   class CustomAutoLanguageClient extends AutoLanguageClient {
     getGrammarScopes () {
       return ['Java', 'Python'];
@@ -36,7 +36,7 @@ describe('AutoLanguageClient.newEditorSelector', () => {
 
     data.forEach(item => {
       const editor = mockEditor(item.path, item.lang);
-      const selector = client.newEditorSelector(editor, basepath);
+      const selector = client.shouldSyncForEditor(editor, basepath);
       expect(selector(editor)).equals(item.expected);
     });
   });
