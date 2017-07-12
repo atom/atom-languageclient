@@ -36,8 +36,7 @@ describe('AutoLanguageClient.shouldSyncForEditor', () => {
 
     data.forEach(item => {
       const editor = mockEditor(item.path, item.lang);
-      const selector = client.shouldSyncForEditor(editor, basepath);
-      expect(selector(editor)).equals(item.expected);
+      expect(client.shouldSyncForEditor(editor, basepath)).equals(item.expected);
     });
   });
 });
