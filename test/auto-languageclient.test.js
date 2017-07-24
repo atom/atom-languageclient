@@ -21,22 +21,22 @@ describe('AutoLanguageClient.shouldSyncForEditor', () => {
   }
 
   it('selects documents in project and in supported language', () => {
-    const basepath = "/path/to/somewhere";
-    const pathInProject = path.resolve(basepath, "file");
-    const pathOutsideProject = "/path/to/elsewhere/file";
-    const supportedLanguage = client.getGrammarScopes()[0];
-    const unsupportedLanguage = client.getGrammarScopes()[0] + "-dummy";
+      const editor = mockEditor("/path/to/somewhere", client.getGrammarScopes()[0]);
+      expect(client.shouldSyncForEditor(editor, "/path/to/somewhere")).equals(true);
+  });
 
-    const data = [
-      { path: pathInProject, lang: supportedLanguage, expected: true },
-      { path: pathInProject, lang: unsupportedLanguage, expected: false },
-      { path: pathOutsideProject, lang: supportedLanguage, expected: false },
-      { path: pathOutsideProject, lang: unsupportedLanguage, expected: false }
-    ];
+  it('does not select documents outside of project', () => {
+      const editor = mockEditor("/path/to/elsewhere/file", client.getGrammarScopes()[0]);
+      expect(client.shouldSyncForEditor(editor, "/path/to/somewhere")).equals(false);
+  })
 
-    data.forEach(item => {
-      const editor = mockEditor(item.path, item.lang);
-      expect(client.shouldSyncForEditor(editor, basepath)).equals(item.expected);
-    });
+  it('does not select documents in unsupported language', () => {
+    const editor = mockEditor("/path/to/somewhere", client.getGrammarScopes()[0] + '-dummy');
+    expect(client.shouldSyncForEditor(editor, "/path/to/somewhere")).equals(false);
+  });
+
+  it('does not select documents in unsupported language outside of project', () => {
+    const editor = mockEditor("/path/to/elsewhere/file", client.getGrammarScopes()[0] + '-dummy');
+    expect(client.shouldSyncForEditor(editor, "/path/to/somewhere")).equals(false);
   });
 });
