@@ -100,6 +100,7 @@ describe('AutoCompleteAdapter', () => {
       expect(result.type).equals('keyword');
       expect(result.leftLabel).equals('keyword');
       expect(result.description).equals('a truly useful keyword');
+      expect(result.descriptionMarkdown).equals('a truly useful keyword');
     });
 
     it('converts LSP CompletionItem to AutoComplete Suggestion with textEdit', () => {
@@ -127,6 +128,7 @@ describe('AutoCompleteAdapter', () => {
       expect(result.type).equals('variable');
       expect(result.leftLabel).equals('number');
       expect(result.description).equals('a truly useful variable');
+      expect(result.descriptionMarkdown).equals('a truly useful variable');
       expect(result.replacementPrefix).equals('replacementPrefix');
       expect(result.text).equals('newText');
       expect(autocompleteRequest.editor.getTextInBufferRange.calledOnce).equals(true);
@@ -150,6 +152,7 @@ describe('AutoCompleteAdapter', () => {
       expect(result.type).equals('keyword');
       expect(result.leftLabel).equals('detail');
       expect(result.description).equals('a very exciting keyword');
+      expect(result.descriptionMarkdown).equals('a very exciting keyword');
     });
 
     it('converts LSP CompletionItem without insertText or filterText to AutoComplete Suggestion', () => {
@@ -165,6 +168,7 @@ describe('AutoCompleteAdapter', () => {
       expect(result.type).equals('keyword');
       expect(result.leftLabel).equals('detail');
       expect(result.description).equals('A very useful keyword');
+      expect(result.descriptionMarkdown).equals('A very useful keyword');
     });
   });
 
