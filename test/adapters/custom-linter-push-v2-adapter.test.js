@@ -6,7 +6,7 @@ import {expect} from 'chai';
 import {Point, Range} from 'atom';
 
 const messageUrl = "dummy";
-const messageSolutions = ["dummy"];
+const messageSolutions: Array<any> = ["dummy"];
 
 class CustomLinterPushV2Adapter extends LinterPushV2Adapter {
 
@@ -35,7 +35,7 @@ describe('CustomLinterPushV2Adapter', () => {
         type: ls.DiagnosticSeverity.Information,
       };
 
-      const connection = { onPublishDiagnostics: function(){} };
+      const connection: any = { onPublishDiagnostics: function(){} };
       const adapter = new CustomLinterPushV2Adapter(connection);
       const result = adapter.diagnosticToV2Message(filePath, diagnostic);
 
