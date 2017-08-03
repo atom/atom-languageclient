@@ -44,7 +44,11 @@ describe('LinterPushV2Adapter', () => {
         severity: ls.DiagnosticSeverity.Information,
         type: ls.DiagnosticSeverity.Information,
       };
-      const result = LinterPushV2Adapter.diagnosticToV2Message(filePath, diagnostic);
+
+      const connection = { onPublishDiagnostics: function(){} };
+      const adapter = new LinterPushV2Adapter(connection);
+      const result = adapter.diagnosticToV2Message(filePath, diagnostic);
+
       expect(result.excerpt).equals(diagnostic.message);
       expect(result.linterName).equals(diagnostic.source);
       expect(result.location.file).equals(filePath);
