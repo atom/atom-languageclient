@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Exit if any single command fails.
+set -e
+
 echo "Downloading latest Atom release..."
 ATOM_CHANNEL="${ATOM_CHANNEL:=stable}"
 
@@ -94,10 +97,8 @@ if [ -n "${APM_TEST_PACKAGES}" ]; then
   done
 fi
 
+echo "Running lint..."
+npm run lint
+
 echo "Running specs..."
 "$ATOM_SCRIPT_PATH" --test build/test
-TEST_RESULT=$?
-
-echo "=================="
-echo "Test exit code: $TEST_RESULT"
-if [ $TEST_RESULT -ne 0 ]; then exit $TEST_RESULT; fi
