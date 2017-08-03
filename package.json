@@ -48,7 +48,7 @@
     "chai": "^3.5.0",
     "eslint": "^3.19.0",
     "eslint-config-fbjs-opensource": "^1.0.0",
-    "flow-bin": "^0.42.0",
+    "flow-bin": "^0.52.0",
     "mocha": "^3.2.0",
     "mocha-appveyor-reporter": "^0.3.0",
     "sinon": "^2.0.0"
