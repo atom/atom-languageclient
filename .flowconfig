@@ -7,3 +7,6 @@ flow-libs/
 flow-typed/
 
 [options]
+
+[version]
+0.52.0
