@@ -98,7 +98,7 @@ declare class atom$CompositeDisposable {
   constructor(...disposables: IDisposable[]): void,
   dispose(): void,
 
-  add(disposable: IDisposable): void,
+  add(...disposables: Array<IDisposable>): void,
   remove(disposable: IDisposable): void,
   clear(): void,
 }
@@ -1736,6 +1736,7 @@ type atom$AutocompleteSuggestion = {
   className?: ?string,
   iconHTML?: ?string,
   description?: ?string,
+  descriptionMarkdown?: ?string,
   descriptionMoreURL?: ?string,
 };
 
