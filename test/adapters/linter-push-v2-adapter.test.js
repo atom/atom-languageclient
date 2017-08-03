@@ -45,7 +45,7 @@ describe('LinterPushV2Adapter', () => {
         type: ls.DiagnosticSeverity.Information,
       };
 
-      const connection = { onPublishDiagnostics: function(){} };
+      const connection: any = { onPublishDiagnostics: function(){} };
       const adapter = new LinterPushV2Adapter(connection);
       const result = adapter.diagnosticToV2Message(filePath, diagnostic);
 

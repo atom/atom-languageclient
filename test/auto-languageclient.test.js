@@ -14,7 +14,7 @@ describe('AutoLanguageClient', () => {
 
     const client = new CustomAutoLanguageClient();
 
-    function mockEditor(uri, scopeName) {
+    function mockEditor(uri, scopeName): any {
       return {
          getURI: () => uri,
          getGrammar: () => { return { scopeName: scopeName } }
