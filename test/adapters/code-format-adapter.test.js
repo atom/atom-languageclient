@@ -54,7 +54,7 @@ describe('CodeFormatAdapter', () => {
     });
 
     it('throws if neither range or document formatting are supported', async () => {
-      expect(() => CodeFormatAdapter.format(connection, { }, fakeEditor, range)).to.throw();
+      expect(() => CodeFormatAdapter.format(connection, { }, fakeEditor, range)).to.throw('');
     });
   });
 
