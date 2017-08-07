@@ -61,7 +61,6 @@ The underlying JSON-RPC communication is handled by the [vscode-jsonrpc npm modu
 A minimal implementation can be illustrated by the Omnisharp package here which has only npm-managed dependencies.  You simply provide the scope name, language name and server name as well as start your process and AutoLanguageClient takes care of interrogating your language server capabilities and wiring up the appropriate services within Atom to expose them.
 
 ```javascript
-const cp = require('child_process')
 const {AutoLanguageClient} = require('atom-languageclient')
 
 class CSharpLanguageClient extends AutoLanguageClient {
@@ -70,7 +69,7 @@ class CSharpLanguageClient extends AutoLanguageClient {
   getServerName () { return 'OmniSharp' }
 
   startServerProcess () {
-    return cp.spawn('node', [ require.resolve('omnisharp-client/languageserver/server') ])
+    return super.spawnChildNode([ require.resolve('omnisharp-client/languageserver/server') ])
   }
 }
 
@@ -120,7 +119,7 @@ Atom-LanguageClient can log all sent and received messages nicely formatted to t
 Some more elaborate scenarios can be found in the [ide-java](https://github.com/atom/ide-java) package which includes:
 
 * Downloading and unpacking non-npm dependencies (in this case a .tar.gz containing JAR files)
-* Per-platform start-up configuration
+* Platform-specific start-up configuration
 * Wiring up custom extensions to the protocol (language/status to Atom Status-Bar, language/actionableNotification to Atom Notifications)
 
 ### Available packages
@@ -128,6 +127,7 @@ Some more elaborate scenarios can be found in the [ide-java](https://github.com/
 Right now we have the following experimental Atom LSP packages in development. They are mostly usable but are missing some features that either the LSP server doesn't support or expose functionality that is as yet unmapped to Atom (TODO and TBD in the capabilities table above).
 
 * [ide-csharp](https://github.com/atom/ide-csharp) provides C# support via [Omnisharp (node-omnisharp)](https://github.com/OmniSharp/omnisharp-node-client)
+* [ide-flowtype](https://github.com/flowtype/ide-flowtype) provides Flow support via [Flow Language Server](https://github.com/flowtype/flow-language-server)
 * [ide-java](https://github.com/atom/ide-java) provides Java support via [Java Eclipse JDT](https://github.com/eclipse/eclipse.jdt.ls)
 * [ide-php](https://github.com/atom/ide-php) provides PHP support via [FelixFBeckers PHP Language Server](https://github.com/felixfbecker/php-language-server)
 * [ide-typescript](https://github.com/atom/ide-typescript) provides TypeScript and Javascript support via [SourceGraph Typescript Language Server](https://github.com/sourcegraph/javascript-typescript-langserver)
