@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "postinstall-build": "^3.0.0",
-    "vscode-jsonrpc": "^3.2.0"
+    "vscode-jsonrpc": "^3.3.1"
   },
   "atomTestRunner": "./test/runner",
   "atomTranspilers": [
