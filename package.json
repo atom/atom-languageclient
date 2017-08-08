@@ -9,13 +9,11 @@
     "clean": "rm -rf build",
     "compile": "babel lib --out-dir build/lib && babel test --out-dir build/test",
     "lint": "flow",
-    "postinstall": "postinstall-build --only-as-dependency build \"npm run compile\"",
     "prepublish": "npm run clean && npm run compile",
     "test": "npm run compile && atom --test build/test",
     "watch": "babel lib --out-dir build/lib -w"
   },
   "dependencies": {
-    "postinstall-build": "^3.0.0",
     "vscode-jsonrpc": "^3.3.1"
   },
   "atomTestRunner": "./test/runner",
