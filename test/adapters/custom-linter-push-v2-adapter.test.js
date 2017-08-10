@@ -9,10 +9,6 @@ const messageUrl = 'dummy';
 const messageSolutions: Array<any> = ['dummy'];
 
 class CustomLinterPushV2Adapter extends LinterPushV2Adapter {
-  constructor(connection) {
-    super(connection);
-  }
-
   diagnosticToV2Message(path, diagnostic) {
     const message = super.diagnosticToV2Message(path, diagnostic);
     message.url = messageUrl;

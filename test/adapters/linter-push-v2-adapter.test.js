@@ -4,7 +4,6 @@ import LinterPushV2Adapter from '../../lib/adapters/linter-push-v2-adapter';
 import * as ls from '../../lib/languageclient';
 import sinon from 'sinon';
 import {expect} from 'chai';
-import Convert from '../../lib/convert';
 import {Point, Range} from 'atom';
 import {createSpyConnection} from '../helpers.js';
 
@@ -15,30 +14,6 @@ describe('LinterPushV2Adapter', () => {
   afterEach(() => {
     global.sinon.restore();
   });
-
-  const flatMap = (source, lambda) => Array.prototype.concat.apply([], source.map(lambda));
-  const defaultLanguageClient = new ls.LanguageClientConnection(createSpyConnection());
-  const compareLinter = (a: linter$V2Message, b: linter$V2Message): number => {
-    if (a == null) {
-      return 1;
-    }
-    if (b == null) {
-      return -1;
-    }
-    if ((a.location.file || '') < (b.location.file || '')) {
-      return -1;
-    }
-    if ((a.location.file || '') > (b.location.file || '')) {
-      return 1;
-    }
-    if ((a.location.position.start || 0) < (b.location.position.start || 0)) {
-      return -1;
-    }
-    if ((a.location.position.start || 0) > (b.location.position.start || 0)) {
-      return 1;
-    }
-    return 0;
-  };
 
   describe('constructor', () => {
     it('subscribes to onPublishDiagnostics', () => {

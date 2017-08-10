@@ -1,7 +1,6 @@
 // @flow
 
-import invariant from 'assert';
-import {Point, Range} from 'atom';
+import {Range} from 'atom';
 import {expect} from 'chai';
 import sinon from 'sinon';
 import * as ls from '../../lib/languageclient';
@@ -41,7 +40,7 @@ describe('CodeFormatAdapter', () => {
   });
 
   describe('format', () => {
-    it('prefers range formatting if available', async () => {
+    it('prefers range formatting if available', () => {
       const rangeStub = sinon.spy(connection, 'documentRangeFormatting');
       const docStub = sinon.spy(connection, 'documentFormatting');
       CodeFormatAdapter.format(
@@ -57,7 +56,7 @@ describe('CodeFormatAdapter', () => {
       expect(docStub.called).to.be.false;
     });
 
-    it('falls back to document formatting if range formatting not available', async () => {
+    it('falls back to document formatting if range formatting not available', () => {
       const rangeStub = sinon.spy(connection, 'documentRangeFormatting');
       const docStub = sinon.spy(connection, 'documentFormatting');
       CodeFormatAdapter.format(connection, {documentFormattingProvider: true}, fakeEditor, range);
@@ -65,7 +64,7 @@ describe('CodeFormatAdapter', () => {
       expect(docStub.called).to.be.true;
     });
 
-    it('throws if neither range or document formatting are supported', async () => {
+    it('throws if neither range or document formatting are supported', () => {
       expect(() => CodeFormatAdapter.format(connection, {}, fakeEditor, range)).to.throw('');
     });
   });
@@ -167,7 +166,7 @@ describe('CodeFormatAdapter', () => {
       expect(options.tabSize).to.equal(17);
     });
 
-    it('returns the tab size from the editor', () => {
+    it('returns the soft tab setting from the editor', () => {
       sinon.stub(fakeEditor, 'getSoftTabs').returns(true);
       const options = CodeFormatAdapter.getFormatOptions(fakeEditor);
       expect(options.insertSpaces).to.be.true;
