@@ -19,12 +19,12 @@ describe('DatatipAdapter', () => {
 
   describe('canAdapt', () => {
     it('returns true if hoverProvider is supported', () => {
-      const result = DatatipAdapter.canAdapt({ hoverProvider: true });
+      const result = DatatipAdapter.canAdapt({hoverProvider: true});
       expect(result).to.be.true;
     });
 
     it('returns false if hoverProvider not supported', () => {
-      const result = DatatipAdapter.canAdapt({ });
+      const result = DatatipAdapter.canAdapt({});
       expect(result).to.be.false;
     });
   });
@@ -42,11 +42,7 @@ describe('DatatipAdapter', () => {
       const grammarSpy = sinon.spy(atom.grammars, 'grammarForScopeName');
 
       const datatipAdapter = new DatatipAdapter();
-      const datatip = await datatipAdapter.getDatatip(
-        connection,
-        fakeEditor,
-        new Point(0, 0),
-      );
+      const datatip = await datatipAdapter.getDatatip(connection, fakeEditor, new Point(0, 0));
       expect(datatip).to.be.ok;
       invariant(datatip != null);
 

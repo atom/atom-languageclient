@@ -9,18 +9,34 @@ import {Point, Range} from 'atom';
 import {createSpyConnection} from '../helpers.js';
 
 describe('LinterPushV2Adapter', () => {
-  beforeEach(() => { global.sinon = sinon.sandbox.create(); });
-  afterEach(() => { global.sinon.restore(); });
+  beforeEach(() => {
+    global.sinon = sinon.sandbox.create();
+  });
+  afterEach(() => {
+    global.sinon.restore();
+  });
 
   const flatMap = (source, lambda) => Array.prototype.concat.apply([], source.map(lambda));
   const defaultLanguageClient = new ls.LanguageClientConnection(createSpyConnection());
   const compareLinter = (a: linter$V2Message, b: linter$V2Message): number => {
-    if (a == null) { return 1; }
-    if (b == null) { return -1; }
-    if ((a.location.file || '') < (b.location.file || '')) { return -1; }
-    if ((a.location.file || '') > (b.location.file || '')) { return 1; }
-    if ((a.location.position.start || 0) < (b.location.position.start || 0)) { return -1; }
-    if ((a.location.position.start || 0) > (b.location.position.start || 0)) { return 1; }
+    if (a == null) {
+      return 1;
+    }
+    if (b == null) {
+      return -1;
+    }
+    if ((a.location.file || '') < (b.location.file || '')) {
+      return -1;
+    }
+    if ((a.location.file || '') > (b.location.file || '')) {
+      return 1;
+    }
+    if ((a.location.position.start || 0) < (b.location.position.start || 0)) {
+      return -1;
+    }
+    if ((a.location.position.start || 0) > (b.location.position.start || 0)) {
+      return 1;
+    }
     return 0;
   };
 
@@ -38,14 +54,17 @@ describe('LinterPushV2Adapter', () => {
       const filePath = '/a/b/c/d';
       const diagnostic: ls.Diagnostic = {
         message: 'This is a message',
-        range: {start: {line: 1, character: 2}, end: {line: 3, character: 4}},
+        range: {
+          start: {line: 1, character: 2},
+          end: {line: 3, character: 4},
+        },
         source: 'source',
         code: 'code',
         severity: ls.DiagnosticSeverity.Information,
         type: ls.DiagnosticSeverity.Information,
       };
 
-      const connection: any = { onPublishDiagnostics: function(){} };
+      const connection: any = {onPublishDiagnostics() {}};
       const adapter = new LinterPushV2Adapter(connection);
       const result = adapter.diagnosticToV2Message(filePath, diagnostic);
 

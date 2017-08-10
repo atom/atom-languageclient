@@ -5,17 +5,16 @@ import * as ls from '../../lib/languageclient';
 import {expect} from 'chai';
 import {Point, Range} from 'atom';
 
-const messageUrl = "dummy";
-const messageSolutions: Array<any> = ["dummy"];
+const messageUrl = 'dummy';
+const messageSolutions: Array<any> = ['dummy'];
 
 class CustomLinterPushV2Adapter extends LinterPushV2Adapter {
-
   constructor(connection) {
     super(connection);
   }
 
   diagnosticToV2Message(path, diagnostic) {
-    var message = super.diagnosticToV2Message(path, diagnostic);
+    const message = super.diagnosticToV2Message(path, diagnostic);
     message.url = messageUrl;
     message.solutions = messageSolutions;
     return message;
@@ -28,14 +27,17 @@ describe('CustomLinterPushV2Adapter', () => {
       const filePath = '/a/b/c/d';
       const diagnostic: ls.Diagnostic = {
         message: 'This is a message',
-        range: {start: {line: 1, character: 2}, end: {line: 3, character: 4}},
+        range: {
+          start: {line: 1, character: 2},
+          end: {line: 3, character: 4},
+        },
         source: 'source',
         code: 'code',
         severity: ls.DiagnosticSeverity.Information,
         type: ls.DiagnosticSeverity.Information,
       };
 
-      const connection: any = { onPublishDiagnostics: function(){} };
+      const connection: any = {onPublishDiagnostics() {}};
       const adapter = new CustomLinterPushV2Adapter(connection);
       const result = adapter.diagnosticToV2Message(filePath, diagnostic);
 
