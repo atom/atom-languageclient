@@ -19,8 +19,12 @@ const createFakeEditor = (path: string, text: ?string): atom$TextEditor => {
 };
 
 describe('Convert', () => {
-  beforeEach(() => { originalPlatform = process.platform; });
-  afterEach(() => { Object.defineProperty(process, 'platform', {value: originalPlatform}); });
+  beforeEach(() => {
+    originalPlatform = process.platform;
+  });
+  afterEach(() => {
+    Object.defineProperty(process, 'platform', {value: originalPlatform});
+  });
 
   describe('pathToUri', () => {
     it('prefixes an absolute path with file://', () => {
@@ -148,15 +152,17 @@ describe('Convert', () => {
     it('converts a multiple grammarScopes to a comma-seperated list of atom-text-editor scopes', () => {
       const grammarScopes = ['abc.def', 'ghi.jkl'];
       const textEditorScopes = Convert.grammarScopesToTextEditorScopes(grammarScopes);
-      expect(textEditorScopes)
-        .equals('atom-text-editor[data-grammar="abc def"], atom-text-editor[data-grammar="ghi jkl"]');
+      expect(textEditorScopes).equals(
+        'atom-text-editor[data-grammar="abc def"], atom-text-editor[data-grammar="ghi jkl"]',
+      );
     });
 
     it('converts grammarScopes containing HTML sensitive characters to escaped sequences', () => {
       const grammarScopes = ['abc<def', 'ghi"jkl'];
       const textEditorScopes = Convert.grammarScopesToTextEditorScopes(grammarScopes);
-      expect(textEditorScopes)
-        .equals('atom-text-editor[data-grammar="abc&lt;def"], atom-text-editor[data-grammar="ghi&quot;jkl"]');
+      expect(textEditorScopes).equals(
+        'atom-text-editor[data-grammar="abc&lt;def"], atom-text-editor[data-grammar="ghi&quot;jkl"]',
+      );
     });
   });
 

@@ -8,8 +8,12 @@ import {expect} from 'chai';
 import {createSpyConnection, createFakeEditor} from '../helpers.js';
 
 describe('AutoCompleteAdapter', () => {
-  beforeEach(() => { global.sinon = sinon.sandbox.create(); });
-  afterEach(() => { global.sinon.restore(); });
+  beforeEach(() => {
+    global.sinon = sinon.sandbox.create();
+  });
+  afterEach(() => {
+    global.sinon.restore();
+  });
 
   const request: atom$AutocompleteRequest = {
     editor: createFakeEditor(),
@@ -112,7 +116,10 @@ describe('AutoCompleteAdapter', () => {
         detail: 'number',
         documentation: 'a truly useful variable',
         textEdit: {
-          range: {start: {line: 10, character: 20}, end: {line: 30, character: 40}},
+          range: {
+            start: {line: 10, character: 20},
+            end: {line: 30, character: 40},
+          },
           newText: 'newText',
         },
       };
@@ -132,7 +139,9 @@ describe('AutoCompleteAdapter', () => {
       expect(result.replacementPrefix).equals('replacementPrefix');
       expect(result.text).equals('newText');
       expect(autocompleteRequest.editor.getTextInBufferRange.calledOnce).equals(true);
-      expect(autocompleteRequest.editor.getTextInBufferRange.getCall(0).args).deep.equals([new Range(new Point(10, 20), new Point(30, 40))]);
+      expect(autocompleteRequest.editor.getTextInBufferRange.getCall(0).args).deep.equals([
+        new Range(new Point(10, 20), new Point(30, 40)),
+      ]);
     });
   });
 
@@ -181,20 +190,23 @@ describe('AutoCompleteAdapter', () => {
     };
 
     it('does not do anything if there is no textEdit', () => {
-      const completionItem = Object.assign({}, basicCompletionItem);
+      const completionItem = {...basicCompletionItem};
       AutoCompleteAdapter.applyTextEditToSuggestion(null, new TextEditor(), completionItem);
       expect(completionItem).deep.equals(basicCompletionItem);
     });
 
     it('applies changes from TextEdit to replacementPrefix and text', () => {
       const textEdit = {
-        range: {start: {line: 1, character: 2}, end: {line: 3, character: 4}},
+        range: {
+          start: {line: 1, character: 2},
+          end: {line: 3, character: 4},
+        },
         newText: 'newText',
       };
       const editor = new TextEditor();
       sinon.stub(editor, 'getTextInBufferRange').returns('replacementPrefix');
 
-      const completionItem = Object.assign({}, basicCompletionItem);
+      const completionItem = {...basicCompletionItem};
       AutoCompleteAdapter.applyTextEditToSuggestion(textEdit, editor, completionItem);
       expect(completionItem.replacementPrefix).equals('replacementPrefix');
       expect(completionItem.text).equals('newText');

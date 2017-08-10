@@ -7,8 +7,12 @@ import {expect} from 'chai';
 import {createSpyConnection} from './helpers.js';
 
 describe('LanguageClientConnection', () => {
-  beforeEach(() => { global.sinon = sinon.sandbox.create(); });
-  afterEach(() => { global.sinon.restore(); });
+  beforeEach(() => {
+    global.sinon = sinon.sandbox.create();
+  });
+  afterEach(() => {
+    global.sinon.restore();
+  });
 
   it('listens to the RPC connection it is given', () => {
     const rpc = createSpyConnection();
@@ -38,7 +42,7 @@ describe('LanguageClientConnection', () => {
     });
 
     it('sends a request for initialize', async () => {
-      const params: ls.InitializeParams = {capabilities: { }};
+      const params: ls.InitializeParams = {capabilities: {}};
       await lc.initialize(params);
 
       expect(lc._sendRequest.called).equals(true);
@@ -130,7 +134,10 @@ describe('LanguageClientConnection', () => {
     it('sends a request for codeAction', async () => {
       const params: ls.CodeActionParams = {
         textDocument: textDocumentPositionParams.textDocument,
-        range: {start: {line: 1, character: 1}, end: {line: 24, character: 32}},
+        range: {
+          start: {line: 1, character: 1},
+          end: {line: 24, character: 32},
+        },
         context: {diagnostics: []},
       };
       await lc.codeAction(params);
@@ -153,7 +160,10 @@ describe('LanguageClientConnection', () => {
 
     it('sends a request for codeLensResolve', async () => {
       const params: ls.CodeLens = {
-        range: {start: {line: 1, character: 1}, end: {line: 24, character: 32}},
+        range: {
+          start: {line: 1, character: 1},
+          end: {line: 24, character: 32},
+        },
       };
       await lc.codeLensResolve(params);
 
@@ -175,7 +185,10 @@ describe('LanguageClientConnection', () => {
 
     it('sends a request for documentLinkResolve', async () => {
       const params: ls.DocumentLink = {
-        range: {start: {line: 1, character: 1}, end: {line: 24, character: 32}},
+        range: {
+          start: {line: 1, character: 1},
+          end: {line: 24, character: 32},
+        },
         target: 'abc.def.ghi',
       };
       await lc.documentLinkResolve(params);
@@ -200,7 +213,10 @@ describe('LanguageClientConnection', () => {
     it('sends a request for documentRangeFormatting', async () => {
       const params: ls.DocumentRangeFormattingParams = {
         textDocument: textDocumentPositionParams.textDocument,
-        range: {start: {line: 1, character: 1}, end: {line: 24, character: 32}},
+        range: {
+          start: {line: 1, character: 1},
+          end: {line: 24, character: 32},
+        },
         options: {tabSize: 6, insertSpaces: true, someValue: 'optional'},
       };
       await lc.documentRangeFormatting(params);
@@ -239,7 +255,7 @@ describe('LanguageClientConnection', () => {
   });
 
   describe('send notifications', () => {
-    const textDocumentItem : ls.TextDocumentItem = {
+    const textDocumentItem: ls.TextDocumentItem = {
       uri: 'file:///best/bits.js',
       languageId: 'javascript',
       text: 'function a() { return "b"; };',
@@ -260,7 +276,9 @@ describe('LanguageClientConnection', () => {
     });
 
     it('didChangeConfiguration sends notification', () => {
-      const params: ls.DidChangeConfigurationParams = {settings: {a: {b: 'c'}}};
+      const params: ls.DidChangeConfigurationParams = {
+        settings: {a: {b: 'c'}},
+      };
       lc.didChangeConfiguration(params);
 
       expect(lc._sendNotification.called).equals(true);
@@ -269,7 +287,9 @@ describe('LanguageClientConnection', () => {
     });
 
     it('didOpenTextDocument sends notification', () => {
-      const params: ls.DidOpenTextDocumentParams = {textDocument: textDocumentItem};
+      const params: ls.DidOpenTextDocumentParams = {
+        textDocument: textDocumentItem,
+      };
       lc.didOpenTextDocument(params);
 
       expect(lc._sendNotification.called).equals(true);
@@ -280,7 +300,7 @@ describe('LanguageClientConnection', () => {
     it('didChangeTextDocument sends notification', () => {
       const params: ls.DidChangeTextDocumentParams = {
         textDocument: versionedTextDocumentIdentifier,
-        contentChanges: []
+        contentChanges: [],
       };
       lc.didChangeTextDocument(params);
 
@@ -290,7 +310,9 @@ describe('LanguageClientConnection', () => {
     });
 
     it('didCloseTextDocument sends notification', () => {
-      const params: ls.DidCloseTextDocumentParams = {textDocument: textDocumentItem};
+      const params: ls.DidCloseTextDocumentParams = {
+        textDocument: textDocumentItem,
+      };
       lc.didCloseTextDocument(params);
 
       expect(lc._sendNotification.called).equals(true);
@@ -299,7 +321,9 @@ describe('LanguageClientConnection', () => {
     });
 
     it('didSaveTextDocument sends notification', () => {
-      const params: ls.DidSaveTextDocumentParams = {textDocument: textDocumentItem};
+      const params: ls.DidSaveTextDocumentParams = {
+        textDocument: textDocumentItem,
+      };
       lc.didSaveTextDocument(params);
 
       expect(lc._sendNotification.called).equals(true);
@@ -319,7 +343,7 @@ describe('LanguageClientConnection', () => {
 
   describe('notification methods', () => {
     let lc;
-    const eventMap = { };
+    const eventMap = {};
 
     beforeEach(() => {
       lc = new ls.LanguageClientConnection(createSpyConnection(), new NullLogger());
@@ -330,14 +354,18 @@ describe('LanguageClientConnection', () => {
 
     it('onExit calls back on exit', () => {
       let called = false;
-      lc.onExit(() => { called = true; });
+      lc.onExit(() => {
+        called = true;
+      });
       eventMap.exit();
       expect(called).equals(true);
     });
 
     it('onShowMessage calls back on window/showMessage', () => {
       let called = false;
-      lc.onShowMessage(() => { called = true; });
+      lc.onShowMessage(() => {
+        called = true;
+      });
       eventMap['window/showMessage']();
       expect(called).equals(true);
     });
