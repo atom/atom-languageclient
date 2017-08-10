@@ -1,7 +1,6 @@
 // @flow
 
 import AutoLanguageClient from '../lib/auto-languageclient';
-import path from 'path';
 import {expect} from 'chai';
 
 describe('AutoLanguageClient', () => {
