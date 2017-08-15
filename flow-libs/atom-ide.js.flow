@@ -1,4 +1,4 @@
-export type nuclide$OutlineProvider = {
+export type atomIde$OutlineProvider = {
   name: string,
   // If there are multiple providers for a given grammar, the one with the highest priority will be
   // used.
@@ -8,7 +8,7 @@ export type nuclide$OutlineProvider = {
   getOutline: (editor: atom$TextEditor) => Promise<?Outline>,
 };
 
-export type nuclide$OutlineTree = {
+export type atomIde$OutlineTree = {
   icon?: string, // from atom$Octicon | atom$OcticonsPrivate (types not allowed over rpc so we use string)
 
   // Must be one or the other. If both are present, tokenizedText is preferred.
@@ -18,14 +18,14 @@ export type nuclide$OutlineTree = {
 
   startPosition: atom$Point,
   endPosition?: atom$Point,
-  children: Array<nuclide$OutlineTree>,
+  children: Array<atomIde$OutlineTree>,
 };
 
-export type nuclide$Outline = {
-  outlineTrees: Array<nuclide$OutlineTree>,
+export type atomIde$Outline = {
+  outlineTrees: Array<atomIde$OutlineTree>,
 };
 
-export type nuclide$TokenKind = 'keyword'
+export type atomIde$TokenKind = 'keyword'
   | 'class-name'
   | 'constructor'
   | 'method'
@@ -36,67 +36,67 @@ export type nuclide$TokenKind = 'keyword'
   | 'type'
   ;
 
-export type nuclide$TextToken = {
-  kind: nuclide$TokenKind,
+export type atomIde$TextToken = {
+  kind: atomIde$TokenKind,
   value: string,
 };
 
-export type nuclide$TokenizedText = Array<nuclide$TextToken>;
+export type atomIde$TokenizedText = Array<atomIde$TextToken>;
 
-export type nuclide$DefinitionProvider = {
+export type atomIde$DefinitionProvider = {
   name: string,
   priority: number,
   grammarScopes: Array<string>,
-  getDefinition: (editor: atom$TextEditor, position: atom$Point) => Promise<?nuclide$DefinitionQueryResult>,
+  getDefinition: (editor: atom$TextEditor, position: atom$Point) => Promise<?atomIde$DefinitionQueryResult>,
 };
 
-export type NuclideUri = string;
+export type IdeUri = string;
 
-export type nuclide$Definition = {
-  path: NuclideUri,
+export type atomIde$Definition = {
+  path: IdeUri,
   position: atom$Point,
   range?: atom$Range,
   id?: string,
   name?: string,
   language: string,
-  projectRoot?: NuclideUri,
+  projectRoot?: IdeUri,
 };
 
-export type nuclide$DefinitionQueryResult = {
+export type atomIde$DefinitionQueryResult = {
   queryRange: Array<atom$Range>,
-  definitions: Array<nuclide$Definition>,
+  definitions: Array<atomIde$Definition>,
 };
 
-export type nuclide$FindReferencesProvider = {
+export type atomIde$FindReferencesProvider = {
   // Return true if your provider supports finding references for the provided TextEditor.
   isEditorSupported(editor: atom$TextEditor): Promise<boolean>,
 
   // `findReferences` will only be called if `isEditorSupported` previously returned true
   // for the given TextEditor.
-  findReferences(editor: atom$TextEditor, position: atom$Point): Promise<?nuclide$FindReferencesReturn>,
+  findReferences(editor: atom$TextEditor, position: atom$Point): Promise<?atomIde$FindReferencesReturn>,
 };
 
-export type nuclide$Reference = {
-  uri: NuclideUri,      // Nuclide URI of the file path
+export type atomIde$Reference = {
+  uri: IdeUri,      // URI of the file path
   name: ?string,    // name of calling method/function/symbol
   range: atom$Range,
 };
 
-export type nuclide$FindReferencesData = {
+export type atomIde$FindReferencesData = {
   type: 'data',
-  baseUri: NuclideUri,
+  baseUri: IdeUri,
   referencedSymbolName: string,
-  references: Array<nuclide$Reference>,
+  references: Array<atomIde$Reference>,
 };
 
-export type nuclide$FindReferencesError = {
+export type atomIde$FindReferencesError = {
   type: 'error',
   message: string,
 };
 
-export type nuclide$FindReferencesReturn = nuclide$FindReferencesData | nuclide$FindReferencesError;
+export type atomIde$FindReferencesReturn = atomIde$FindReferencesData | atomIde$FindReferencesError;
 
-export type nuclide$MarkedString =
+export type atomIde$MarkedString =
   | {
       type: 'markdown',
       value: string,
@@ -108,13 +108,13 @@ export type nuclide$MarkedString =
     };
 
 // This omits the React variant.
-export type nuclide$Datatip = {|
-  markedStrings: Array<nuclide$MarkedString>,
+export type atomIde$Datatip = {|
+  markedStrings: Array<atomIde$MarkedString>,
   range: atom$Range,
   pinnable?: boolean,
 |};
 
-export type nuclide$DatatipProvider = {
+export type atomIde$DatatipProvider = {
   datatip(
     editor: atom$TextEditor,
     bufferPosition: atom$Point,
@@ -128,20 +128,20 @@ export type nuclide$DatatipProvider = {
   providerName: string,
 };
 
-export type nuclide$DatatipService = {
-  addProvider(provider: nuclide$DatatipProvider): IDisposable,
+export type atomIde$DatatipService = {
+  addProvider(provider: atomIde$DatatipProvider): IDisposable,
 };
 
-export type nuclide$RangeCodeFormatProvider = {|
+export type atomIde$RangeCodeFormatProvider = {|
   formatCode: (
     editor: atom$TextEditor,
     range: atom$Range,
-  ) => Promise<Array<nuclide$TextEdit>>,
+  ) => Promise<Array<atomIde$TextEdit>>,
   priority: number,
   grammarScopes: Array<string>,
 |};
 
-export type nuclide$TextEdit = {
+export type atomIde$TextEdit = {
   oldRange: atom$Range,
   newText: string,
   // If included, this will be used to verify that the edit still applies cleanly.
