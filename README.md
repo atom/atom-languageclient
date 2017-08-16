@@ -38,7 +38,7 @@ The language server protocol consists of a number of capabilities. Some of these
 | textDocument/signatureHelp      | TBD                           |
 | textDocument/definition         | Atom-IDE definitions          |
 | textDocument/findReferences     | Atom-IDE findReferences       |
-| textDocument/documentHighlight  | Atom-IDE definitions          |
+| textDocument/documentHighlight  | Atom-IDE code highlights      |
 | textDocument/documentSymbol     | Atom-IDE outline view         |
 | workspace/symbol                | TBD                           |
 | textDocument/codeAction         | TBD                           |
@@ -82,7 +82,7 @@ Note that you will also need to add various entries to the `providedServices` an
 
 ### Using other connection types
 
-The default connection type is *stdio* however both *ipc* and *sockets* are also available.  
+The default connection type is *stdio* however both *ipc* and *sockets* are also available.
 
 #### IPC
 
