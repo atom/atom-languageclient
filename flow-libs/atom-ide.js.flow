@@ -25,7 +25,8 @@ export type atomIde$Outline = {
   outlineTrees: Array<atomIde$OutlineTree>,
 };
 
-export type atomIde$TokenKind = 'keyword'
+export type atomIde$TokenKind =
+  | 'keyword'
   | 'class-name'
   | 'constructor'
   | 'method'
@@ -33,8 +34,7 @@ export type atomIde$TokenKind = 'keyword'
   | 'string'
   | 'whitespace'
   | 'plain'
-  | 'type'
-  ;
+  | 'type';
 
 export type atomIde$TextToken = {
   kind: atomIde$TokenKind,
@@ -77,8 +77,8 @@ export type atomIde$FindReferencesProvider = {
 };
 
 export type atomIde$Reference = {
-  uri: IdeUri,      // URI of the file path
-  name: ?string,    // name of calling method/function/symbol
+  uri: IdeUri, // URI of the file path
+  name: ?string, // name of calling method/function/symbol
   range: atom$Range,
 };
 
@@ -133,10 +133,7 @@ export type atomIde$DatatipService = {
 };
 
 export type atomIde$RangeCodeFormatProvider = {|
-  formatCode: (
-    editor: atom$TextEditor,
-    range: atom$Range,
-  ) => Promise<Array<atomIde$TextEdit>>,
+  formatCode: (editor: atom$TextEditor, range: atom$Range) => Promise<Array<atomIde$TextEdit>>,
   priority: number,
   grammarScopes: Array<string>,
 |};
@@ -146,4 +143,10 @@ export type atomIde$TextEdit = {
   newText: string,
   // If included, this will be used to verify that the edit still applies cleanly.
   oldText?: string,
+};
+
+export type atomIde$CodeHighlightProvider = {
+  highlight(editor: atom$TextEditor, bufferPosition: atom$Point): Promise<?Array<atom$Range>>,
+  priority: number,
+  grammarScopes: Array<string>,
 };
