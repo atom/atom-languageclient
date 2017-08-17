@@ -126,13 +126,21 @@ Some more elaborate scenarios can be found in the [ide-java](https://github.com/
 
 Right now we have the following experimental Atom LSP packages in development. They are mostly usable but are missing some features that either the LSP server doesn't support or expose functionality that is as yet unmapped to Atom (TODO and TBD in the capabilities table above).
 
+### Atom team packages
+
 * [ide-csharp](https://github.com/atom/ide-csharp) provides C# support via [Omnisharp (node-omnisharp)](https://github.com/OmniSharp/omnisharp-node-client)
 * [ide-flowtype](https://github.com/flowtype/ide-flowtype) provides Flow support via [Flow Language Server](https://github.com/flowtype/flow-language-server)
 * [ide-java](https://github.com/atom/ide-java) provides Java support via [Java Eclipse JDT](https://github.com/eclipse/eclipse.jdt.ls)
 * [ide-php](https://github.com/atom/ide-php) provides PHP support via [FelixFBeckers PHP Language Server](https://github.com/felixfbecker/php-language-server)
 * [ide-typescript](https://github.com/atom/ide-typescript) provides TypeScript and Javascript support via [SourceGraph Typescript Language Server](https://github.com/sourcegraph/javascript-typescript-langserver)
 
-Additional LSP servers for consideration can be found at [LangServer.org](http://langserver.org)
+### Community packages
+
+* [ide-vue](https://github.com/rwatts3/atom-ide-vue) provides Vue language support using the [Vue Language Server](https://www.npmjs.com/package/vue-language-server)
+
+### Other language servers
+
+Additional LSP servers that might be of interest to be packaged with this for Atom can be found at [LangServer.org](http://langserver.org)
 
 ## Contributing
 
