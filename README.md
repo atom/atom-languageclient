@@ -137,6 +137,7 @@ Right now we have the following experimental Atom LSP packages in development. T
 ### Community packages
 
 * [ide-vue](https://github.com/rwatts3/atom-ide-vue) provides Vue language support using the [Vue Language Server](https://www.npmjs.com/package/vue-language-server)
+* [ide-json](https://github.com/rwatts3/atom-ide-json) provides JSON Language support using [VSCODE's JSON Language Server](https://github.com/vscode-langservers/vscode-json-languageserver-bin)
 
 ### Other language servers
 
