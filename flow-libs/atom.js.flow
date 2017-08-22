@@ -1360,6 +1360,7 @@ declare class atom$MenuManager {
 declare class atom$Project {
   // Event Subscription
   onDidChangePaths(callback: (projectPaths: Array<string>) => mixed): IDisposable,
+  onDidChangeFiles(callback: (fileEvents: Array<atom$ProjectFileEvent) => mixed): IDisposable,
   onDidAddBuffer(callback: (buffer: atom$TextBuffer) => mixed): IDisposable,
 
   // Accessing the git repository
@@ -1394,6 +1395,14 @@ type TextBufferScanIterator = (arg: {
 // need to know is that if something needs a checkpoint you should only pass it values received from
 // TextBuffer::createCheckpoint
 type atom$TextBufferCheckpoint = number;
+
+type atom$ProjectFileEvent = {
+  action: atom$ProjectFileEventType,
+  path: string,
+  oldPath: string,
+}
+
+type atom$ProjectFileEventType = 'created' | 'modified' | 'deleted' | 'renamed';
 
 // TextBuffer did-change/will-change
 type atom$TextEditEvent = {
