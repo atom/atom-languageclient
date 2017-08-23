@@ -1360,7 +1360,7 @@ declare class atom$MenuManager {
 declare class atom$Project {
   // Event Subscription
   onDidChangePaths(callback: (projectPaths: Array<string>) => mixed): IDisposable,
-  onDidChangeFiles(callback: (fileEvents: Array<atom$ProjectFileEvent) => mixed): IDisposable,
+  onDidChangeFiles(callback: (fileEvents: Array<atom$ProjectFileEvent>) => mixed): IDisposable,
   onDidAddBuffer(callback: (buffer: atom$TextBuffer) => mixed): IDisposable,
 
   // Accessing the git repository
