@@ -1399,7 +1399,7 @@ type atom$TextBufferCheckpoint = number;
 type atom$ProjectFileEvent = {
   action: atom$ProjectFileEventType,
   path: string,
-  oldPath: string,
+  oldPath?: string,
 }
 
 type atom$ProjectFileEventType = 'created' | 'modified' | 'deleted' | 'renamed';
