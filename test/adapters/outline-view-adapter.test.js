@@ -6,16 +6,10 @@ import sinon from 'sinon';
 import {expect} from 'chai';
 
 describe('OutlineViewAdapter', () => {
-  const sourceItem = {
-    kind: ls.SymbolKind.Class,
-    name: 'Program',
-    location: {
-      range: {
-        start: {line: 1, character: 2},
-        end: {line: 3, character: 4},
-      },
-    },
-  };
+  const createLocation = (a, b, c, d) => ({
+    uri: '',
+    range: {start: {line: a, character: b}, end: {line: c, character: d}},
+  });
 
   beforeEach(() => {
     global.sinon = sinon.sandbox.create();
@@ -36,31 +30,81 @@ describe('OutlineViewAdapter', () => {
     });
   });
 
-  describe('createOutlineTree', () => {
+  describe('createOutlineTrees', () => {
     it('creates an empty array given an empty array', () => {
       const result = OutlineViewAdapter.createOutlineTrees([]);
       expect(result).to.deep.equal([]);
     });
 
-    it('creates a single converted item from a single source item', () => {
+    it('creates a single converted root item from a single source item', () => {
+      const sourceItem = {kind: ls.SymbolKind.Namespace, name: 'R', location: createLocation(5, 6, 7, 8)};
       const expected = OutlineViewAdapter.symbolToOutline(sourceItem);
       const result = OutlineViewAdapter.createOutlineTrees([sourceItem]);
       expect(result).to.deep.equal([expected]);
+    });
+
+    it('creates an empty root container with a single source item when containerName missing', () => {
+      const sourceItem = {kind: ls.SymbolKind.Class, name: 'Program', location: createLocation(1, 2, 3, 4)};
+      const expected = OutlineViewAdapter.symbolToOutline(sourceItem);
+      const missingContainerSource = Object.assign(sourceItem, {containerName: 'missing'});
+      const result = OutlineViewAdapter.createOutlineTrees([missingContainerSource]);
+      expect(result.length).to.equal(1);
+      expect(result[0].representativeName).to.equal('missing');
+      expect(result[0].children).to.deep.equal([expected]);
+    });
+
+    it('creates a simple named hierarchy', () => {
+      const sourceItems = [
+        {kind: ls.SymbolKind.Namespace, name: 'java.com', location: createLocation(1, 0, 10, 0)},
+        {kind: ls.SymbolKind.Class, name: 'Program', location: createLocation(2, 0, 7, 0), containerName: 'java.com'},
+        {kind: ls.SymbolKind.Function, name: 'main', location: createLocation(4, 0, 5, 0), containerName: 'Program'},
+      ];
+      const result = OutlineViewAdapter.createOutlineTrees(sourceItems);
+      expect(result.length).to.equal(1);
+      expect(result[0].children.length).to.equal(1);
+      expect(result[0].children[0].representativeName).to.equal('Program');
+      expect(result[0].children[0].children.length).to.equal(1);
+      expect(result[0].children[0].children[0].representativeName).to.equal('main');
+    });
+
+    it('retains duplicate named items', () => {
+      const sourceItems = [
+        {kind: ls.SymbolKind.Namespace, name: 'duplicate', location: createLocation(1, 0, 5, 0)},
+        {kind: ls.SymbolKind.Namespace, name: 'duplicate', location: createLocation(6, 0, 10, 0)},
+        {kind: ls.SymbolKind.Function, name: 'main', location: createLocation(7, 0, 8, 0), containerName: 'duplicate'},
+      ];
+      const result = OutlineViewAdapter.createOutlineTrees(sourceItems);
+      expect(result.length).to.equal(2);
+      expect(result[0].representativeName).to.equal('duplicate');
+      expect(result[1].representativeName).to.equal('duplicate');
+    });
+
+    it('disambiguates containerName based on range', () => {
+      const sourceItems = [
+        {kind: ls.SymbolKind.Namespace, name: 'duplicate', location: createLocation(1, 0, 5, 0)},
+        {kind: ls.SymbolKind.Namespace, name: 'duplicate', location: createLocation(6, 0, 10, 0)},
+        {kind: ls.SymbolKind.Function, name: 'main', location: createLocation(7, 0, 8, 0), containerName: 'duplicate'},
+      ];
+      const result = OutlineViewAdapter.createOutlineTrees(sourceItems);
+      expect(result[1].children.length).to.equal(1);
+      expect(result[1].children[0].representativeName).to.equal('main');
     });
   });
 
   describe('symbolToOutline', () => {
     it('converts an individual item', () => {
+      const sourceItem = {kind: ls.SymbolKind.Class, name: 'Program', location: createLocation(1, 2, 3, 4)};
       const result = OutlineViewAdapter.symbolToOutline(sourceItem);
       expect(result.icon).to.equal('type-class');
       expect(result.representativeName).to.equal('Program');
-      expect(result.tokenizedText[0].kind).to.equal('type');
-      expect(result.tokenizedText[0].value).to.equal('Program');
-      expect(result.startPosition.row).to.equal(1);
-      expect(result.startPosition.column).to.equal(2);
-      expect(result.endPosition.row).to.equal(3);
-      expect(result.endPosition.column).to.equal(4);
       expect(result.children).to.deep.equal([]);
+      const r = (result: any);
+      expect(r.tokenizedText[0].kind).to.equal('type');
+      expect(r.tokenizedText[0].value).to.equal('Program');
+      expect(r.startPosition.row).to.equal(1);
+      expect(r.startPosition.column).to.equal(2);
+      expect(r.endPosition.row).to.equal(3);
+      expect(r.endPosition.column).to.equal(4);
     });
   });
 });
