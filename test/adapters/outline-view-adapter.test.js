@@ -89,6 +89,45 @@ describe('OutlineViewAdapter', () => {
       expect(result[1].children.length).to.equal(1);
       expect(result[1].children[0].representativeName).to.equal('main');
     });
+
+    it("does not become it's own parent", () => {
+      const sourceItems = [
+        {kind: ls.SymbolKind.Namespace, name: 'duplicate', location: createLocation(1, 0, 10, 0)},
+        {
+          kind: ls.SymbolKind.Namespace,
+          name: 'duplicate',
+          location: createLocation(6, 0, 7, 0),
+          containerName: 'duplicate',
+        },
+      ];
+      const result = OutlineViewAdapter.createOutlineTrees(sourceItems);
+      expect(result.length).to.equal(1);
+      const r = (result: any);
+      expect(r[0].endPosition.row).to.equal(10);
+      expect(r[0].children.length).to.equal(1);
+      expect(r[0].children[0].endPosition.row).to.equal(7);
+    });
+
+    it('parents to the innnermost named container', () => {
+      const sourceItems = [
+        {kind: ls.SymbolKind.Namespace, name: 'turtles', location: createLocation(1, 0, 10, 0)},
+        {
+          kind: ls.SymbolKind.Namespace,
+          name: 'turtles',
+          location: createLocation(4, 0, 8, 0),
+          containerName: 'turtles',
+        },
+        {kind: ls.SymbolKind.Class, name: 'disc', location: createLocation(4, 0, 5, 0), containerName: 'turtles'},
+      ];
+      const result = OutlineViewAdapter.createOutlineTrees(sourceItems);
+      expect(result.length).to.equal(1);
+      const r = (result: any);
+      expect(r[0].endPosition.row).to.equal(10);
+      expect(r[0].children.length).to.equal(1);
+      expect(r[0].children[0].endPosition.row).to.equal(8);
+      expect(r[0].children[0].children.length).to.equal(1);
+      expect(r[0].children[0].children[0].endPosition.row).to.equal(5);
+    });
   });
 
   describe('symbolToOutline', () => {
