@@ -275,6 +275,14 @@ describe('LanguageClientConnection', () => {
       sinon.stub(lc, '_sendNotification');
     });
 
+    it('exit sends notification', () => {
+      lc.exit();
+
+      expect(lc._sendNotification.called).equals(true);
+      expect(lc._sendNotification.getCall(0).args[0]).equals('exit');
+      expect(lc._sendNotification.getCall(0).args.length).equals(1);
+    });
+
     it('didChangeConfiguration sends notification', () => {
       const params: ls.DidChangeConfigurationParams = {
         settings: {a: {b: 'c'}},
@@ -350,15 +358,6 @@ describe('LanguageClientConnection', () => {
       sinon.stub(lc, '_onNotification').callsFake((message, callback) => {
         eventMap[message.method] = callback;
       });
-    });
-
-    it('onExit calls back on exit', () => {
-      let called = false;
-      lc.onExit(() => {
-        called = true;
-      });
-      eventMap.exit();
-      expect(called).equals(true);
     });
 
     it('onShowMessage calls back on window/showMessage', () => {
