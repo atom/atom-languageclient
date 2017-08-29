@@ -50,6 +50,12 @@ describe('Convert', () => {
   });
 
   describe('uriToPath', () => {
+    it("does not convert http: and https: uri's", () => {
+      setProcessPlatform('darwin');
+      expect(Convert.uriToPath('http://atom.io/a')).equals('http://atom.io/a');
+      expect(Convert.uriToPath('https://atom.io/b')).equals('https://atom.io/b');
+    });
+
     it('converts a file:// path to an absolute path', () => {
       setProcessPlatform('darwin');
       expect(Convert.uriToPath('file:///a/b/c/d.txt')).equals('/a/b/c/d.txt');
