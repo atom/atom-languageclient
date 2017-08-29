@@ -13,8 +13,12 @@ describe('DatatipAdapter', () => {
   let connection;
 
   beforeEach(() => {
+    global.sinon = sinon.sandbox.create();
     connection = new ls.LanguageClientConnection(createSpyConnection());
     fakeEditor = createFakeEditor();
+  });
+  afterEach(() => {
+    global.sinon.restore();
   });
 
   describe('canAdapt', () => {
