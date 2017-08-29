@@ -50,6 +50,20 @@ describe('OutlineViewAdapter', () => {
       const result = OutlineViewAdapter.createOutlineTrees([missingContainerSource]);
       expect(result.length).to.equal(1);
       expect(result[0].representativeName).to.equal('missing');
+      expect(result[0].startPosition.row).to.equal(0);
+      expect(result[0].startPosition.column).to.equal(0);
+      expect(result[0].children).to.deep.equal([expected]);
+    });
+
+    it('creates an empty root container with a single source item when containerName is missing and matches own name', () => {
+      const sourceItem = {kind: ls.SymbolKind.Class, name: 'simple', location: createLocation(1, 2, 3, 4)};
+      const expected = OutlineViewAdapter.symbolToOutline(sourceItem);
+      const missingContainerSource = Object.assign(sourceItem, {containerName: 'simple'});
+      const result = OutlineViewAdapter.createOutlineTrees([missingContainerSource]);
+      expect(result.length).to.equal(1);
+      expect(result[0].representativeName).to.equal('simple');
+      expect(result[0].startPosition.row).to.equal(0);
+      expect(result[0].startPosition.column).to.equal(0);
       expect(result[0].children).to.deep.equal([expected]);
     });
 
