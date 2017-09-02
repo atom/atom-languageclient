@@ -150,3 +150,29 @@ export type atomIde$CodeHighlightProvider = {
   priority: number,
   grammarScopes: Array<string>,
 };
+
+export type atomIde$DiagnosticType = 'Error' | 'Warning' | 'Info';
+
+export type atomIde$Diagnostic = {
+  providerName: string,
+  type: atomIde$DiagnosticType,
+  filePath: string,
+  text?: string,
+  range: atom$Range,
+};
+
+export interface atomIde$CodeAction {
+  apply(): Promise<void>,
+  getTitle(): Promise<string>,
+  dispose(): void,
+}
+
+export type atomIde$CodeActionProvider = {
+  grammarScopes: Array<string>,
+  priority: number,
+  getCodeActions(
+    editor: atom$TextEditor,
+    range: atom$Range,
+    diagnostics: Array<atomIde$Diagnostic>,
+  ): Promise<Array<CodeAction>>,
+};
