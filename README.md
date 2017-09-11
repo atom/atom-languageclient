@@ -98,7 +98,7 @@ class ExampleLanguageClient extends AutoLanguageClient {
 
   startServerProcess () {
     const startServer = require.resolve('@example/js-language-server')
-    return cp.spawn('node', [startServer, '--node-ipc'], {
+    return super.spawnChildNode([startServer, '--node-ipc'], {
       stdio: [null, null, null, 'ipc']
     })
   }
