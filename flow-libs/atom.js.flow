@@ -906,6 +906,7 @@ declare class atom$TextEditor extends atom$Model {
   onDidConflict(callback: () => void): IDisposable,
   serialize: () => mixed,
   getNonWordCharacters: (scopes: atom$ScopeDescriptor) => string,
+  id: number,
 }
 
 /**
