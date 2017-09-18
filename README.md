@@ -41,7 +41,7 @@ The language server protocol consists of a number of capabilities. Some of these
 | textDocument/documentHighlight  | Atom-IDE code highlights      |
 | textDocument/documentSymbol     | Atom-IDE outline view         |
 | workspace/symbol                | TBD                           |
-| textDocument/codeAction         | TBD                           |
+| textDocument/codeAction         | Atom-IDE code actions         |
 | textDocument/codeLens           | TBD                           |
 | textDocument/formatting         | Format File command           |
 | textDocument/rangeFormatting    | Format Selection command      |
