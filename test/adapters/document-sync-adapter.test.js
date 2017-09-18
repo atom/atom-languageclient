@@ -51,7 +51,7 @@ describe('DocumentSyncAdapter', () => {
 
   describe('constructor', () => {
     function create(textDocumentSync) {
-      return new DocumentSyncAdapter((null: any), textDocumentSync, (null: any));
+      return new DocumentSyncAdapter((null: any), textDocumentSync, () => false);
     }
 
     it('sets _documentSyncKind correctly Incremental for v2 capabilities', () => {

@@ -3,6 +3,7 @@
 import {Range} from 'atom';
 import {expect} from 'chai';
 import sinon from 'sinon';
+import Convert from '../../lib/convert';
 import * as ls from '../../lib/languageclient';
 import CodeFormatAdapter from '../../lib/adapters/code-format-adapter';
 import {createSpyConnection, createFakeEditor} from '../helpers.js';
@@ -182,7 +183,7 @@ describe('CodeFormatAdapter', () => {
         },
         newText: 'abc-def',
       };
-      const actual = CodeFormatAdapter.convertLsTextEdit(textEdit);
+      const actual = Convert.convertLsTextEdit(textEdit);
       expect(actual.oldRange).to.eql(new Range([1, 0], [2, 3]));
       expect(actual.newText).to.equal('abc-def');
     });
