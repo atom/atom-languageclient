@@ -137,6 +137,7 @@ Right now we have the following experimental Atom LSP packages in development. T
 ### Community packages
 
 * [ide-vue](https://github.com/rwatts3/atom-ide-vue) provides Vue language support using the [Vue Language Server](https://www.npmjs.com/package/vue-language-server)
+* [ide-rust](https://github.com/mehcode/atom-ide-rust) provides Rust support using [Rust Language Server](https://github.com/rust-lang-nursery/rls)
 
 ### Other language servers
 
