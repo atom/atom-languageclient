@@ -51,7 +51,7 @@ describe('AutoCompleteAdapter', () => {
       const autoCompleteAdapter = new AutoCompleteAdapter();
       const suggestions = await autoCompleteAdapter.getSuggestions(fakeLanguageClient, request);
       expect(suggestions.length).equals(3);
-      expect(suggestions[0].text).equals('label1');
+      expect(suggestions[0].displayText).equals('label1');
       expect(suggestions[1].description).equals('a very exciting field');
       expect(suggestions[2].type).equals('variable');
     });
@@ -69,7 +69,7 @@ describe('AutoCompleteAdapter', () => {
     it('converts LSP CompletionItem array to AutoComplete Suggestions array', () => {
       const results = AutoCompleteAdapter.completionItemsToSuggestions(completionItems, request);
       expect(results.length).equals(3);
-      expect(results[0].text).equals('label1');
+      expect(results[0].displayText).equals('label1');
       expect(results[1].description).equals('a very exciting field');
       expect(results[2].type).equals('variable');
     });
@@ -79,7 +79,7 @@ describe('AutoCompleteAdapter', () => {
       const results = AutoCompleteAdapter.completionItemsToSuggestions(completionList, request);
       expect(results.length).equals(3);
       expect(results[0].description).equals('a very exciting keyword');
-      expect(results[1].text).equals('label2');
+      expect(results[1].displayText).equals('label2');
     });
 
     it('converts empty array into an empty AutoComplete Suggestions array', () => {
@@ -172,7 +172,7 @@ describe('AutoCompleteAdapter', () => {
         documentation: 'A very useful keyword',
       };
       const result = AutoCompleteAdapter.basicCompletionItemToSuggestion(completionItem);
-      expect(result.text).equals('label');
+      expect(result.text).equals(undefined);
       expect(result.displayText).equals('label');
       expect(result.type).equals('keyword');
       expect(result.leftLabel).equals('detail');
