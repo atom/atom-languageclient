@@ -1758,11 +1758,18 @@ type atom$AutocompleteRequest = {
   activatedManually?: boolean,
 };
 
+type atom$AutocompleteDidInsert = {
+  editor: TextEditor,
+  triggerPosition: atom$Point,
+  suggestion: atom$AutocompleteSuggestion
+}
+
 type atom$AutocompleteProvider = {
   selector: string,
   getSuggestions: (
     request: atom$AutocompleteRequest,
   ) => Promise<?Array<atom$AutocompleteSuggestion>>,
+  onDidInsertSuggestion?: (arg: atom$AutocompleteDidInsert) => void,
   disableForSelector?: string,
   inclusionPriority?: number,
   excludeLowerPriority?: boolean,
