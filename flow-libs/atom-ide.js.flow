@@ -176,3 +176,46 @@ export type atomIde$CodeActionProvider = {
     diagnostics: Array<atomIde$Diagnostic>,
   ): Promise<Array<CodeAction>>,
 };
+
+export type atomIde$SignatureHelpRegistry = (provider: atomIde$SignatureHelpProvider) => IDisposable;
+
+/**
+ * Signature help is activated when:
+ * - upon keystroke, any provider with a matching grammar scope contains
+ *   the pressed key inside its triggerCharacters set
+ * - the signature-help:show command is manually activated
+ *
+ * Once signature help has been triggered, the provider will be queried immediately
+ * with the current cursor position, and then repeatedly upon cursor movements
+ * until a null/empty signature is returned.
+ *
+ * Returned signatures will be displayed in a small datatip at the current cursor.
+ * The highest-priority provider with a non-null result will be used.
+ */
+export type atomIde$SignatureHelpProvider = {
+  priority: number,
+  grammarScopes: Array<string>,
+
+  // A set of characters that will trigger signature help when typed.
+  // If a null/empty set is provided, only manual activation of the command works.
+  triggerCharacters?: Set<string>,
+
+  getSignatureHelp(editor: atom$TextEditor, point: atom$Point): Promise<?atomIde$SignatureHelp>,
+};
+
+export type atomIde$SignatureHelp = {
+  signatures: Array<atomIde$Signature>,
+  activeSignature?: number,
+  activeParameter?: number,
+};
+
+export type atomIde$Signature = {
+  label: string,
+  documentation?: string,
+  parameters?: Array<atomIde$SignatureParameter>,
+};
+
+export type atomIde$SignatureParameter = {
+  label: string,
+  documentation?: string,
+};
