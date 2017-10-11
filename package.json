@@ -46,15 +46,15 @@
     "babel-plugin-transform-function-bind": "6.22.0",
     "babel-plugin-transform-object-rest-spread": "6.23.0",
     "chai": "^3.5.0",
-    "eslint": "^3.19.0",
+    "eslint": "^4.8.0",
     "eslint-config-fbjs-opensource": "^1.0.0",
-    "eslint-config-prettier": "^2.3.0",
+    "eslint-config-prettier": "^2.6.0",
     "eslint-plugin-flowtype": "^2.35.0",
-    "eslint-plugin-prettier": "^2.1.2",
+    "eslint-plugin-prettier": "^2.3.1",
     "flow-bin": "^0.52.0",
     "mocha": "^3.2.0",
     "mocha-appveyor-reporter": "^0.3.0",
-    "prettier": "^1.5.3",
+    "prettier": "^1.7.4",
     "sinon": "^2.0.0"
   }
 }
