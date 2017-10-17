@@ -35,7 +35,7 @@ The language server protocol consists of a number of capabilities. Some of these
 | textDocument/completion         | AutoComplete+                 |
 | completionItem/resolve          | AutoComplete+      (TBD)      |
 | textDocument/hover              | Atom-IDE data tips            |
-| textDocument/signatureHelp      | TBD                           |
+| textDocument/signatureHelp      | Atom-IDE signature help       |
 | textDocument/definition         | Atom-IDE definitions          |
 | textDocument/findReferences     | Atom-IDE findReferences       |
 | textDocument/documentHighlight  | Atom-IDE code highlights      |
