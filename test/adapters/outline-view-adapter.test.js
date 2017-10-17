@@ -44,10 +44,14 @@ describe('OutlineViewAdapter', () => {
     });
 
     it('creates an empty root container with a single source item when containerName missing', () => {
-      const sourceItem = {kind: ls.SymbolKind.Class, name: 'Program', location: createLocation(1, 2, 3, 4)};
+      const sourceItem: ls.SymbolInformation = {
+        kind: ls.SymbolKind.Class,
+        name: 'Program',
+        location: createLocation(1, 2, 3, 4),
+      };
       const expected = OutlineViewAdapter.symbolToOutline(sourceItem);
-      const missingContainerSource = Object.assign(sourceItem, {containerName: 'missing'});
-      const result = OutlineViewAdapter.createOutlineTrees([missingContainerSource]);
+      sourceItem.containerName = 'missing';
+      const result = OutlineViewAdapter.createOutlineTrees([sourceItem]);
       expect(result.length).to.equal(1);
       expect(result[0].representativeName).to.equal('missing');
       expect(result[0].startPosition.row).to.equal(0);
@@ -56,10 +60,14 @@ describe('OutlineViewAdapter', () => {
     });
 
     it('creates an empty root container with a single source item when containerName is missing and matches own name', () => {
-      const sourceItem = {kind: ls.SymbolKind.Class, name: 'simple', location: createLocation(1, 2, 3, 4)};
+      const sourceItem: ls.SymbolInformation = {
+        kind: ls.SymbolKind.Class,
+        name: 'simple',
+        location: createLocation(1, 2, 3, 4),
+      };
       const expected = OutlineViewAdapter.symbolToOutline(sourceItem);
-      const missingContainerSource = Object.assign(sourceItem, {containerName: 'simple'});
-      const result = OutlineViewAdapter.createOutlineTrees([missingContainerSource]);
+      sourceItem.containerName = 'simple';
+      const result = OutlineViewAdapter.createOutlineTrees([sourceItem]);
       expect(result.length).to.equal(1);
       expect(result[0].representativeName).to.equal('simple');
       expect(result[0].startPosition.row).to.equal(0);
