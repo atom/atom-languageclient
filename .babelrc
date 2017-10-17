@@ -4,8 +4,6 @@
     ["add-module-exports", {}],
     ["transform-class-properties", {}],
     ["transform-es2015-modules-commonjs", {"strictMode": false}],
-    ["transform-export-extensions", {}],
-    ["transform-function-bind", {}],
     ["transform-object-rest-spread", {}],
     ["transform-flow-strip-types", {}],
   ]
