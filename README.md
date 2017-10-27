@@ -126,7 +126,7 @@ Some more elaborate scenarios can be found in the [ide-java](https://github.com/
 
 Right now we have the following experimental Atom LSP packages in development. They are mostly usable but are missing some features that either the LSP server doesn't support or expose functionality that is as yet unmapped to Atom (TODO and TBD in the capabilities table above).
 
-### Atom team packages
+### Official packages
 
 * [ide-csharp](https://github.com/atom/ide-csharp) provides C# support via [Omnisharp (node-omnisharp)](https://github.com/OmniSharp/omnisharp-node-client)
 * [ide-flowtype](https://github.com/flowtype/ide-flowtype) provides Flow support via [Flow Language Server](https://github.com/flowtype/flow-language-server)
