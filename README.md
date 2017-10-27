@@ -136,10 +136,7 @@ Right now we have the following experimental Atom LSP packages in development. T
 
 ### Community packages
 
-* [ide-reason](https://github.com/zaaack/atom-ide-reason) provides OCaml and Reason support using [OCaml Language Server](https://github.com/freebroccolo/ocaml-language-server)
-* [ide-rust](https://github.com/mehcode/atom-ide-rust) provides Rust support using [Rust Language Server](https://github.com/rust-lang-nursery/rls)
-* [ide-vue](https://github.com/rwatts3/atom-ide-vue) provides Vue language support using the [Vue Language Server](https://www.npmjs.com/package/vue-language-server)
-* [ide-python](https://github.com/lgeiger/ide-python) provides Python support via [Python Language Server](https://github.com/palantir/python-language-server)
+Our [full list of Atom IDE packages](https://github.com/atom/atom-languageclient/wiki/List-of-Atom-packages-using-Atom-LanguageClient) includes the community packages.
 
 ### Other language servers
 
