@@ -43,17 +43,42 @@ describe('AutoCompleteAdapter', () => {
     },
   ];
 
-  describe('getSuggestions', () => {
-    const fakeLanguageClient = new ls.LanguageClientConnection(createSpyConnection());
-    sinon.stub(fakeLanguageClient, 'completion').resolves(completionItems);
+  const completeResponse = completionItems;
 
-    it('gets AutoComplete suggestions via LSP given an AutoCompleteRequest', async () => {
+  const incompleteResponse: ls.CompletionList = {
+    items: completionItems,
+    isIncomplete: true,
+  };
+
+  describe('getSuggestionsComplete', () => {
+    const fakeLanguageClient = new ls.LanguageClientConnection(createSpyConnection());
+    sinon.stub(fakeLanguageClient, 'completion').resolves(completeResponse);
+
+    it('gets Complete AutoComplete suggestions via LSP given an AutoCompleteRequest', async () => {
       const autoCompleteAdapter = new AutoCompleteAdapter();
-      const suggestions = await autoCompleteAdapter.getSuggestions(fakeLanguageClient, request);
+      const response = await autoCompleteAdapter.getSuggestions(fakeLanguageClient, request);
+      const suggestions = response.completionItems;
       expect(suggestions.length).equals(3);
       expect(suggestions[0].text).equals('label1');
       expect(suggestions[1].description).equals('a very exciting field');
       expect(suggestions[2].type).equals('variable');
+      expect(response.isComplete).equals(true);
+    });
+  });
+
+  describe('getSuggestionsIncomplete', () => {
+    const fakeLanguageClient = new ls.LanguageClientConnection(createSpyConnection());
+    sinon.stub(fakeLanguageClient, 'completion').resolves(incompleteResponse);
+
+    it('gets Incomplete AutoComplete suggestions via LSP given an AutoCompleteRequest', async () => {
+      const autoCompleteAdapter = new AutoCompleteAdapter();
+      const response = await autoCompleteAdapter.getSuggestions(fakeLanguageClient, request);
+      const suggestions = response.completionItems;
+      expect(suggestions.length).equals(3);
+      expect(suggestions[0].text).equals('label1');
+      expect(suggestions[1].description).equals('a very exciting field');
+      expect(suggestions[2].type).equals('variable');
+      expect(response.isComplete).equals(false);
     });
   });
 
@@ -67,7 +92,8 @@ describe('AutoCompleteAdapter', () => {
 
   describe('completionItemsToSuggestions', () => {
     it('converts LSP CompletionItem array to AutoComplete Suggestions array', () => {
-      const results = AutoCompleteAdapter.completionItemsToSuggestions(completionItems, request);
+      const response = AutoCompleteAdapter.completionItemsToSuggestions(completionItems, request);
+      const results = response.completionItems;
       expect(results.length).equals(3);
       expect(results[0].text).equals('label1');
       expect(results[1].description).equals('a very exciting field');
@@ -76,14 +102,17 @@ describe('AutoCompleteAdapter', () => {
 
     it('converts LSP CompletionList to AutoComplete Suggestions array', () => {
       const completionList = {items: completionItems, isIncomplete: false};
-      const results = AutoCompleteAdapter.completionItemsToSuggestions(completionList, request);
+      const response = AutoCompleteAdapter.completionItemsToSuggestions(completionList, request);
+      const results = response.completionItems;
       expect(results.length).equals(3);
       expect(results[0].description).equals('a very exciting keyword');
       expect(results[1].text).equals('label2');
+      completionItems;
     });
 
     it('converts empty array into an empty AutoComplete Suggestions array', () => {
-      const results = AutoCompleteAdapter.completionItemsToSuggestions([], request);
+      const response = AutoCompleteAdapter.completionItemsToSuggestions([], request);
+      const results = response.completionItems;
       expect(results.length).equals(0);
     });
   });
