@@ -75,6 +75,10 @@ describe('Convert', () => {
       setProcessPlatform('darwin');
       expect(Convert.uriToPath('file:///a/sp%20ace/do$lar')).equals('/a/sp ace/do$lar');
     });
+
+    it('parses URI without double slash in the beginning', () => {
+      expect(Convert.uriToPath('file:/a/b/c/d.txt')).equals('/a/b/c/d.txt');
+    });
   });
 
   describe('pointToPosition', () => {
