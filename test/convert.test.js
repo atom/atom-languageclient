@@ -77,6 +77,7 @@ describe('Convert', () => {
     });
 
     it('parses URI without double slash in the beginning', () => {
+      setProcessPlatform('darwin');
       expect(Convert.uriToPath('file:/a/b/c/d.txt')).equals('/a/b/c/d.txt');
     });
   });
