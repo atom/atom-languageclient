@@ -1,3 +1,8 @@
+## v0.6.7
+
+- Update vscode-jsonrpc from 3.3.1 to 3.4.1
+- Allow file: uri without // or /// from the server
+
 ## v0.6.6
 
 - Allow filtering for didChangeWatchedFiles to workaround language servers triggering full rebuilds on changes to .git/build folders etc.
