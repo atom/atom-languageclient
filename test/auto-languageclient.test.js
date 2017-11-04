@@ -1,6 +1,11 @@
 // @flow
 
 import AutoLanguageClient from '../lib/auto-languageclient';
+import AutocompleteAdapter, {type AutocompletionResponse} from '../lib/adapters/autocomplete-adapter';
+import {LanguageClientConnection} from '../lib/languageclient';
+import {createFakeEditor} from './helpers.js';
+import {Point} from 'atom';
+
 import {expect} from 'chai';
 
 describe('AutoLanguageClient', () => {
@@ -42,4 +47,105 @@ describe('AutoLanguageClient', () => {
       expect(client.shouldSyncForEditor(editor, '/path/to/somewhere')).equals(false);
     });
   });
+
+  /*describe('getSuggestions', () => {
+    const expectedSuggestions = [
+      {
+        text: 'blabla',
+        displayText: 'doublebla',
+        filterText: 'bla',
+        snippet: 'bla',
+        type: 'method',
+        leftLabel: 'left bla',
+        description: 'bla bla of bla',
+        descriptionMarkdown: 'markdown',
+      },
+      {
+        text: 'blabla2',
+        displayText: 'doublebla2',
+        filterText: 'bla2',
+        snippet: 'bla2',
+        type: 'method',
+        leftLabel: 'left bla2',
+        description: 'bla bla of bla2',
+        descriptionMarkdown: 'markdown',
+      },
+      {
+        text: 'blabla3',
+        displayText: 'doublebla',
+        filterText: 'bla3',
+        snippet: 'bla3',
+        type: 'method',
+        leftLabel: 'left bla3',
+        description: 'bla bla of bla3',
+        descriptionMarkdown: 'markdown',
+      },
+    ];
+
+    class CustomAutoLanguageClient extends AutoLanguageClient {
+      autoComplete = new AutocompleteAdapter();
+
+      getGrammarScopes() {
+        return ['Java', 'Python'];
+      }
+      getLanguageName() {
+        return 'TypeScript';
+      }
+      getServerName() {
+        return 'SourceGraph';
+      }
+    }
+
+    class CustomAutocompleteAdapter extends AutocompleteAdapter {
+      getSuggestions(
+        connection: LanguageClientConnection,
+        request: atom$AutocompleteRequest,
+      ): Promise<AutocompletionResponse> {
+        const response: AutocompletionResponse = {
+          isComplete: true,
+          completionItems: expectedSuggestions,
+        };
+
+        return Promise.resolve(response);
+      }
+    }
+
+    const client = new CustomAutoLanguageClient();
+    client.autoComplete = new CustomAutocompleteAdapter();
+    client.activate();
+
+    it('correctly resets current EditorSuggestionInfo', () => {
+      const request: atom$AutocompleteRequest = {
+        editor: createFakeEditor(),
+        bufferPosition: new Point(123, 456),
+        prefix: '.',
+        scopeDescriptor: 'some.scope',
+      };
+
+      const expectedResult = {
+        isComplete: true,
+        completionItems: expectedSuggestions,
+      };
+
+      return client.getSuggestions(request).then(results => {
+        expect(client._editorToSuggestions.keys.length).equals('BLA');
+        let editorSuggestionInfo = client._editorToSuggestions.get(request.editor);
+        if (editorSuggestionInfo) {
+          expect(editorSuggestionInfo.isComplete).equals(expectedResult.isComplete);
+          expect(false).equals(true);
+          expect(results).equals(expectedResult.completionItems);
+
+          request.editor.getBuffer().setText('');
+
+          editorSuggestionInfo = client._editorToSuggestions.get(request.editor);
+          if (!editorSuggestionInfo) {
+            editorSuggestionInfo = {};
+          }
+
+          expect(editorSuggestionInfo.isComplete).equals(false);
+          expect(editorSuggestionInfo.currentSuggestions).equals([]);
+        }
+      });
+    });
+  });*/
 });
