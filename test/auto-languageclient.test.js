@@ -1,10 +1,12 @@
 // @flow
 
 import AutoLanguageClient from '../lib/auto-languageclient';
+
+/* TODO - Uncomment after uncommenting the getSuggestion reset test.
 import AutocompleteAdapter, {type AutocompletionResponse} from '../lib/adapters/autocomplete-adapter';
 import {LanguageClientConnection} from '../lib/languageclient';
 import {createFakeEditor} from './helpers.js';
-import {Point} from 'atom';
+import {Point} from 'atom'; */
 
 import {expect} from 'chai';
 
@@ -48,7 +50,7 @@ describe('AutoLanguageClient', () => {
     });
   });
 
-  /*describe('getSuggestions', () => {
+  /* describe('getSuggestions', () => {
     const expectedSuggestions = [
       {
         text: 'blabla',
@@ -147,5 +149,5 @@ describe('AutoLanguageClient', () => {
         }
       });
     });
-  });*/
+  }); */
 });
