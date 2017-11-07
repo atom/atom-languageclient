@@ -131,7 +131,7 @@ describe('AutoCompleteAdapter', () => {
       expect(result.text).equals('insert');
       expect(result.displayText).equals('label');
       expect(result.type).equals('keyword');
-      expect(result.leftLabel).equals('keyword');
+      expect(result.rightLabel).equals('keyword');
       expect(result.description).equals('a truly useful keyword');
       expect(result.descriptionMarkdown).equals('a truly useful keyword');
     });
@@ -162,7 +162,7 @@ describe('AutoCompleteAdapter', () => {
       const result = AutoCompleteAdapter.completionItemToSuggestion(completionItem, autocompleteRequest);
       expect(result.displayText).equals('label');
       expect(result.type).equals('variable');
-      expect(result.leftLabel).equals('number');
+      expect(result.rightLabel).equals('number');
       expect(result.description).equals('a truly useful variable');
       expect(result.descriptionMarkdown).equals('a truly useful variable');
       expect(result.replacementPrefix).equals('replacementPrefix');
@@ -188,7 +188,7 @@ describe('AutoCompleteAdapter', () => {
       expect(result.text).equals('insert');
       expect(result.displayText).equals('label');
       expect(result.type).equals('keyword');
-      expect(result.leftLabel).equals('detail');
+      expect(result.rightLabel).equals('detail');
       expect(result.description).equals('a very exciting keyword');
       expect(result.descriptionMarkdown).equals('a very exciting keyword');
     });
@@ -204,7 +204,7 @@ describe('AutoCompleteAdapter', () => {
       expect(result.text).equals('label');
       expect(result.displayText).equals('label');
       expect(result.type).equals('keyword');
-      expect(result.leftLabel).equals('detail');
+      expect(result.rightLabel).equals('detail');
       expect(result.description).equals('A very useful keyword');
       expect(result.descriptionMarkdown).equals('A very useful keyword');
     });
