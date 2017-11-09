@@ -30,7 +30,7 @@ The language server protocol consists of a number of capabilities. Some of these
 | window/showMessageRequest       | Notifications package         |
 | window/logMessage               | Ignored                       |
 | telemetry/event                 | Ignored                       |
-| workspace/didChangeWatchedFiles | [Atom file watch api](https://github.com/atom/atom/pull/14853) (TODO)    |
+| workspace/didChangeWatchedFiles | Atom file watch API           |
 | textDocument/publishDiagnostics | Linter v2 push/indie          |
 | textDocument/completion         | AutoComplete+                 |
 | completionItem/resolve          | AutoComplete+      (TBD)      |
