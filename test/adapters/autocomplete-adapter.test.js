@@ -56,7 +56,7 @@ describe('AutoCompleteAdapter', () => {
 
     it('gets Complete AutoComplete suggestions via LSP given an AutoCompleteRequest', async () => {
       const autoCompleteAdapter = new AutoCompleteAdapter();
-      const response = await autoCompleteAdapter.getSuggestions(fakeLanguageClient, request);
+      const response = await autoCompleteAdapter.getLSSuggestions(fakeLanguageClient, request);
       const suggestions = response.completionItems;
       expect(suggestions.length).equals(3);
       expect(suggestions[0].text).equals('label1');
@@ -72,7 +72,7 @@ describe('AutoCompleteAdapter', () => {
 
     it('gets Incomplete AutoComplete suggestions via LSP given an AutoCompleteRequest', async () => {
       const autoCompleteAdapter = new AutoCompleteAdapter();
-      const response = await autoCompleteAdapter.getSuggestions(fakeLanguageClient, request);
+      const response = await autoCompleteAdapter.getLSSuggestions(fakeLanguageClient, request);
       const suggestions = response.completionItems;
       expect(suggestions.length).equals(3);
       expect(suggestions[0].text).equals('label1');
