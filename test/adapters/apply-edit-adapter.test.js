@@ -56,6 +56,45 @@ describe('ApplyEditAdapter', () => {
       expect(editor.getText()).to.equal('abc\ndef\n');
     });
 
+    it('works with TextDocumentEdits', async () => {
+      const editor = await atom.workspace.open(TEST_PATH1);
+      editor.setText('abc\ndef\n');
+
+      const result = await ApplyEditAdapter.onApplyEdit({
+        edit: {
+          documentChanges: [{
+            textDocument: {
+                version: 1,
+                uri: Convert.pathToUri(TEST_PATH1)
+            },
+            edits: [
+              {
+                range: {
+                  start: {line: 0, character: 0},
+                  end: {line: 0, character: 3},
+                },
+                newText: 'def',
+              },
+              {
+                range: {
+                  start: {line: 1, character: 0},
+                  end: {line: 1, character: 3},
+                },
+                newText: 'ghi',
+              },
+            ]
+          }],
+        }
+      });
+
+      expect(result.applied).to.equal(true);
+      expect(editor.getText()).to.equal('def\nghi\n');
+
+      // Undo should be atomic.
+      editor.getBuffer().undo();
+      expect(editor.getText()).to.equal('abc\ndef\n');
+    });
+
     it('opens files that are not already open', async () => {
       const result = await ApplyEditAdapter.onApplyEdit({
         edit: {
