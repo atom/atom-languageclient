@@ -59,6 +59,42 @@ describe('AutoCompleteAdapter', () => {
     });
   });
 
+  describe('completeSuggestion', () => {
+    const partialItems = [
+      {
+        label: 'label1',
+        kind: ls.CompletionItemKind.Keyword,
+        sortText: 'z',
+      },
+      {
+        label: 'label2',
+        kind: ls.CompletionItemKind.Field,
+        sortText: 'a',
+      },
+      {
+        label: 'label3',
+        kind: ls.CompletionItemKind.Variable,
+      },
+    ];
+
+    const fakeLanguageClient = new ls.LanguageClientConnection(createSpyConnection());
+    sinon.stub(fakeLanguageClient, 'completion').resolves(partialItems);
+    sinon.stub(fakeLanguageClient, 'completionItemResolve').resolves({
+      label: 'label3',
+      kind: ls.CompletionItemKind.Variable,
+      detail: 'description3',
+      documentation: 'a very exciting variable',
+    });
+
+    it('resolves suggestions via LSP given an AutoCompleteRequest', async () => {
+      const autoCompleteAdapter = new AutoCompleteAdapter();
+      const results: Array<atom$AutocompleteSuggestion> = await autoCompleteAdapter.getSuggestions(fakeLanguageClient, request);
+      expect(results[2].description).equals(undefined);
+      const resolvedItem = await autoCompleteAdapter.completeSuggestion(fakeLanguageClient, results[2], request);
+      expect(resolvedItem.description).equals('a very exciting variable');
+    });
+  });
+
   describe('requestToTextDocumentPositionParams', () => {
     it('creates a TextDocumentPositionParams from an AutocompleteRequest', () => {
       const result = AutoCompleteAdapter.requestToTextDocumentPositionParams(request);
@@ -69,7 +105,8 @@ describe('AutoCompleteAdapter', () => {
 
   describe('completionItemsToSuggestions', () => {
     it('converts LSP CompletionItem array to AutoComplete Suggestions array', () => {
-      const results = AutoCompleteAdapter.completionItemsToSuggestions(completionItems, request);
+      const autoCompleteAdapter = new AutoCompleteAdapter();
+      const results = autoCompleteAdapter.completionItemsToSuggestions(completionItems, request);
       expect(results.length).equals(3);
       expect(results[0].text).equals('label2');
       expect(results[1].description).equals('a very exciting variable');
@@ -78,14 +115,16 @@ describe('AutoCompleteAdapter', () => {
 
     it('converts LSP CompletionList to AutoComplete Suggestions array', () => {
       const completionList = {items: completionItems, isIncomplete: false};
-      const results = AutoCompleteAdapter.completionItemsToSuggestions(completionList, request);
+      const autoCompleteAdapter = new AutoCompleteAdapter();
+      const results = autoCompleteAdapter.completionItemsToSuggestions(completionList, request);
       expect(results.length).equals(3);
       expect(results[0].description).equals('a very exciting field');
       expect(results[1].text).equals('label3');
     });
 
     it('converts empty array into an empty AutoComplete Suggestions array', () => {
-      const results = AutoCompleteAdapter.completionItemsToSuggestions([], request);
+      const autoCompleteAdapter = new AutoCompleteAdapter();
+      const results = autoCompleteAdapter.completionItemsToSuggestions([], request);
       expect(results.length).equals(0);
     });
   });
