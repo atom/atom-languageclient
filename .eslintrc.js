@@ -1,7 +1,6 @@
 module.exports = {
   'extends': [
     'fbjs-opensource',
-    'prettier',
   ],
   'plugins': [
     'flowtype',
