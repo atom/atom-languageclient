@@ -64,8 +64,8 @@ describe('ApplyEditAdapter', () => {
         edit: {
           documentChanges: [{
             textDocument: {
-                version: 1,
-                uri: Convert.pathToUri(TEST_PATH1)
+              version: 1,
+              uri: Convert.pathToUri(TEST_PATH1),
             },
             edits: [
               {
@@ -82,9 +82,9 @@ describe('ApplyEditAdapter', () => {
                 },
                 newText: 'ghi',
               },
-            ]
+            ],
           }],
-        }
+        },
       });
 
       expect(result.applied).to.equal(true);
