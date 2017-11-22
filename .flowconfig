@@ -10,4 +10,4 @@ flow-typed/
 experimental.const_params=true
 
 [version]
-0.57.3
+0.59.0
