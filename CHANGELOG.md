@@ -8,6 +8,7 @@
 - Support TextDocumentEdit in ApplyEditAdapter for v3
 - Upgrade flow, remove prettier
 - Busy Signals added for start and shutdown
+- Dispose connection on server stop, prevent rpc errors in console
 
 ## v0.6.7
 
