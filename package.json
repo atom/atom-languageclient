@@ -1,6 +1,6 @@
 {
   "name": "atom-languageclient",
-  "version": "0.6.7",
+  "version": "0.7.0",
   "description": "Integrate Language Servers with Atom",
   "repository": "https://github.com/atom/atom-languageclient",
   "license": "MIT",
@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "fuzzaldrin-plus": "^0.5.0",
-    "vscode-jsonrpc": "^3.4.1"
+    "vscode-jsonrpc": "^3.5.0"
   },
   "atomTestRunner": "./test/runner",
   "atomTranspilers": [
@@ -33,7 +33,7 @@
   ],
   "devDependencies": {
     "atom-babel6-transpiler": "1.1.2",
-    "atom-mocha-test-runner": "^1.0.0",
+    "atom-mocha-test-runner": "^1.2.0",
     "babel-cli": "^6.26.0",
     "babel-core": "6.26.0",
     "babel-plugin-add-module-exports": "0.2.1",
@@ -42,12 +42,10 @@
     "babel-plugin-transform-flow-strip-types": "6.22.0",
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "chai": "^3.5.0",
-    "eslint": "^4.9.0",
+    "eslint": "^4.11.0",
     "eslint-config-fbjs-opensource": "^1.0.0",
-    "eslint-config-prettier": "^2.6.0",
     "eslint-plugin-flowtype": "^2.39.1",
-    "eslint-plugin-prettier": "^2.3.1",
-    "flow-bin": "^0.57.3",
+    "flow-bin": "^0.59.0",
     "mocha": "^3.2.0",
     "mocha-appveyor-reporter": "^0.4.0",
     "sinon": "^2.0.0"

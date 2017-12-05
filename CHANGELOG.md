@@ -1,3 +1,15 @@
+## v0.7.0
+
+- Support snippet type completion items
+- Move completionItem detail to right for consistency with VSCode
+- Make ServerManager restartable
+- Sort completion results
+- LSP v3 flow types plus wiring up of willSave
+- Support TextDocumentEdit in ApplyEditAdapter for v3
+- Upgrade flow, remove prettier
+- Busy Signals added for start and shutdown
+- Dispose connection on server stop, prevent rpc errors in console
+
 ## v0.6.7
 
 - Update vscode-jsonrpc from 3.3.1 to 3.4.1
