@@ -33,7 +33,7 @@ The language server protocol consists of a number of capabilities. Some of these
 | workspace/didChangeWatchedFiles | Atom file watch API           |
 | textDocument/publishDiagnostics | Linter v2 push/indie          |
 | textDocument/completion         | AutoComplete+                 |
-| completionItem/resolve          | AutoComplete+      (TBD)      |
+| completionItem/resolve          | AutoComplete+ (Atom 1.24+)    |
 | textDocument/hover              | Atom-IDE data tips            |
 | textDocument/signatureHelp      | Atom-IDE signature help       |
 | textDocument/definition         | Atom-IDE definitions          |

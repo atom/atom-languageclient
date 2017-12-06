@@ -1763,6 +1763,9 @@ type atom$AutocompleteProvider = {
   getSuggestions: (
     request: atom$AutocompleteRequest,
   ) => Promise<?Array<atom$AutocompleteSuggestion>>,
+  getSuggestionDetailsOnFocus: (
+    suggestion: atom$AutocompleteSuggestion,
+  ) => Promise<?atom$AutocompleteSuggestion>,
   disableForSelector?: string,
   inclusionPriority?: number,
   excludeLowerPriority?: boolean,
