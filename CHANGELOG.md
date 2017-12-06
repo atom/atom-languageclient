@@ -1,3 +1,7 @@
+## v0.7.1
+
+- AutoComplete to CompletionItems now support resolve when using Atom 1.24 or later
+
 ## v0.7.0
 
 - Support snippet type completion items
