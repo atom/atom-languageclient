@@ -1,3 +1,7 @@
+## v0.7.2
+
+- AutoComplete to CompletionItems now actually work on Atom 1.24 not just a previous PR
+
 ## v0.7.1
 
 - AutoComplete to CompletionItems now support resolve when using Atom 1.24 or later
