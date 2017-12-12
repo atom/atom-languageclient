@@ -151,7 +151,7 @@ describe('AutoCompleteAdapter', () => {
         detail: 'keyword',
         documentation: 'a truly useful keyword',
       };
-      const result = { }
+      const result = { };
       AutoCompleteAdapter.completionItemToSuggestion(completionItem, result, request);
       expect(result.text).equals('insert');
       expect(result.displayText).equals('label');
@@ -184,7 +184,7 @@ describe('AutoCompleteAdapter', () => {
         scopeDescriptor: 'some.scope',
       };
       sinon.stub(autocompleteRequest.editor, 'getTextInBufferRange').returns('replacementPrefix');
-      const result = { }
+      const result = { };
       AutoCompleteAdapter.completionItemToSuggestion(completionItem, result, autocompleteRequest);
       expect(result.displayText).equals('label');
       expect(result.type).equals('variable');
@@ -210,7 +210,7 @@ describe('AutoCompleteAdapter', () => {
         detail: 'detail',
         documentation: 'a very exciting keyword',
       };
-      const result = { }
+      const result = { };
       AutoCompleteAdapter.applyCompletionItemToSuggestion(completionItem, result);
       expect(result.text).equals('insert');
       expect(result.displayText).equals('label');
@@ -227,7 +227,7 @@ describe('AutoCompleteAdapter', () => {
         detail: 'detail',
         documentation: 'A very useful keyword',
       };
-      const result = { }
+      const result = { };
       AutoCompleteAdapter.applyCompletionItemToSuggestion(completionItem, result);
       expect(result.text).equals('label');
       expect(result.displayText).equals('label');
