@@ -1,6 +1,7 @@
 // @flow
 
 import AutoCompleteAdapter from '../../lib/adapters/autocomplete-adapter';
+import type ActiveServer from '../../lib/server-manager.js';
 import * as ls from '../../lib/languageclient';
 import sinon from 'sinon';
 import {Point, Range, TextEditor} from 'atom';
@@ -46,12 +47,12 @@ describe('AutoCompleteAdapter', () => {
   ];
 
   describe('getSuggestions', () => {
-    const fakeLanguageClient = new ls.LanguageClientConnection(createSpyConnection());
-    sinon.stub(fakeLanguageClient, 'completion').resolves(completionItems);
+    const server: ActiveServer = { connection: new ls.LanguageClientConnection(createSpyConnection()) };
+    sinon.stub(server.connection, 'completion').resolves(completionItems);
 
     it('gets AutoComplete suggestions via LSP given an AutoCompleteRequest', async () => {
       const autoCompleteAdapter = new AutoCompleteAdapter();
-      const results = await autoCompleteAdapter.getSuggestions(fakeLanguageClient, request);
+      const results = await autoCompleteAdapter.getSuggestions(server, request);
       expect(results.length).equals(3);
       expect(results[0].text).equals('label2');
       expect(results[1].description).equals('a very exciting variable');
@@ -77,9 +78,9 @@ describe('AutoCompleteAdapter', () => {
       },
     ];
 
-    const fakeLanguageClient = new ls.LanguageClientConnection(createSpyConnection());
-    sinon.stub(fakeLanguageClient, 'completion').resolves(partialItems);
-    sinon.stub(fakeLanguageClient, 'completionItemResolve').resolves({
+    const server: ActiveServer = { connection: new ls.LanguageClientConnection(createSpyConnection()) };
+    sinon.stub(server.connection, 'completion').resolves(partialItems);
+    sinon.stub(server.connection, 'completionItemResolve').resolves({
       label: 'label3',
       kind: ls.CompletionItemKind.Variable,
       detail: 'description3',
@@ -88,9 +89,9 @@ describe('AutoCompleteAdapter', () => {
 
     it('resolves suggestions via LSP given an AutoCompleteRequest', async () => {
       const autoCompleteAdapter = new AutoCompleteAdapter();
-      const results: Array<atom$AutocompleteSuggestion> = await autoCompleteAdapter.getSuggestions(fakeLanguageClient, request);
+      const results: Array<atom$AutocompleteSuggestion> = await autoCompleteAdapter.getSuggestions(server, request);
       expect(results[2].description).equals(undefined);
-      const resolvedItem = await autoCompleteAdapter.completeSuggestion(fakeLanguageClient, results[2], request);
+      const resolvedItem = await autoCompleteAdapter.completeSuggestion(server, results[2], request);
       expect(resolvedItem.description).equals('a very exciting variable');
     });
   });
