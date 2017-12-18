@@ -1,3 +1,7 @@
+## v0.7.3
+
+- AutoCompleteAdapter now takes an [optional function for customizing suggestions](https://github.com/atom/atom-languageclient/pull/137)
+
 ## v0.7.2
 
 - AutoComplete to CompletionItems now actually work on Atom 1.24 not just a previous PR
