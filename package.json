@@ -15,6 +15,7 @@
     "watch": "babel lib --out-dir build/lib -w"
   },
   "dependencies": {
+    "fuzzaldrin-plus": "^0.6.0",
     "vscode-jsonrpc": "^3.5.0"
   },
   "atomTestRunner": "./test/runner",

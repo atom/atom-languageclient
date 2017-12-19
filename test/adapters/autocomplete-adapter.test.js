@@ -21,6 +21,7 @@ describe('AutoCompleteAdapter', () => {
     bufferPosition: new Point(123, 456),
     prefix: 'def',
     scopeDescriptor: 'some.scope',
+    activatedManually: true,
   };
 
   const completionItems = [
@@ -47,7 +48,10 @@ describe('AutoCompleteAdapter', () => {
   ];
 
   describe('getSuggestions', () => {
-    const server: ActiveServer = { connection: new ls.LanguageClientConnection(createSpyConnection()) };
+    const server: ActiveServer = {
+      capabilities: { completionProvider: { } },
+      connection: new ls.LanguageClientConnection(createSpyConnection())
+    };
     sinon.stub(server.connection, 'completion').resolves(completionItems);
 
     it('gets AutoComplete suggestions via LSP given an AutoCompleteRequest', async () => {
@@ -78,7 +82,10 @@ describe('AutoCompleteAdapter', () => {
       },
     ];
 
-    const server: ActiveServer = { connection: new ls.LanguageClientConnection(createSpyConnection()) };
+    const server: ActiveServer = {
+      capabilities: { completionProvider: { } },
+      connection: new ls.LanguageClientConnection(createSpyConnection())
+    };
     sinon.stub(server.connection, 'completion').resolves(partialItems);
     sinon.stub(server.connection, 'completionItemResolve').resolves({
       label: 'label3',
