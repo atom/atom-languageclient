@@ -1761,7 +1761,7 @@ type atom$AutocompleteRequest = {
 type atom$AutocompleteDidInsert = {
   editor: TextEditor,
   triggerPosition: atom$Point,
-  suggestion: atom$AutocompleteSuggestion
+  suggestion: atom$AutocompleteSuggestion,
 }
 
 type atom$AutocompleteProvider = {
