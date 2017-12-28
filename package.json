@@ -1,6 +1,6 @@
 {
   "name": "atom-languageclient",
-  "version": "0.6.7",
+  "version": "0.7.3",
   "description": "Integrate Language Servers with Atom",
   "repository": "https://github.com/atom/atom-languageclient",
   "license": "MIT",
@@ -15,7 +15,7 @@
     "watch": "babel lib --out-dir build/lib -w"
   },
   "dependencies": {
-    "vscode-jsonrpc": "^3.4.1"
+    "vscode-jsonrpc": "^3.5.0"
   },
   "atomTestRunner": "./test/runner",
   "atomTranspilers": [
@@ -32,7 +32,7 @@
   ],
   "devDependencies": {
     "atom-babel6-transpiler": "1.1.2",
-    "atom-mocha-test-runner": "^1.0.0",
+    "atom-mocha-test-runner": "^1.2.0",
     "babel-cli": "^6.26.0",
     "babel-core": "6.26.0",
     "babel-plugin-add-module-exports": "0.2.1",
@@ -41,7 +41,7 @@
     "babel-plugin-transform-flow-strip-types": "6.22.0",
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "chai": "^3.5.0",
-    "eslint": "^4.9.0",
+    "eslint": "^4.11.0",
     "eslint-config-fbjs-opensource": "^1.0.0",
     "eslint-plugin-flowtype": "^2.39.1",
     "flow-bin": "^0.59.0",

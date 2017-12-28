@@ -1,3 +1,27 @@
+## v0.7.3
+
+- AutoCompleteAdapter now takes an [optional function for customizing suggestions](https://github.com/atom/atom-languageclient/pull/137)
+
+## v0.7.2
+
+- AutoComplete to CompletionItems now actually work on Atom 1.24 not just a previous PR
+
+## v0.7.1
+
+- AutoComplete to CompletionItems now support resolve when using Atom 1.24 or later
+
+## v0.7.0
+
+- Support snippet type completion items
+- Move completionItem detail to right for consistency with VSCode
+- Make ServerManager restartable
+- Sort completion results
+- LSP v3 flow types plus wiring up of willSave
+- Support TextDocumentEdit in ApplyEditAdapter for v3
+- Upgrade flow, remove prettier
+- Busy Signals added for start and shutdown
+- Dispose connection on server stop, prevent rpc errors in console
+
 ## v0.6.7
 
 - Update vscode-jsonrpc from 3.3.1 to 3.4.1

@@ -59,6 +59,42 @@ describe('AutoCompleteAdapter', () => {
     });
   });
 
+  describe('completeSuggestion', () => {
+    const partialItems = [
+      {
+        label: 'label1',
+        kind: ls.CompletionItemKind.Keyword,
+        sortText: 'z',
+      },
+      {
+        label: 'label2',
+        kind: ls.CompletionItemKind.Field,
+        sortText: 'a',
+      },
+      {
+        label: 'label3',
+        kind: ls.CompletionItemKind.Variable,
+      },
+    ];
+
+    const fakeLanguageClient = new ls.LanguageClientConnection(createSpyConnection());
+    sinon.stub(fakeLanguageClient, 'completion').resolves(partialItems);
+    sinon.stub(fakeLanguageClient, 'completionItemResolve').resolves({
+      label: 'label3',
+      kind: ls.CompletionItemKind.Variable,
+      detail: 'description3',
+      documentation: 'a very exciting variable',
+    });
+
+    it('resolves suggestions via LSP given an AutoCompleteRequest', async () => {
+      const autoCompleteAdapter = new AutoCompleteAdapter();
+      const results: Array<atom$AutocompleteSuggestion> = await autoCompleteAdapter.getSuggestions(fakeLanguageClient, request);
+      expect(results[2].description).equals(undefined);
+      const resolvedItem = await autoCompleteAdapter.completeSuggestion(fakeLanguageClient, results[2], request);
+      expect(resolvedItem.description).equals('a very exciting variable');
+    });
+  });
+
   describe('requestToTextDocumentPositionParams', () => {
     it('creates a TextDocumentPositionParams from an AutocompleteRequest', () => {
       const result = AutoCompleteAdapter.requestToTextDocumentPositionParams(request);
@@ -69,23 +105,38 @@ describe('AutoCompleteAdapter', () => {
 
   describe('completionItemsToSuggestions', () => {
     it('converts LSP CompletionItem array to AutoComplete Suggestions array', () => {
-      const results = AutoCompleteAdapter.completionItemsToSuggestions(completionItems, request);
+      const autoCompleteAdapter = new AutoCompleteAdapter();
+      const results = Array.from(autoCompleteAdapter.completionItemsToSuggestions(completionItems, request));
       expect(results.length).equals(3);
-      expect(results[0].text).equals('label2');
-      expect(results[1].description).equals('a very exciting variable');
-      expect(results[2].type).equals('keyword');
+      expect(results[0][0].text).equals('label2');
+      expect(results[1][0].description).equals('a very exciting variable');
+      expect(results[2][0].type).equals('keyword');
     });
 
     it('converts LSP CompletionList to AutoComplete Suggestions array', () => {
       const completionList = {items: completionItems, isIncomplete: false};
-      const results = AutoCompleteAdapter.completionItemsToSuggestions(completionList, request);
+      const autoCompleteAdapter = new AutoCompleteAdapter();
+      const results = Array.from(autoCompleteAdapter.completionItemsToSuggestions(completionList, request));
       expect(results.length).equals(3);
-      expect(results[0].description).equals('a very exciting field');
-      expect(results[1].text).equals('label3');
+      expect(results[0][0].description).equals('a very exciting field');
+      expect(results[1][0].text).equals('label3');
+    });
+
+    it('converts LSP CompletionList to AutoComplete Suggestions array using the onDidConvertCompletionItem', () => {
+      const completionList = {items: completionItems, isIncomplete: false};
+      const autoCompleteAdapter = new AutoCompleteAdapter();
+      const results = Array.from(autoCompleteAdapter.completionItemsToSuggestions(completionList, request, (c, a, r) => {
+        a.text = c.label + ' ok';
+        a.displayText = r.scopeDescriptor;
+      }));
+      expect(results.length).equals(3);
+      expect(results[0][0].displayText).equals('some.scope');
+      expect(results[1][0].text).equals('label3 ok');
     });
 
     it('converts empty array into an empty AutoComplete Suggestions array', () => {
-      const results = AutoCompleteAdapter.completionItemsToSuggestions([], request);
+      const autoCompleteAdapter = new AutoCompleteAdapter();
+      const results = Array.from(autoCompleteAdapter.completionItemsToSuggestions([], request));
       expect(results.length).equals(0);
     });
   });
@@ -100,7 +151,8 @@ describe('AutoCompleteAdapter', () => {
         detail: 'keyword',
         documentation: 'a truly useful keyword',
       };
-      const result = AutoCompleteAdapter.completionItemToSuggestion(completionItem, request);
+      const result = { };
+      AutoCompleteAdapter.completionItemToSuggestion(completionItem, result, request);
       expect(result.text).equals('insert');
       expect(result.displayText).equals('label');
       expect(result.type).equals('keyword');
@@ -132,7 +184,8 @@ describe('AutoCompleteAdapter', () => {
         scopeDescriptor: 'some.scope',
       };
       sinon.stub(autocompleteRequest.editor, 'getTextInBufferRange').returns('replacementPrefix');
-      const result = AutoCompleteAdapter.completionItemToSuggestion(completionItem, autocompleteRequest);
+      const result = { };
+      AutoCompleteAdapter.completionItemToSuggestion(completionItem, result, autocompleteRequest);
       expect(result.displayText).equals('label');
       expect(result.type).equals('variable');
       expect(result.rightLabel).equals('number');
@@ -157,7 +210,8 @@ describe('AutoCompleteAdapter', () => {
         detail: 'detail',
         documentation: 'a very exciting keyword',
       };
-      const result = AutoCompleteAdapter.basicCompletionItemToSuggestion(completionItem);
+      const result = { };
+      AutoCompleteAdapter.applyCompletionItemToSuggestion(completionItem, result);
       expect(result.text).equals('insert');
       expect(result.displayText).equals('label');
       expect(result.type).equals('keyword');
@@ -173,7 +227,8 @@ describe('AutoCompleteAdapter', () => {
         detail: 'detail',
         documentation: 'A very useful keyword',
       };
-      const result = AutoCompleteAdapter.basicCompletionItemToSuggestion(completionItem);
+      const result = { };
+      AutoCompleteAdapter.applyCompletionItemToSuggestion(completionItem, result);
       expect(result.text).equals('label');
       expect(result.displayText).equals('label');
       expect(result.type).equals('keyword');
