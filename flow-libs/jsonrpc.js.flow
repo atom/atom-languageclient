@@ -21,3 +21,24 @@ export type JsonRpcConnection = {
   onUnhandledNotification(callback: Object => void): void,
   onDispose(callback: () => void): void,
 };
+
+// https://github.com/Microsoft/vscode-languageserver-node/blob/master/jsonrpc/src/cancellation.ts
+export interface CancellationToken {
+	// Is `true` when the token has been cancelled, `false` otherwise.
+	+isCancellationRequested: boolean,
+
+	// An [event](#Event) which fires upon cancellation.
+	+onCancellationRequested: Event<any>,
+}
+
+export type MutableToken = {
+	cancel(): void,
+	isCancellationRequested(): boolean,
+	onCancellationRequested(): Event<any>,
+};
+
+export type CancellationTokenSource = {
+	token(): CancellationToken,
+	cancel(): void,
+	dispose(): void,
+};
