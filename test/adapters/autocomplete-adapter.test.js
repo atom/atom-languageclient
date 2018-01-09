@@ -1,13 +1,25 @@
 // @flow
 
 import AutoCompleteAdapter from '../../lib/adapters/autocomplete-adapter';
+import {type ActiveServer} from '../../lib/server-manager.js';
 import * as ls from '../../lib/languageclient';
 import sinon from 'sinon';
-import {Point, Range, TextEditor} from 'atom';
+import {CompositeDisposable, Point, Range, TextEditor} from 'atom';
 import {expect} from 'chai';
 import {createSpyConnection, createFakeEditor} from '../helpers.js';
+import {ChildProcess} from 'child_process';
 
 describe('AutoCompleteAdapter', () => {
+  function createActiveServerSpy() {
+    return {
+      capabilities: {completionProvider: { }},
+      connection: new ls.LanguageClientConnection(createSpyConnection()),
+      disposable: new CompositeDisposable(),
+      process: new ChildProcess(),
+      projectPath: '/',
+    };
+  }
+
   beforeEach(() => {
     global.sinon = sinon.sandbox.create();
   });
@@ -20,6 +32,7 @@ describe('AutoCompleteAdapter', () => {
     bufferPosition: new Point(123, 456),
     prefix: 'def',
     scopeDescriptor: 'some.scope',
+    activatedManually: true,
   };
 
   const completionItems = [
@@ -46,12 +59,12 @@ describe('AutoCompleteAdapter', () => {
   ];
 
   describe('getSuggestions', () => {
-    const fakeLanguageClient = new ls.LanguageClientConnection(createSpyConnection());
-    sinon.stub(fakeLanguageClient, 'completion').resolves(completionItems);
+    const server: ActiveServer = createActiveServerSpy();
+    sinon.stub(server.connection, 'completion').resolves(completionItems);
 
     it('gets AutoComplete suggestions via LSP given an AutoCompleteRequest', async () => {
       const autoCompleteAdapter = new AutoCompleteAdapter();
-      const results = await autoCompleteAdapter.getSuggestions(fakeLanguageClient, request);
+      const results = await autoCompleteAdapter.getSuggestions(server, request);
       expect(results.length).equals(3);
       expect(results[0].text).equals('label2');
       expect(results[1].description).equals('a very exciting variable');
@@ -77,9 +90,9 @@ describe('AutoCompleteAdapter', () => {
       },
     ];
 
-    const fakeLanguageClient = new ls.LanguageClientConnection(createSpyConnection());
-    sinon.stub(fakeLanguageClient, 'completion').resolves(partialItems);
-    sinon.stub(fakeLanguageClient, 'completionItemResolve').resolves({
+    const server: ActiveServer = createActiveServerSpy();
+    sinon.stub(server.connection, 'completion').resolves(partialItems);
+    sinon.stub(server.connection, 'completionItemResolve').resolves({
       label: 'label3',
       kind: ls.CompletionItemKind.Variable,
       detail: 'description3',
@@ -88,18 +101,28 @@ describe('AutoCompleteAdapter', () => {
 
     it('resolves suggestions via LSP given an AutoCompleteRequest', async () => {
       const autoCompleteAdapter = new AutoCompleteAdapter();
-      const results: Array<atom$AutocompleteSuggestion> = await autoCompleteAdapter.getSuggestions(fakeLanguageClient, request);
+      const results: Array<atom$AutocompleteSuggestion> = await autoCompleteAdapter.getSuggestions(server, request);
       expect(results[2].description).equals(undefined);
-      const resolvedItem = await autoCompleteAdapter.completeSuggestion(fakeLanguageClient, results[2], request);
-      expect(resolvedItem.description).equals('a very exciting variable');
+      const resolvedItem = await autoCompleteAdapter.completeSuggestion(server, results[2], request);
+      expect(resolvedItem && resolvedItem.description).equals('a very exciting variable');
     });
   });
 
-  describe('requestToTextDocumentPositionParams', () => {
-    it('creates a TextDocumentPositionParams from an AutocompleteRequest', () => {
-      const result = AutoCompleteAdapter.requestToTextDocumentPositionParams(request);
+  describe('createCompletionParams', () => {
+    it('creates CompletionParams from an AutocompleteRequest with no trigger', () => {
+      const result = AutoCompleteAdapter.createCompletionParams(request, null);
       expect(result.textDocument.uri).equals('file:///a/b/c/d.js');
       expect(result.position).deep.equals({line: 123, character: 456});
+      expect(result.context && result.context.triggerKind === ls.CompletionTriggerKind.Invoked);
+      expect(result.context && result.context.triggerCharacter === undefined);
+    });
+
+    it('creates CompletionParams from an AutocompleteRequest with a trigger', () => {
+      const result = AutoCompleteAdapter.createCompletionParams(request, '.');
+      expect(result.textDocument.uri).equals('file:///a/b/c/d.js');
+      expect(result.position).deep.equals({line: 123, character: 456});
+      expect(result.context && result.context.triggerKind === ls.CompletionTriggerKind.TriggerCharacter);
+      expect(result.context && result.context.triggerCharacter === '.');
     });
   });
 
