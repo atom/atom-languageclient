@@ -1,3 +1,21 @@
+## v0.8.0
+
+This update improves auto complete support in a number of ways;
+
+- Automatic triggering only if a trigger character specified by the server is typed (this should improve performance as well as cut down connection issues caused by crashing servers)
+- Filtering is performed by atom-languageclient when server reports results are complete (perf, better results)
+- Resolve is now called only if the language server supports it #162
+- CompletionItemKinds defined in v3 of the protocol are now mapped
+- Allows customization of the conversion between LSP and autocomplete-plus suggestions via a hook #137
+- New onDidInsertSuggestion override available when autocomplete request inserted #115
+- Use `CompletionItem.textEdit` field for snippet content #165
+
+Additional changes include;
+
+- CancellationToken support for cancelling pending requests #160
+- Automatic cancellation for incomplete resolve and autocomplete requests #160
+- Improved debug logging (stderr in #158 as well and signal report on exit)
+
 ## v0.7.3
 
 - AutoCompleteAdapter now takes an [optional function for customizing suggestions](https://github.com/atom/atom-languageclient/pull/137)
