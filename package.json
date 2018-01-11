@@ -1,6 +1,6 @@
 {
   "name": "atom-languageclient",
-  "version": "0.7.3",
+  "version": "0.8.0",
   "description": "Integrate Language Servers with Atom",
   "repository": "https://github.com/atom/atom-languageclient",
   "license": "MIT",
