@@ -14,7 +14,7 @@ Provide integration support for adding Language Server Protocol servers to Atom.
 This npm package can be used by Atom package authors wanting to integrate LSP-compatible language servers with Atom. It provides:
 
 * Conversion routines between Atom and LSP types
-* A FlowTyped wrapper around JSON-RPC for **v2** of the LSP protocol (v3 to follow)
+* A FlowTyped wrapper around JSON-RPC for **v3** of the LSP protocol
 * All necessary FlowTyped input and return structures for LSP, notifications etc.
 * A number of adapters to translate communication between Atom/Atom-IDE and the LSP's capabilities
 * Automatic wiring up of adapters based on the negotiated capabilities of the language server
@@ -49,7 +49,8 @@ The language server protocol consists of a number of capabilities. Some of these
 | textDocument/rename             | TBD                           |
 | textDocument/didChange          | Send on save                  |
 | textDocument/didOpen            | Send on open                  |
-| textDocument/didSave            | Send on save                  |
+| textDocument/didSave            | Send after save               |
+| textDocument/willSave           | Send before save              |
 | textDocument/didClose           | Send on close                 |
 
 ## Developing packages
