@@ -7,6 +7,7 @@ import * as rpc from 'vscode-jsonrpc';
 export function createSpyConnection(): rpc.connection {
   return {
     listen: sinon.spy(),
+    onClose: sinon.spy(),
     onError: sinon.spy(),
     onUnhandledNotification: sinon.spy(),
     onNotification: sinon.spy(),
