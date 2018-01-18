@@ -283,6 +283,15 @@ describe('LanguageClientConnection', () => {
       expect(lc._sendNotification.getCall(0).args.length).equals(1);
     });
 
+    it('initialized sends notification', () => {
+      lc.initialized();
+
+      expect(lc._sendNotification.called).equals(true);
+      expect(lc._sendNotification.getCall(0).args[0]).equals('initialized');
+      const expected: ls.InitializedParams = {};
+      expect(lc._sendNotification.getCall(0).args[1]).to.deep.equal(expected);
+    });
+
     it('didChangeConfiguration sends notification', () => {
       const params: ls.DidChangeConfigurationParams = {
         settings: {a: {b: 'c'}},
