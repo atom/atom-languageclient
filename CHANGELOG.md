@@ -1,3 +1,21 @@
+## v0.8.1
+
+### New
+
+- Auto-restart language servers that crash (up to 5 times in 3 minutes) #172
+- API to restart your language servers (e.g. after downloading new server, changing config) #172
+- Configuration change monitoring via workspace/didChangeConfiguration #167
+- API to get the connection associated with an editor to send custom messages #173
+
+### Changes
+
+- Trigger autocomplete all the time instead of just on triggerchars\
+
+### Fixes
+
+- Do not send non-null initialization parameters #171
+- Clean up after unexpected server shutdown #169
+
 ## v0.8.0
 
 This update improves auto complete support in a number of ways;
