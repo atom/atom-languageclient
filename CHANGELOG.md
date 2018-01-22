@@ -1,3 +1,7 @@
+## v0.8.2
+
+- Prevent ServerManager from hanging on a failed server startup promise #174 (thanks @alexheretic!)
+
 ## v0.8.1
 
 ### New
