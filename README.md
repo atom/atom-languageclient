@@ -7,7 +7,7 @@ Provide integration support for adding Language Server Protocol servers to Atom.
 
 ## Background
 
-[Language Server Protocol (LSP)](https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md) is a JSON-RPC based mechanism whereby a client (IDE) may connect to an out-of-process server that can provide rich analysis, refactoring and interactive features for a given programming language.
+[Language Server Protocol (LSP)](https://microsoft.github.io/language-server-protocol/) is a JSON-RPC based mechanism whereby a client (IDE) may connect to an out-of-process server that can provide rich analysis, refactoring and interactive features for a given programming language.
 
 ## Implementation
 
