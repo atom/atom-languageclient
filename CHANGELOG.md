@@ -1,3 +1,7 @@
+## v0.8.3
+
+- Ensure that triggerChars is correctly sent or not sent depending on whether it was auto-triggered
+
 ## v0.8.2
 
 - Prevent ServerManager from hanging on a failed server startup promise #174 (thanks @alexheretic!)
