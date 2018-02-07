@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es6",
+        "outDir": "build",
+        "lib": ["es6", "dom"],
+        "inlineSources": true,
+        "inlineSourceMap": true,
+        "typeRoots" : [
+          "./typings",
+          "./node_modules/@types"
+        ]
+    },
+    "include": [
+        "lib/**/*.ts",
+        "test/**/*.ts"
+    ]
+}

@@ -1,7 +1,6 @@
-// @flow
-
 import * as ls from './languageclient';
-import {Point, Range} from 'atom';
+import {Point, ProjectFileEvent, Range, TextEditor} from 'atom';
+import {Diagnostic, DiagnosticType, TextEdit} from '../typings/atom-ide';
 import URL from 'url';
 
 // Public: Class that contains a number of helper methods for general conversions
@@ -44,12 +43,12 @@ export default class Convert {
     return filePath;
   }
 
-  // Public: Convert an Atom {PointObject} to a language server {Position}.
+  // Public: Convert an Atom {Point} to a language server {Position}.
   //
-  // * `point` An Atom {PointObject} to convert from.
+  // * `point` An Atom {Point} to convert from.
   //
   // Returns the {Position} representation of the Atom {PointObject}.
-  static pointToPosition(point: atom$PointObject): ls.Position {
+  static pointToPosition(point: Point): ls.Position {
     return {line: point.row, character: point.column};
   }
 
@@ -58,7 +57,7 @@ export default class Convert {
   // * 'position' A language server {Position} to convert from.
   //
   // Returns the Atom {PointObject} representation of the given {Position}.
-  static positionToPoint(position: ls.Position): atom$Point {
+  static positionToPoint(position: ls.Position): Point {
     return new Point(position.line, position.character);
   }
 
@@ -67,7 +66,7 @@ export default class Convert {
   // * 'range' A language server {Range} to convert from.
   //
   // Returns the Atom {Range} representation of the given language server {Range}.
-  static lsRangeToAtomRange(range: ls.Range): atom$Range {
+  static lsRangeToAtomRange(range: ls.Range): Range {
     return new Range(Convert.positionToPoint(range.start), Convert.positionToPoint(range.end));
   }
 
@@ -76,7 +75,7 @@ export default class Convert {
   // * 'range' An Atom {Range} to convert from.
   //
   // Returns the language server {Range} representation of the given Atom {Range}.
-  static atomRangeToLSRange(range: atom$Range): ls.Range {
+  static atomRangeToLSRange(range: Range): ls.Range {
     return {
       start: Convert.pointToPosition(range.start),
       end: Convert.pointToPosition(range.end),
@@ -89,7 +88,7 @@ export default class Convert {
   //
   // Returns a {TextDocumentIdentifier} that has a `uri` property with the Uri for the
   // given editor's path.
-  static editorToTextDocumentIdentifier(editor: atom$TextEditor): ls.TextDocumentIdentifier {
+  static editorToTextDocumentIdentifier(editor: TextEditor): ls.TextDocumentIdentifier {
     return {uri: Convert.pathToUri(editor.getPath() || '')};
   }
 
@@ -102,8 +101,8 @@ export default class Convert {
   // Returns a {TextDocumentPositionParams} that has textDocument property with the editors {TextDocumentIdentifier}
   // and a position property with the supplied point (or current cursor position when not specified).
   static editorToTextDocumentPositionParams(
-    editor: atom$TextEditor,
-    point: ?atom$Point,
+    editor: TextEditor,
+    point?: Point,
   ): ls.TextDocumentPositionParams {
     return {
       textDocument: Convert.editorToTextDocumentIdentifier(editor),
@@ -150,7 +149,7 @@ export default class Convert {
   // * 'fileEvent' An {atom$ProjectFileEvent} to be converted.
   //
   // Returns an array of LSP {ls.FileEvent} objects that equivalent conversions to the fileEvent parameter.
-  static atomFileEventToLSFileEvents(fileEvent: atom$ProjectFileEvent): ls.FileEvent[] {
+  static atomFileEventToLSFileEvents(fileEvent: ProjectFileEvent): ls.FileEvent[] {
     switch (fileEvent.action) {
       case 'created':
         return [{uri: Convert.pathToUri(fileEvent.path), type: ls.FileChangeType.Created}];
@@ -173,7 +172,7 @@ export default class Convert {
     }
   }
 
-  static atomIdeDiagnosticToLSDiagnostic(diagnostic: atomIde$Diagnostic): ls.Diagnostic {
+  static atomIdeDiagnosticToLSDiagnostic(diagnostic: Diagnostic): ls.Diagnostic {
     return {
       range: Convert.atomRangeToLSRange(diagnostic.range),
       severity: Convert.diagnosticTypeToLSSeverity(diagnostic.type),
@@ -182,7 +181,7 @@ export default class Convert {
     };
   }
 
-  static diagnosticTypeToLSSeverity(type: atomIde$DiagnosticType): $Values<typeof ls.DiagnosticSeverity> {
+  static diagnosticTypeToLSSeverity(type: DiagnosticType): $Values<typeof ls.DiagnosticSeverity> {
     switch (type) {
       case 'Error':
         return ls.DiagnosticSeverity.Error;
@@ -191,7 +190,7 @@ export default class Convert {
       case 'Info':
         return ls.DiagnosticSeverity.Information;
       default:
-        (type: empty);
+        // (type: empty);
         throw Error(`Unexpected diagnostic type ${type}`);
     }
   }
@@ -202,7 +201,7 @@ export default class Convert {
   // * `textEdits` The language server protocol {TextEdit} objects to convert.
   //
   // Returns an {Array} of Atom {TextEdit} objects.
-  static convertLsTextEdits(textEdits: ?Array<ls.TextEdit>): Array<atomIde$TextEdit> {
+  static convertLsTextEdits(textEdits: Array<ls.TextEdit>): Array<TextEdit> {
     return (textEdits || []).map(Convert.convertLsTextEdit);
   }
 
@@ -212,7 +211,7 @@ export default class Convert {
   // * `textEdits` The language server protocol {TextEdit} objects to convert.
   //
   // Returns an Atom {TextEdit} object.
-  static convertLsTextEdit(textEdit: ls.TextEdit): atomIde$TextEdit {
+  static convertLsTextEdit(textEdit: ls.TextEdit): TextEdit {
     return {
       oldRange: Convert.lsRangeToAtomRange(textEdit.range),
       newText: textEdit.newText,
