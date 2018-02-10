@@ -1,7 +1,9 @@
+
 import * as ls from './languageclient';
-import {Point, ProjectFileEvent, Range, TextEditor} from 'atom';
-import {Diagnostic, DiagnosticType, TextEdit} from '../typings/atom-ide';
-import URL from 'url';
+import { Point, Range, TextEditor } from 'atom';
+import { ProjectFileEvent } from 'atom2';
+import { Diagnostic, DiagnosticType, TextEdit } from 'atom-ide';
+import * as URL from 'url';
 
 // Public: Class that contains a number of helper methods for general conversions
 // between the language server protocol and Atom/Atom packages.
@@ -181,7 +183,7 @@ export default class Convert {
     };
   }
 
-  static diagnosticTypeToLSSeverity(type: DiagnosticType): $Values<typeof ls.DiagnosticSeverity> {
+  static diagnosticTypeToLSSeverity(type: DiagnosticType): ls.DiagnosticSeverity {
     switch (type) {
       case 'Error':
         return ls.DiagnosticSeverity.Error;

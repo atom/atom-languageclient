@@ -6,10 +6,16 @@
         "lib": ["es6", "dom"],
         "inlineSources": true,
         "inlineSourceMap": true,
-        "typeRoots" : [
-          "./typings",
-          "./node_modules/@types"
-        ]
+        "allowJs": true,
+        "baseUrl": "./",
+        "paths": {
+            "atom-ide": [
+                "./typings/atom-ide/index.d.ts"
+            ],
+            "atom2": [
+                "./typings/atom/index.d.ts"
+            ]
+        }
     },
     "include": [
         "lib/**/*.ts",

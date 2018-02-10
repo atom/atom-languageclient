@@ -18,7 +18,9 @@
     "@types/atom": "^1.23.2",
     "@types/node": "^8.0.41",
     "fuzzaldrin-plus": "^0.6.0",
-    "vscode-jsonrpc": "^3.5.0"
+    "vscode-jsonrpc": "^3.5.0",
+    "vscode-languageserver-protocol": "^3.5.0",
+    "vscode-languageserver-types": "^3.5.0"
   },
   "atomTestRunner": "./test/runner",
   "atomTranspilers": [

@@ -1,11 +1,9 @@
-// @flow
-
-export type Logger = {
-  warn(...args: any): void,
-  error(...args: any): void,
-  info(...args: any): void,
-  log(...args: any): void,
-  debug(...args: any): void,
+export interface Logger {
+  warn(...args: any[]): void,
+  error(...args: any[]): void,
+  info(...args: any[]): void,
+  log(...args: any[]): void,
+  debug(...args: any[]): void,
 };
 
 /* eslint-disable no-console */
@@ -17,23 +15,23 @@ export class ConsoleLogger {
     this.prefix = prefix;
   }
 
-  warn(...args: any) {
+  warn(...args: any[]) {
     console.warn(...this.format(args));
   }
 
-  error(...args: any) {
+  error(...args: any[]) {
     console.error(...this.format(args));
   }
 
-  info(...args: any) {
+  info(...args: any[]) {
     console.info(...this.format(args));
   }
 
-  debug(...args: any) {
+  debug(...args: any[]) {
     console.debug(...this.format(args));
   }
 
-  log(...args: any) {
+  log(...args: any[]) {
     console.log(...this.format(args));
   }
 
@@ -54,9 +52,9 @@ export class ConsoleLogger {
 }
 
 export class NullLogger {
-  warn(...args: any): void {}
-  error(...args: any): void {}
-  info(...args: any): void {}
-  log(...args: any): void {}
-  debug(...args: any): void {}
+  warn(...args: any[]): void {}
+  error(...args: any[]): void {}
+  info(...args: any[]): void {}
+  log(...args: any[]): void {}
+  debug(...args: any[]): void {}
 }
