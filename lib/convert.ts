@@ -104,7 +104,7 @@ export default class Convert {
   // and a position property with the supplied point (or current cursor position when not specified).
   static editorToTextDocumentPositionParams(
     editor: TextEditor,
-    point?: Point,
+    point: Point | null,
   ): ls.TextDocumentPositionParams {
     return {
       textDocument: Convert.editorToTextDocumentIdentifier(editor),
@@ -192,7 +192,6 @@ export default class Convert {
       case 'Info':
         return ls.DiagnosticSeverity.Information;
       default:
-        // (type: empty);
         throw Error(`Unexpected diagnostic type ${type}`);
     }
   }
