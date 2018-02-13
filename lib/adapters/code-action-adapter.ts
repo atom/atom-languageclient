@@ -1,10 +1,10 @@
-// @flow
+import LinterPushV2Adapter from './linter-push-v2-adapter';
 
-import type LinterPushV2Adapter from './linter-push-v2-adapter';
-
-import invariant from 'assert';
-import {LanguageClientConnection, type ServerCapabilities} from '../languageclient';
+import assert = require('assert');
+import { LanguageClientConnection, ServerCapabilities } from '../languageclient';
+import { TextEditor, Range } from 'atom';
 import Convert from '../convert';
+import * as atomIde from 'atom-ide';
 
 export default class CodeActionAdapter {
   // Returns a {Boolean} indicating this adapter can adapt the server based on the
@@ -27,15 +27,15 @@ export default class CodeActionAdapter {
   static async getCodeActions(
     connection: LanguageClientConnection,
     serverCapabilities: ServerCapabilities,
-    linterAdapter: ?LinterPushV2Adapter,
-    editor: atom$TextEditor,
-    range: atom$Range,
-    diagnostics: Array<atomIde$Diagnostic>,
-  ): Promise<Array<atomIde$CodeAction>> {
+    linterAdapter: LinterPushV2Adapter | null,
+    editor: TextEditor,
+    range: Range,
+    diagnostics: Array<atomIde.Diagnostic>,
+  ): Promise<Array<atomIde.CodeAction>> {
     if (linterAdapter == null) {
       return [];
     }
-    invariant(serverCapabilities.codeActionProvider, 'Must have the textDocument/codeAction capability');
+    assert(serverCapabilities.codeActionProvider, 'Must have the textDocument/codeAction capability');
     const commands = await connection.codeAction({
       textDocument: Convert.editorToTextDocumentIdentifier(editor),
       range: Convert.atomRangeToLSRange(range),

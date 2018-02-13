@@ -1,10 +1,11 @@
 // @flow
 
-import invariant from 'assert';
-import {CompositeDisposable} from 'atom';
-import {LanguageClientConnection, type ServerCapabilities} from '../languageclient';
+import assert = require('assert');
+import { CompositeDisposable, Point, TextEditor } from 'atom';
+import { LanguageClientConnection, ServerCapabilities, SignatureHelp } from '../languageclient';
 import Convert from '../convert';
-import type {ActiveServer} from '../server-manager';
+import { ActiveServer } from '../server-manager';
+import * as atomIde from 'atom-ide';
 
 export default class SignatureHelpAdapter {
   _disposables: CompositeDisposable = new CompositeDisposable();
@@ -28,9 +29,9 @@ export default class SignatureHelpAdapter {
     this._disposables.dispose();
   }
 
-  attach(register: atomIde$SignatureHelpRegistry): void {
+  attach(register: atomIde.SignatureHelpRegistry): void {
     const {signatureHelpProvider} = this._capabilities;
-    invariant(signatureHelpProvider != null);
+    assert(signatureHelpProvider != null);
 
     let triggerCharacters = null;
     if (Array.isArray(signatureHelpProvider.triggerCharacters)) {
@@ -48,7 +49,7 @@ export default class SignatureHelpAdapter {
   }
 
   // Public: Retrieves signature help for a given editor and position.
-  getSignatureHelp(editor: atom$TextEditor, point: atom$Point): Promise<?atomIde$SignatureHelp> {
+  getSignatureHelp(editor: TextEditor, point: Point): SignatureHelp | Promise<SignatureHelp> {
     return this._connection.signatureHelp(Convert.editorToTextDocumentPositionParams(editor, point));
   }
 }

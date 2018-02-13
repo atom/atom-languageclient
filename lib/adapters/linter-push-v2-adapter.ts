@@ -1,20 +1,21 @@
-// @flow
-
+import * as linter from 'atom-linter';
+import * as atom from 'atom';
 import {
   DiagnosticSeverity,
   LanguageClientConnection,
-  type Diagnostic,
-  type DiagnosticCode,
-  type PublishDiagnosticsParams,
+  Diagnostic,
+  PublishDiagnosticsParams,
 } from '../languageclient';
 import Convert from '../convert';
+
+type DiagnosticCode = number | string;
 
 // Public: Listen to diagnostics messages from the language server and publish them
 // to the user by way of the Linter Push (Indie) v2 API supported by Atom IDE UI.
 export default class LinterPushV2Adapter {
-  _diagnosticMap: Map<string, Array<linter$V2Message>> = new Map();
-  _diagnosticCodes: Map<string, Map<string, ?DiagnosticCode>> = new Map();
-  _indies: Set<linter$V2IndieDelegate> = new Set();
+  _diagnosticMap: Map<string, Array<linter.V2Message>> = new Map();
+  _diagnosticCodes: Map<string, Map<string, DiagnosticCode | null>> = new Map();
+  _indies: Set<linter.V2IndieDelegate> = new Set();
 
   // Public: Create a new {LinterPushV2Adapter} that will listen for diagnostics
   // via the supplied {LanguageClientConnection}.
@@ -32,7 +33,7 @@ export default class LinterPushV2Adapter {
   // Public: Attach this {LinterPushV2Adapter} to a given {V2IndieDelegate} registry.
   //
   // * `indie` A {V2IndieDelegate} that wants to receive messages.
-  attach(indie: linter$V2IndieDelegate): void {
+  attach(indie: linter.V2IndieDelegate): void {
     this._indies.add(indie);
     this._diagnosticMap.forEach((value, key) => indie.setMessages(key, value));
     indie.onDidDestroy(() => {
@@ -73,7 +74,7 @@ export default class LinterPushV2Adapter {
   // * `diagnostics` A {Diagnostic} object received from the language server.
   //
   // Returns a {V2Message} equivalent to the {Diagnostic} object supplied by the language server.
-  diagnosticToV2Message(path: string, diagnostic: Diagnostic): linter$V2Message {
+  diagnosticToV2Message(path: string, diagnostic: Diagnostic): linter.V2Message {
     return {
       location: {
         file: path,
@@ -108,7 +109,7 @@ export default class LinterPushV2Adapter {
   // Diagnostic codes are tricky because there's no suitable place in the Linter API for them.
   // For now, we'll record the original code for each range/message combination and retrieve it
   // when needed (e.g. for passing back into code actions)
-  getDiagnosticCode(editor: atom$TextEditor, range: atom$Range, text: string): ?(number | string) {
+  getDiagnosticCode(editor: atom.TextEditor, range: atom.Range, text: string): DiagnosticCode | null {
     const path = editor.getPath();
     if (path != null) {
       const diagnosticCodes = this._diagnosticCodes.get(path);
@@ -120,6 +121,6 @@ export default class LinterPushV2Adapter {
   }
 }
 
-function getCodeKey(range: atom$Range, text: string): string {
+function getCodeKey(range: atom.Range, text: string): string {
   return [].concat(...range.serialize(), text).join(',');
 }

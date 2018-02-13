@@ -1,6 +1,4 @@
-// @flow
-
-import fs from 'fs';
+import * as fs from 'fs';
 
 // Public: Download a file and store it on a file system using streaming with appropriate progress callback.
 //
@@ -16,8 +14,8 @@ import fs from 'fs';
 export default (async function downloadFile(
   sourceUrl: string,
   targetFile: string,
-  progressCallback: ?ByteProgressCallback,
-  length: ?number,
+  progressCallback?: ByteProgressCallback,
+  length?: number,
 ): Promise<void> {
   const request = new Request(sourceUrl, {
     headers: new Headers({'Content-Type': 'application/octet-stream'}),
@@ -54,7 +52,7 @@ async function streamWithProgress(
   length: number,
   reader: ReadableStreamReader,
   writer: fs.WriteStream,
-  progressCallback: ?ByteProgressCallback,
+  progressCallback?: ByteProgressCallback,
 ): Promise<void> {
   let bytesDone = 0;
 
@@ -74,7 +72,7 @@ async function streamWithProgress(
       writer.write(Buffer.from(chunk));
       if (progressCallback != null) {
         bytesDone += chunk.byteLength;
-        const percent: ?number = length === 0 ? null : Math.floor(bytesDone / length * 100);
+        const percent: number = length === 0 ? null : Math.floor(bytesDone / length * 100);
         progressCallback(bytesDone, percent);
       }
     }
@@ -83,4 +81,4 @@ async function streamWithProgress(
 
 // Public: Progress callback function signature indicating the bytesDone and
 // optional percentage when length is known.
-export type ByteProgressCallback = (bytesDone: number, percent: ?number) => {};
+export type ByteProgressCallback = (bytesDone: number, percent?: number) => {};

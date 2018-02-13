@@ -1,26 +1,32 @@
-// @flow
-
+import Convert from '../convert';
 import {
   LanguageClientConnection,
   FileChangeType,
   TextDocumentSaveReason,
   TextDocumentSyncKind,
-  type TextDocumentSyncOptions,
-  type TextDocumentContentChangeEvent,
-  type VersionedTextDocumentIdentifier,
-  type ServerCapabilities,
+  TextDocumentSyncOptions,
+  TextDocumentContentChangeEvent,
+  VersionedTextDocumentIdentifier,
+  ServerCapabilities,
 } from '../languageclient';
-import Convert from '../convert';
-import {CompositeDisposable} from 'atom';
+import {
+  CompositeDisposable,
+  Disposable,
+  TextEditor
+} from 'atom';
+import {
+  DidStopChangingEvent,
+  TextEditEvent,
+} from 'atom2';
 
 // Public: Synchronizes the documents between Atom and the language server by notifying
 // each end of changes, opening, closing and other events as well as sending and applying
 // changes either in whole or in part depending on what the language server supports.
 export default class DocumentSyncAdapter {
-  _editorSelector: atom$TextEditor => boolean;
+  _editorSelector: (editor: TextEditor) => boolean;
   _disposable = new CompositeDisposable();
   _documentSyncKind: number;
-  _editors: WeakMap<atom$TextEditor, TextEditorSyncAdapter> = new WeakMap();
+  _editors: WeakMap<TextEditor, TextEditorSyncAdapter> = new WeakMap();
   _connection: LanguageClientConnection;
   _versions: Map<string, number> = new Map();
 
@@ -60,8 +66,8 @@ export default class DocumentSyncAdapter {
   //                    indicating whether this adapter should care about the contents of the editor.
   constructor(
     connection: LanguageClientConnection,
-    documentSyncKind: ?(TextDocumentSyncOptions | number),
-    editorSelector: atom$TextEditor => boolean,
+    documentSyncKind: TextDocumentSyncOptions | number | null,
+    editorSelector: (editor: TextEditor) => boolean,
   ) {
     this._connection = connection;
     if (typeof documentSyncKind === 'number') {
@@ -84,7 +90,7 @@ export default class DocumentSyncAdapter {
   // when it is closed or otherwise destroyed.
   //
   // * `editor` A {TextEditor} to consider for observation.
-  observeTextEditor(editor: atom$TextEditor): void {
+  observeTextEditor(editor: TextEditor): void {
     const listener = editor.observeGrammar(grammar => this._handleGrammarChange(editor));
     this._disposable.add(
       editor.onDidDestroy(() => {
@@ -98,7 +104,7 @@ export default class DocumentSyncAdapter {
     }
   }
 
-  _handleGrammarChange(editor: atom$TextEditor): void {
+  _handleGrammarChange(editor: TextEditor): void {
     const sync = this._editors.get(editor);
     if (sync != null && !this._editorSelector(editor)) {
       this._editors.delete(editor);
@@ -109,7 +115,7 @@ export default class DocumentSyncAdapter {
     }
   }
 
-  _handleNewEditor(editor: atom$TextEditor): void {
+  _handleNewEditor(editor: TextEditor): void {
     const sync = new TextEditorSyncAdapter(editor, this._connection, this._documentSyncKind, this._versions);
     this._editors.set(editor, sync);
     this._disposable.add(sync);
@@ -125,7 +131,7 @@ export default class DocumentSyncAdapter {
     );
   }
 
-  getEditorSyncAdapter(editor: atom$TextEditor): ?TextEditorSyncAdapter {
+  getEditorSyncAdapter(editor: TextEditor): TextEditorSyncAdapter | null {
     return this._editors.get(editor);
   }
 }
@@ -133,7 +139,7 @@ export default class DocumentSyncAdapter {
 // Public: Keep a single {TextEditor} in sync with a given language server.
 class TextEditorSyncAdapter {
   _disposable = new CompositeDisposable();
-  _editor: atom$TextEditor;
+  _editor: TextEditor;
   _currentUri: string;
   _connection: LanguageClientConnection;
   _fakeDidChangeWatchedFiles: boolean;
@@ -145,7 +151,7 @@ class TextEditorSyncAdapter {
   // * `connection` A {LanguageClientConnection} to a language server to keep in sync.
   // * `documentSyncKind` Whether to use Full (1) or Incremental (2) when sending changes.
   constructor(
-    editor: atom$TextEditor,
+    editor: TextEditor,
     connection: LanguageClientConnection,
     documentSyncKind: number,
     versions: Map<string, number>,
@@ -173,7 +179,7 @@ class TextEditorSyncAdapter {
 
   // The change tracking disposable listener that will ensure that changes are sent to the
   // language server as appropriate.
-  setupChangeTracking(documentSyncKind: number): ?IDisposable {
+  setupChangeTracking(documentSyncKind: number): Disposable | null {
     switch (documentSyncKind) {
       case TextDocumentSyncKind.Full:
         return this._editor.onDidChange(this.sendFullChanges.bind(this));
@@ -223,7 +229,7 @@ class TextEditorSyncAdapter {
   //           text editor.
   // Note: The order of changes in the event is guaranteed top to bottom.  Language server
   // expects this in reverse.
-  sendIncrementalChanges(event: atom$DidStopChangingEvent): void {
+  sendIncrementalChanges(event: DidStopChangingEvent): void {
     if (event.changes.length > 0) {
       if (!this._isPrimaryAdapter()) { return; } // Multiple editors, we are not first
 
@@ -241,7 +247,7 @@ class TextEditorSyncAdapter {
   // * `change` The Atom {TextEditEvent} to convert.
   //
   // Returns a {TextDocumentContentChangeEvent} that represents the converted {TextEditEvent}.
-  static textEditToContentChange(change: atom$TextEditEvent): TextDocumentContentChangeEvent {
+  static textEditToContentChange(change: TextEditEvent): TextDocumentContentChangeEvent {
     return {
       range: Convert.atomRangeToLSRange(change.oldRange),
       rangeLength: change.oldText.length,
@@ -320,7 +326,7 @@ class TextEditorSyncAdapter {
     if (!this._isPrimaryAdapter()) { return; }
 
     const uri = this.getEditorUri();
-    this._connection.didSaveTextDocument({textDocument: {uri}});
+    this._connection.didSaveTextDocument({textDocument: {uri, version: this._getVersion((uri))}});
     if (this._fakeDidChangeWatchedFiles) {
       this._connection.didChangeWatchedFiles({
         changes: [{uri, type: FileChangeType.Changed}],

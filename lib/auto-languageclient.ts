@@ -1,13 +1,22 @@
-// @flow
-
 import * as cp from 'child_process';
 import * as ls from './languageclient';
 import * as rpc from 'vscode-jsonrpc';
-import path from 'path';
-import {CompositeDisposable, Disposable} from 'atom';
-import {ConsoleLogger, NullLogger, type Logger} from './logger';
-import {ServerManager, type ActiveServer} from './server-manager.js';
+import * as path from 'path';
+import * as atomIde from 'atom-ide';
+import * as atom2 from 'atom2';
+import * as linter from 'atom-linter';
+import {Socket} from 'net';
+import {ConsoleLogger, NullLogger, Logger} from './logger';
+import {ServerManager, ActiveServer} from './server-manager.js';
 import Convert from './convert.js';
+
+import {
+  CompositeDisposable,
+  Disposable,
+  Point,
+  Range,
+  TextEditor
+} from 'atom';
 
 import ApplyEditAdapter from './adapters/apply-edit-adapter';
 import AutocompleteAdapter from './adapters/autocomplete-adapter';
@@ -32,25 +41,25 @@ type ConnectionType = 'stdio' | 'socket' | 'ipc';
 export default class AutoLanguageClient {
   _disposable = new CompositeDisposable();
   _serverManager: ServerManager;
-  _linterDelegate: linter$V2IndieDelegate;
-  _signatureHelpRegistry: ?atomIde$SignatureHelpRegistry;
-  _lastAutocompleteRequest: ?atom$AutocompleteRequest;
+  _linterDelegate: linter.V2IndieDelegate;
+  _signatureHelpRegistry: atomIde.SignatureHelpRegistry;
+  _lastAutocompleteRequest: atom2.AutocompleteRequest;
   _isDeactivating: boolean;
 
   // Available if consumeBusySignal is setup
-  busySignalService: ?atomIde$BusySignalService;
+  busySignalService: atomIde.BusySignalService;
 
   processStdErr: string = '';
   logger: Logger;
   name: string;
-  socket: net$Socket;
+  socket: Socket;
 
   // Shared adapters that can take the RPC connection as required
-  autoComplete: ?AutocompleteAdapter;
-  datatip: ?DatatipAdapter;
-  definitions: ?DefinitionAdapter;
-  findReferences: ?FindReferencesAdapter;
-  outlineView: ?OutlineViewAdapter;
+  autoComplete: AutocompleteAdapter;
+  datatip: DatatipAdapter;
+  definitions: DefinitionAdapter;
+  findReferences: FindReferencesAdapter;
+  outlineView: OutlineViewAdapter;
 
   // You must implement these so we know how to deal with your language and server
   // -------------------------------------------------------------------------
@@ -71,7 +80,7 @@ export default class AutoLanguageClient {
   }
 
   // Start your server process
-  startServerProcess(projectPath: string): child_process$ChildProcess | Promise<child_process$ChildProcess> {
+  startServerProcess(projectPath: string): cp.ChildProcess | Promise<cp.ChildProcess> {
     throw Error('Must override startServerProcess to start language server process when extending AutoLanguageClient');
   }
 
@@ -79,12 +88,12 @@ export default class AutoLanguageClient {
   // ---------------------------------------------------------------------------
 
   // Determine whether we should start a server for a given editor if we don't have one yet
-  shouldStartForEditor(editor: atom$TextEditor): boolean {
+  shouldStartForEditor(editor: TextEditor): boolean {
     return this.getGrammarScopes().includes(editor.getGrammar().scopeName);
   }
 
   // Return the parameters used to initialize a client - you may want to extend capabilities
-  getInitializeParams(projectPath: string, process: child_process$ChildProcess): ls.InitializeParams {
+  getInitializeParams(projectPath: string, process: cp.ChildProcess): ls.InitializeParams {
     return {
       processId: process.pid,
       rootPath: projectPath,
@@ -193,7 +202,7 @@ export default class AutoLanguageClient {
   // ---------------------------------------------------------------------------
 
   // Gets a LanguageClientConnection for a given TextEditor
-  async getConnectionForEditor(editor: atom$TextEditor): Promise<?ls.LanguageClientConnection> {
+  async getConnectionForEditor(editor: TextEditor): Promise<ls.LanguageClientConnection> {
     const server = await this._serverManager.getServer(editor);
     return server ? server.connection : null;
   }
@@ -234,7 +243,7 @@ export default class AutoLanguageClient {
     await this._serverManager.stopAllServers();
   }
 
-  spawnChildNode(args: Array<string>, options?: child_process$spawnOpts = {}): child_process$ChildProcess {
+  spawnChildNode(args: Array<string>, options: cp.SpawnOptions = {}): cp.ChildProcess {
     this.logger.debug(`starting child Node "${args.join(' ')}"`);
     options.env = options.env || Object.create(process.env);
     options.env.ELECTRON_RUN_AS_NODE = '1';
@@ -278,7 +287,7 @@ export default class AutoLanguageClient {
     this.postInitialization(newServer);
     connection.initialized();
     connection.on('close', () => {
-      if (!this.isDeactivating) {
+      if (!this._isDeactivating) {
         this._serverManager.stopServer(newServer);
         if (!this._serverManager.hasServerReachedRestartLimit(newServer)) {
           this.logger.debug(`Restarting language server for project '${newServer.projectPath}'`);
@@ -307,7 +316,7 @@ export default class AutoLanguageClient {
     return newServer;
   }
 
-  captureServerErrors(childProcess: child_process$ChildProcess, projectPath: string): void {
+  captureServerErrors(childProcess: cp.ChildProcess, projectPath: string): void {
     childProcess.on('error', err => this.handleSpawnFailure(err));
     childProcess.on('exit', (code, signal) => this.logger.debug(`exit: code ${code} signal ${signal}`));
     childProcess.stderr.setEncoding('utf8');
@@ -333,7 +342,7 @@ export default class AutoLanguageClient {
   }
 
   // Creates the RPC connection which can be ipc, socket or stdio
-  createRpcConnection(process: child_process$ChildProcess): rpc.Connection {
+  createRpcConnection(process: cp.ChildProcess): rpc.MessageConnection {
     let reader, writer;
     const connectionType = this.getConnectionType();
     switch (connectionType) {
@@ -352,6 +361,9 @@ export default class AutoLanguageClient {
     }
 
     return rpc.createMessageConnection(reader, writer, {
+      log: m => {},
+      warn: m => {},
+      info: m => {},
       error: m => {
         this.logger.error(m);
       },
@@ -385,16 +397,16 @@ export default class AutoLanguageClient {
     }
   }
 
-  shouldSyncForEditor(editor: atom$TextEditor, projectPath: string): boolean {
+  shouldSyncForEditor(editor: TextEditor, projectPath: string): boolean {
     return this.isFileInProject(editor, projectPath) && this.shouldStartForEditor(editor);
   }
 
-  isFileInProject(editor: atom$TextEditor, projectPath: string): boolean {
-    return (editor.getURI() || '').startsWith(projectPath);
+  isFileInProject(editor: TextEditor, projectPath: string): boolean {
+    return ((<any>editor).getURI() || '').startsWith(projectPath);
   }
 
   // Autocomplete+ via LS completion---------------------------------------
-  provideAutocomplete(): atom$AutocompleteProvider {
+  provideAutocomplete(): atom2.AutocompleteProvider {
     return {
       selector: this.getGrammarScopes()
         .map(g => '.' + g)
@@ -409,8 +421,8 @@ export default class AutoLanguageClient {
   }
 
   async getSuggestions(
-    request: atom$AutocompleteRequest,
-  ): Promise<Array<atom$AutocompleteSuggestion>> {
+    request: atom2.AutocompleteRequest,
+  ): Promise<Array<atom2.AutocompleteSuggestion>> {
     const server = await this._serverManager.getServer(request.editor);
     if (server == null || !AutocompleteAdapter.canAdapt(server.capabilities)) {
       return [];
@@ -421,7 +433,7 @@ export default class AutoLanguageClient {
     return this.autoComplete.getSuggestions(server, request, this.onDidConvertAutocomplete);
   }
 
-  async getSuggestionDetailsOnSelect(suggestion: atom$AutocompleteSuggestion): Promise<?atom$AutocompleteSuggestion> {
+  async getSuggestionDetailsOnSelect(suggestion: atom2.AutocompleteSuggestion): Promise<atom2.AutocompleteSuggestion | null> {
     const request = this._lastAutocompleteRequest;
     if (request == null) { return null; }
     const server = await this._serverManager.getServer(request.editor);
@@ -434,15 +446,15 @@ export default class AutoLanguageClient {
 
   onDidConvertAutocomplete(
     completionItem: ls.CompletionItem,
-    suggestion: atom$AutocompleteSuggestion,
-    request: atom$AutocompleteRequest,
+    suggestion: atom2.AutocompleteSuggestion,
+    request: atom2.AutocompleteRequest,
   ): void {
   }
 
-  onDidInsertSuggestion(arg: atom$AutocompleteDidInsert): void {}
+  onDidInsertSuggestion(arg: atom2.AutocompleteDidInsert): void {}
 
   // Definitions via LS documentHighlight and gotoDefinition------------
-  provideDefinitions(): atomIde$DefinitionProvider {
+  provideDefinitions(): atomIde.DefinitionProvider {
     return {
       name: this.name,
       priority: 20,
@@ -451,7 +463,7 @@ export default class AutoLanguageClient {
     };
   }
 
-  async getDefinition(editor: TextEditor, point: atom$Point): Promise<?atomIde$DefinitionQueryResult> {
+  async getDefinition(editor: TextEditor, point: Point): Promise<atomIde.DefinitionQueryResult | null> {
     const server = await this._serverManager.getServer(editor);
     if (server == null || !DefinitionAdapter.canAdapt(server.capabilities)) {
       return null;
@@ -468,7 +480,7 @@ export default class AutoLanguageClient {
   }
 
   // Outline View via LS documentSymbol---------------------------------
-  provideOutlines(): atomIde$OutlineProvider {
+  provideOutlines(): atomIde.OutlineProvider {
     return {
       name: this.name,
       grammarScopes: this.getGrammarScopes(),
@@ -477,7 +489,7 @@ export default class AutoLanguageClient {
     };
   }
 
-  async getOutline(editor: atom$TextEditor): Promise<?atomIde$Outline> {
+  async getOutline(editor: TextEditor): Promise<atomIde.Outline | null> {
     const server = await this._serverManager.getServer(editor);
     if (server == null || !OutlineViewAdapter.canAdapt(server.capabilities)) {
       return null;
@@ -488,7 +500,7 @@ export default class AutoLanguageClient {
   }
 
   // Linter push v2 API via LS publishDiagnostics
-  consumeLinterV2(registerIndie: ({name: string}) => linter$V2IndieDelegate): void {
+  consumeLinterV2(registerIndie: ({name: string}) => linter.V2IndieDelegate): void {
     this._linterDelegate = registerIndie({name: this.name});
     if (this._linterDelegate == null) {
       return;
@@ -502,14 +514,14 @@ export default class AutoLanguageClient {
   }
 
   // Find References via LS findReferences------------------------------
-  provideFindReferences(): atomIde$FindReferencesProvider {
+  provideFindReferences(): atomIde.FindReferencesProvider {
     return {
-      isEditorSupported: (editor: atom$TextEditor) => this.getGrammarScopes().includes(editor.getGrammar().scopeName),
-      findReferences: this.getReferences.bind(this),
+      isEditorSupported: (editor: TextEditor) => this.getGrammarScopes().includes(editor.getGrammar().scopeName),
+      findReferences: this.getReferences.bind(this)
     };
   }
 
-  async getReferences(editor: atom$TextEditor, point: atom$Point): Promise<?atomIde$FindReferencesReturn> {
+  async getReferences(editor: TextEditor, point: Point): Promise<atomIde.FindReferencesReturn | null> {
     const server = await this._serverManager.getServer(editor);
     if (server == null || !FindReferencesAdapter.canAdapt(server.capabilities)) {
       return null;
@@ -520,7 +532,7 @@ export default class AutoLanguageClient {
   }
 
   // Datatip via LS textDocument/hover----------------------------------
-  consumeDatatip(service: atomIde$DatatipService): void {
+  consumeDatatip(service: atomIde.DatatipService): void {
     this._disposable.add(
       service.addProvider({
         providerName: this.name,
@@ -534,7 +546,7 @@ export default class AutoLanguageClient {
     );
   }
 
-  async getDatatip(editor: atom$TextEditor, point: atom$Point): Promise<?atomIde$Datatip> {
+  async getDatatip(editor: TextEditor, point: Point): Promise<atomIde.Datatip | null> {
     const server = await this._serverManager.getServer(editor);
     if (server == null || !DatatipAdapter.canAdapt(server.capabilities)) {
       return null;
@@ -545,7 +557,7 @@ export default class AutoLanguageClient {
   }
 
   // Code Format via LS formatDocument & formatDocumentRange------------
-  provideCodeFormat(): atomIde$RangeCodeFormatProvider {
+  provideCodeFormat(): atomIde.RangeCodeFormatProvider {
     return {
       grammarScopes: this.getGrammarScopes(),
       priority: 1,
@@ -553,7 +565,7 @@ export default class AutoLanguageClient {
     };
   }
 
-  async getCodeFormat(editor: atom$TextEditor, range: atom$Range): Promise<Array<atomIde$TextEdit>> {
+  async getCodeFormat(editor: TextEditor, range: Range): Promise<Array<atomIde.TextEdit>> {
     const server = await this._serverManager.getServer(editor);
     if (server == null || !CodeFormatAdapter.canAdapt(server.capabilities)) {
       return [];
@@ -562,7 +574,7 @@ export default class AutoLanguageClient {
     return CodeFormatAdapter.format(server.connection, server.capabilities, editor, range);
   }
 
-  provideCodeHighlight(): atomIde$CodeHighlightProvider {
+  provideCodeHighlight(): atomIde.CodeHighlightProvider {
     return {
       grammarScopes: this.getGrammarScopes(),
       priority: 1,
@@ -572,7 +584,7 @@ export default class AutoLanguageClient {
     };
   }
 
-  async getCodeHighlight(editor: atom$TextEditor, position: atom$Point): Promise<?Array<atom$Range>> {
+  async getCodeHighlight(editor: TextEditor, position: Point): Promise<Array<Range> | null> {
     const server = await this._serverManager.getServer(editor);
     if (server == null || !CodeHighlightAdapter.canAdapt(server.capabilities)) {
       return null;
@@ -581,7 +593,7 @@ export default class AutoLanguageClient {
     return CodeHighlightAdapter.highlight(server.connection, server.capabilities, editor, position);
   }
 
-  provideCodeActions(): atomIde$CodeActionProvider {
+  provideCodeActions(): atomIde.CodeActionProvider {
     return {
       grammarScopes: this.getGrammarScopes(),
       priority: 1,
@@ -591,7 +603,7 @@ export default class AutoLanguageClient {
     };
   }
 
-  async getCodeActions(editor: atom$TextEditor, range: atom$Range, diagnostics: Array<atomIde$Diagnostic>) {
+  async getCodeActions(editor: TextEditor, range: Range, diagnostics: Array<atomIde.Diagnostic>) {
     const server = await this._serverManager.getServer(editor);
     if (server == null || !CodeActionAdapter.canAdapt(server.capabilities)) {
       return null;
@@ -607,7 +619,7 @@ export default class AutoLanguageClient {
     );
   }
 
-  consumeSignatureHelp(registry: atomIde$SignatureHelpRegistry): IDisposable {
+  consumeSignatureHelp(registry: atomIde.SignatureHelpRegistry): Disposable {
     this._signatureHelpRegistry = registry;
     for (const server of this._serverManager.getActiveServers()) {
       if (server.signatureHelpAdapter != null) {
@@ -619,7 +631,7 @@ export default class AutoLanguageClient {
     });
   }
 
-  consumeBusySignal(service: atomIde$BusySignalService): IDisposable {
+  consumeBusySignal(service: atomIde.BusySignalService): Disposable {
     this.busySignalService = service;
     return new Disposable(() => delete this.busySignalService);
   }

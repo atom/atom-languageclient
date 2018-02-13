@@ -1,12 +1,12 @@
-// @flow
-
-import {
+;import {
   LanguageClientConnection,
-  type DocumentFormattingParams,
-  type DocumentRangeFormattingParams,
-  type FormattingOptions,
-  type ServerCapabilities,
+  DocumentFormattingParams,
+  DocumentRangeFormattingParams,
+  FormattingOptions,
+  ServerCapabilities,
 } from '../languageclient';
+import { TextEditor, Range } from 'atom';
+import * as atomIde from 'atom-ide'
 import Convert from '../convert';
 
 // Public: Adapts the language server protocol "textDocument/completion" to the
@@ -40,9 +40,9 @@ export default class CodeFormatAdapter {
   static format(
     connection: LanguageClientConnection,
     serverCapabilities: ServerCapabilities,
-    editor: atom$TextEditor,
-    range: atom$Range,
-  ): Promise<Array<atomIde$TextEdit>> {
+    editor: TextEditor,
+    range: Range,
+  ): Promise<Array<atomIde.TextEdit>> {
     if (serverCapabilities.documentRangeFormattingProvider) {
       return CodeFormatAdapter.formatRange(connection, editor, range);
     }
@@ -63,8 +63,8 @@ export default class CodeFormatAdapter {
   // to format the document.
   static async formatDocument(
     connection: LanguageClientConnection,
-    editor: atom$TextEditor,
-  ): Promise<Array<atomIde$TextEdit>> {
+    editor: TextEditor,
+  ): Promise<Array<atomIde.TextEdit>> {
     const edits = await connection.documentFormatting(CodeFormatAdapter.createDocumentFormattingParams(editor));
     return Convert.convertLsTextEdits(edits);
   }
@@ -76,7 +76,7 @@ export default class CodeFormatAdapter {
   //
   // Returns {DocumentFormattingParams} containing the identity of the text document as well as
   // options to be used in formatting the document such as tab size and tabs vs spaces.
-  static createDocumentFormattingParams(editor: atom$TextEditor): DocumentFormattingParams {
+  static createDocumentFormattingParams(editor: TextEditor): DocumentFormattingParams {
     return {
       textDocument: Convert.editorToTextDocumentIdentifier(editor),
       options: CodeFormatAdapter.getFormatOptions(editor),
@@ -93,9 +93,9 @@ export default class CodeFormatAdapter {
   // to format the document.
   static async formatRange(
     connection: LanguageClientConnection,
-    editor: atom$TextEditor,
-    range: atom$Range,
-  ): Promise<Array<atomIde$TextEdit>> {
+    editor: TextEditor,
+    range: Range,
+  ): Promise<Array<atomIde.TextEdit>> {
     const edits = await connection.documentRangeFormatting(
       CodeFormatAdapter.createDocumentRangeFormattingParams(editor, range),
     );
@@ -112,8 +112,8 @@ export default class CodeFormatAdapter {
   // range of the text to be formatted as well as the options to be used in formatting the
   // document such as tab size and tabs vs spaces.
   static createDocumentRangeFormattingParams(
-    editor: atom$TextEditor,
-    range: atom$Range,
+    editor: TextEditor,
+    range: Range,
   ): DocumentRangeFormattingParams {
     return {
       textDocument: Convert.editorToTextDocumentIdentifier(editor),
@@ -131,7 +131,7 @@ export default class CodeFormatAdapter {
   // Returns the {FormattingOptions} to be used containing the keys:
   //  * `tabSize` The number of spaces a tab represents.
   //  * `insertSpaces` {True} if spaces should be used, {False} for tab characters.
-  static getFormatOptions(editor: atom$TextEditor): FormattingOptions {
+  static getFormatOptions(editor: TextEditor): FormattingOptions {
     return {
       tabSize: editor.getTabLength(),
       insertSpaces: editor.getSoftTabs(),

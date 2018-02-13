@@ -3,7 +3,7 @@
         "module": "commonjs",
         "target": "es6",
         "outDir": "build",
-        "lib": ["es6", "dom"],
+        "lib": ["es7", "dom"],
         "inlineSources": true,
         "inlineSourceMap": true,
         "allowJs": true,
@@ -14,6 +14,9 @@
             ],
             "atom2": [
                 "./typings/atom/index.d.ts"
+            ],
+            "atom-linter": [
+                "./typings/atom-linter/index.d.ts"
             ]
         }
     },

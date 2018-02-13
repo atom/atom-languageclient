@@ -71,7 +71,7 @@ export interface DefinitionQueryResult {
 
 export interface FindReferencesProvider {
   // Return true if your provider supports finding references for the provided TextEditor.
-  isEditorSupported(editor: TextEditor): Promise<boolean>,
+  isEditorSupported(editor: TextEditor): boolean | Promise<boolean>,
 
   // `findReferences` will only be called if `isEditorSupported` previously returned true
   // for the given TextEditor.
@@ -127,7 +127,9 @@ export interface DatatipProvider {
   validForScope(scopeName: string): boolean,
   // A unique name for the provider to be used for analytics.
   // It is recommended that it be the name of the provider's package.
-  providerName: string
+  providerName: string,
+  priority: number,
+  grammarScopes: Array<string>
 }
 
 export interface DatatipService {

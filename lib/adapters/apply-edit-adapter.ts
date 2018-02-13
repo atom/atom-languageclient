@@ -1,10 +1,10 @@
-// @flow
-
 import {
   LanguageClientConnection,
-  type ApplyWorkspaceEditParams,
-  type ApplyWorkspaceEditResponse,
+  ApplyWorkspaceEditParams,
+  ApplyWorkspaceEditResponse,
 } from '../languageclient';
+import { TextBuffer } from 'atom';
+import * as atomIde from 'atom-ide';
 import Convert from '../convert';
 
 // Public: Adapts workspace/applyEdit commands to editors.
@@ -49,7 +49,7 @@ export default class ApplyEditAdapter {
         const edits = Convert.convertLsTextEdits(changes[uri]);
         // Sort edits in reverse order to prevent edit conflicts.
         edits.sort((edit1, edit2) => -edit1.oldRange.compare(edit2.oldRange));
-        const buffer = editor.getBuffer();
+        const buffer = <TextBuffer>(<any>editor).getBuffer();
         const checkpoint = buffer.createCheckpoint();
         checkpoints.push({buffer, checkpoint});
         let prevEdit = null;
@@ -74,7 +74,7 @@ export default class ApplyEditAdapter {
   }
 
   // Private: Do some basic sanity checking on the edit ranges.
-  static validateEdit(buffer: atom$TextBuffer, edit: atomIde$TextEdit, prevEdit: ?atomIde$TextEdit): void {
+  static validateEdit(buffer: TextBuffer, edit: atomIde.TextEdit, prevEdit: atomIde.TextEdit | null): void {
     const path = buffer.getPath() || '';
     if (prevEdit != null && edit.oldRange.end.compare(prevEdit.oldRange.start) > 0) {
       throw Error(`Found overlapping edit ranges in ${path}`);

@@ -1,20 +1,21 @@
-// @flow
+import { Logger } from './logger';
+import LinterPushV2Adapter from './adapters/linter-push-v2-adapter';
+import DocumentSyncAdapter from './adapters/document-sync-adapter';
+import SignatureHelpAdapter from './adapters/signature-help-adapter';
 
-import {type Logger} from './logger';
-import type LinterPushV2Adapter from './adapters/linter-push-v2-adapter';
-import type DocumentSyncAdapter from './adapters/document-sync-adapter';
-import type SignatureHelpAdapter from './adapters/signature-help-adapter';
-
-import path from 'path';
+import * as path from 'path';
+import * as cp from 'child_process';
 import * as ls from './languageclient';
+import * as atomIde from 'atom-ide';
+import * as atom2 from 'atom2';
 import Convert from './convert';
-import {CompositeDisposable} from 'atom';
+import { CompositeDisposable, TextEditor } from 'atom';
 
 // The necessary elements for a server that has started or is starting.
 export type ActiveServer = {
   disposable: CompositeDisposable,
   projectPath: string,
-  process: child_process$ChildProcess,
+  process: cp.ChildProcess,
   connection: ls.LanguageClientConnection,
   capabilities: ls.ServerCapabilities,
   linterPushV2?: LinterPushV2Adapter,
@@ -24,7 +25,7 @@ export type ActiveServer = {
 
 type RestartCounter = {
   restarts: number;
-  timerId: number;
+  timerId: NodeJS.Timer;
 };
 
 // Manages the language server lifecycles and their associated objects necessary
@@ -35,22 +36,22 @@ export class ServerManager {
   _restartCounterPerProject: Map<string, RestartCounter> = new Map();
   _stoppingServers: Array<ActiveServer> = [];
   _disposable: CompositeDisposable = new CompositeDisposable();
-  _editorToServer: Map<atom$TextEditor, ActiveServer> = new Map();
+  _editorToServer: Map<TextEditor, ActiveServer> = new Map();
   _logger: Logger;
   _normalizedProjectPaths: Array<string> = [];
-  _startForEditor: (editor: atom$TextEditor) => boolean;
+  _startForEditor: (editor: TextEditor) => boolean;
   _startServer: (projectPath: string) => Promise<ActiveServer>;
   _changeWatchedFileFilter: (filePath: string) => boolean;
-  _getBusySignalService: () => ?atomIde$BusySignalService;
+  _getBusySignalService: () => atomIde.BusySignalService | null;
   _languageServerName: string;
   _isStarted = false;
 
   constructor(
     startServer: (projectPath: string) => Promise<ActiveServer>,
     logger: Logger,
-    startForEditor: (editor: atom$TextEditor) => boolean,
+    startForEditor: (editor: TextEditor) => boolean,
     changeWatchedFileFilter: (filePath: string) => boolean,
-    busySignalServiceGetter: () => ?atomIde$BusySignalService,
+    busySignalServiceGetter: () => atomIde.BusySignalService | null,
     languageServerName: string,
   ) {
     this._languageServerName = languageServerName;
@@ -80,7 +81,7 @@ export class ServerManager {
     }
   }
 
-  observeTextEditors(editor: atom$TextEditor): void {
+  observeTextEditors(editor: TextEditor): void {
     // Track grammar changes for opened editors
     const listener = editor.observeGrammar(grammar => this._handleGrammarChange(editor));
     this._disposable.add(editor.onDidDestroy(() => listener.dispose()));
@@ -88,7 +89,7 @@ export class ServerManager {
     this._handleTextEditor(editor);
   }
 
-  async _handleTextEditor(editor: atom$TextEditor): Promise<void> {
+  async _handleTextEditor(editor: TextEditor): Promise<void> {
     if (!this._editorToServer.has(editor)) {
       // editor hasn't been processed yet, so process it by allocating LS for it if necessary
       const server = await this.getServer(editor, {shouldStart: true});
@@ -105,7 +106,7 @@ export class ServerManager {
     }
   }
 
-  _handleGrammarChange(editor: atom$TextEditor) {
+  _handleGrammarChange(editor: TextEditor) {
     if (this._startForEditor(editor)) {
       // If editor is interesting for LS process the editor further to attempt to start LS if needed
       this._handleTextEditor(editor);
@@ -135,9 +136,9 @@ export class ServerManager {
   }
 
   async getServer(
-    textEditor: atom$TextEditor,
+    textEditor: TextEditor,
     {shouldStart}: {shouldStart?: boolean} = {shouldStart: false},
-  ): Promise<?ActiveServer> {
+  ): Promise<ActiveServer | null> {
     const finalProjectPath = this.determineProjectPath(textEditor);
     if (finalProjectPath == null) {
       // Files not yet saved have no path
@@ -264,7 +265,7 @@ export class ServerManager {
     });
   }
 
-  determineProjectPath(textEditor: atom$TextEditor): ?string {
+  determineProjectPath(textEditor: TextEditor): string | null {
     const filePath = textEditor.getPath();
     if (filePath == null) {
       return null;
@@ -287,7 +288,7 @@ export class ServerManager {
     this.updateNormalizedProjectPaths();
   }
 
-  projectFilesChanged(fileEvents: Array<atom$ProjectFileEvent>): void {
+  projectFilesChanged(fileEvents: Array<atom2.ProjectFileEvent>): void {
     if (this._activeServers.length === 0) {
       return;
     }

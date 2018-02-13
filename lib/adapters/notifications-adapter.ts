@@ -1,12 +1,12 @@
-// @flow
-
 import {
   LanguageClientConnection,
   MessageType,
-  type MessageActionItem,
-  type ShowMessageParams,
-  type ShowMessageRequestParams,
+  MessageActionItem,
+  ShowMessageParams,
+  ShowMessageRequestParams,
 } from '../languageclient';
+import { Notification, NotificationOptions } from 'atom';
+import { NotificationButton } from 'atom2';
 
 // Public: Adapts Atom's user notifications to those of the language server protocol.
 export default class NotificationsAdapter {
@@ -17,9 +17,9 @@ export default class NotificationsAdapter {
     connection.onShowMessageRequest(m => NotificationsAdapter.onShowMessageRequest(m, name));
   }
 
-  static onShowMessageRequest(params: ShowMessageRequestParams, name: string): Promise<?MessageActionItem> {
+  static onShowMessageRequest(params: ShowMessageRequestParams, name: string): Promise<MessageActionItem | null> {
     return new Promise((resolve, reject) => {
-      const options: atom$NotificationOptions = {
+      const options: NotificationOptions = {
         dismissable: true,
         detail: name,
       };
@@ -67,7 +67,7 @@ export default class NotificationsAdapter {
   // * `actionItem` The {MessageActionItem} to be converted.
   //
   // Returns a {NotificationButton} equivalent to the {MessageActionItem} given.
-  static actionItemToNotificationButton(actionItem: MessageActionItem): atom$NotificationButton {
+  static actionItemToNotificationButton(actionItem: MessageActionItem): NotificationButton {
     return {
       text: actionItem.title,
     };
@@ -77,8 +77,8 @@ export default class NotificationsAdapter {
 function addNotificationForMessage(
   messageType: number,
   message: string,
-  options: atom$NotificationOptions,
-): ?atom$Notification {
+  options: NotificationOptions,
+): Notification | null {
   switch (messageType) {
     case MessageType.Error:
       return atom.notifications.addError(message, options);
