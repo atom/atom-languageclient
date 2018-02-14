@@ -1,30 +1,30 @@
 import { Disposable, Grammar, Point, Range, TextEditor } from 'atom';
 
 export interface OutlineProvider {
-  name: string,
+  name: string;
   // If there are multiple providers for a given grammar, the one with the highest priority will be
   // used.
-  priority: number,
-  grammarScopes: Array<string>,
-  updateOnEdit?: boolean,
-  getOutline: (editor: TextEditor) => Promise<Outline | null>,
+  priority: number;
+  grammarScopes: string[];
+  updateOnEdit?: boolean;
+  getOutline: (editor: TextEditor) => Promise<Outline | null>;
 }
 
 export interface OutlineTree {
-  icon?: string, // from atom$Octicon | atom$OcticonsPrivate (types not allowed over rpc so we use string)
+  icon?: string; // from atom$Octicon | atom$OcticonsPrivate (types not allowed over rpc so we use string)
 
   // Must be one or the other. If both are present, tokenizedText is preferred.
-  plainText?: string,
-  tokenizedText?: TokenizedText,
-  representativeName?: string,
+  plainText?: string;
+  tokenizedText?: TokenizedText;
+  representativeName?: string;
 
-  startPosition: Point,
-  endPosition?: Point,
-  children: Array<OutlineTree>,
+  startPosition: Point;
+  endPosition?: Point;
+  children: OutlineTree[];
 }
 
 export interface Outline {
-  outlineTrees: Array<OutlineTree>,
+  outlineTrees: OutlineTree[];
 }
 
 export type TokenKind =
@@ -39,61 +39,61 @@ export type TokenKind =
   | 'type';
 
 export interface TextToken {
-  kind: TokenKind,
-  value: string,
+  kind: TokenKind;
+  value: string;
 }
 
-export type TokenizedText = Array<TextToken>;
+export type TokenizedText = TextToken[];
 
 export interface DefinitionProvider {
-  name: string,
-  priority: number,
-  grammarScopes: Array<string>,
-  getDefinition: (editor: TextEditor, position: Point) => Promise<DefinitionQueryResult | null>,
+  name: string;
+  priority: number;
+  grammarScopes: string[];
+  getDefinition: (editor: TextEditor, position: Point) => Promise<DefinitionQueryResult | null>;
 }
 
 export type IdeUri = string;
 
 export interface Definition {
-  path: IdeUri,
-  position: Point,
-  range?: Range,
-  id?: string,
-  name?: string,
-  language: string,
-  projectRoot?: IdeUri,
+  path: IdeUri;
+  position: Point;
+  range?: Range;
+  id?: string;
+  name?: string;
+  language: string;
+  projectRoot?: IdeUri;
 }
 
 export interface DefinitionQueryResult {
-  queryRange: Array<Range>,
-  definitions: Array<Definition>,
+  queryRange: Range[];
+  definitions: Definition[];
 }
 
 export interface FindReferencesProvider {
   // Return true if your provider supports finding references for the provided TextEditor.
-  isEditorSupported(editor: TextEditor): boolean | Promise<boolean>,
+  isEditorSupported(editor: TextEditor): boolean | Promise<boolean>;
 
   // `findReferences` will only be called if `isEditorSupported` previously returned true
   // for the given TextEditor.
-  findReferences(editor: TextEditor, position: Point): Promise<FindReferencesReturn | null>,
+  findReferences(editor: TextEditor, position: Point): Promise<FindReferencesReturn | null>;
 }
 
 export interface Reference {
-  uri: IdeUri, // URI of the file path
-  name: string | null, // name of calling method/function/symbol
-  range: Range,
+  uri: IdeUri; // URI of the file path
+  name: string | null; // name of calling method/function/symbol
+  range: Range;
 }
 
 export interface FindReferencesData {
-  type: 'data',
-  baseUri: IdeUri,
-  referencedSymbolName: string,
-  references: Array<Reference>,
+  type: 'data';
+  baseUri: IdeUri;
+  referencedSymbolName: string;
+  references: Reference[];
 }
 
 export interface FindReferencesError {
-  type: 'error',
-  message: string,
+  type: 'error';
+  message: string;
 }
 
 export type FindReferencesReturn = FindReferencesData | FindReferencesError;
@@ -110,10 +110,10 @@ export type MarkedString =
     };
 
 // This omits the React variant.
-export type Datatip = {
-  markedStrings: Array<MarkedString>,
-  range: Range,
-  pinnable?: boolean,
+export interface Datatip {
+  markedStrings: MarkedString[];
+  range: Range;
+  pinnable?: boolean;
 }
 
 export interface DatatipProvider {
@@ -123,76 +123,76 @@ export interface DatatipProvider {
     // The mouse event that triggered the datatip.
     // This is null for manually toggled datatips.
     mouseEvent: MouseEvent | null,
-  ): Promise<Datatip>,
-  validForScope(scopeName: string): boolean,
+  ): Promise<Datatip>;
+  validForScope(scopeName: string): boolean;
   // A unique name for the provider to be used for analytics.
   // It is recommended that it be the name of the provider's package.
-  providerName: string,
-  priority: number,
-  grammarScopes: Array<string>
+  providerName: string;
+  priority: number;
+  grammarScopes: string[];
 }
 
 export interface DatatipService {
-  addProvider(provider: DatatipProvider): Disposable
+  addProvider(provider: DatatipProvider): Disposable;
 }
 
 export interface RangeCodeFormatProvider {
-  formatCode: (editor: TextEditor, range: Range) => Promise<Array<TextEdit>>,
-  priority: number,
-  grammarScopes: Array<string>
+  formatCode: (editor: TextEditor, range: Range) => Promise<TextEdit[]>;
+  priority: number;
+  grammarScopes: string[];
 }
 
 export interface TextEdit {
-  oldRange: Range,
-  newText: string,
+  oldRange: Range;
+  newText: string;
   // If included, this will be used to verify that the edit still applies cleanly.
-  oldText?: string
+  oldText?: string;
 }
 
 export interface CodeHighlightProvider {
-  highlight(editor: TextEditor, bufferPosition: Point): Promise<Array<Range> | null>,
-  priority: number,
-  grammarScopes: Array<string>
+  highlight(editor: TextEditor, bufferPosition: Point): Promise<Range[] | null>;
+  priority: number;
+  grammarScopes: string[];
 }
 
 export type DiagnosticType = 'Error' | 'Warning' | 'Info';
 
 export interface Diagnostic {
-  providerName: string,
-  type: DiagnosticType,
-  filePath: string,
-  text?: string,
-  range: Range
+  providerName: string;
+  type: DiagnosticType;
+  filePath: string;
+  text?: string;
+  range: Range;
 }
 
 export interface CodeAction {
-  apply(): Promise<void>,
-  getTitle(): Promise<string>,
-  dispose(): void,
+  apply(): Promise<void>;
+  getTitle(): Promise<string>;
+  dispose(): void;
 }
 
 export interface CodeActionProvider {
-  grammarScopes: Array<string>,
-  priority: number,
+  grammarScopes: string[];
+  priority: number;
   getCodeActions(
     editor: TextEditor,
     range: Range,
-    diagnostics: Array<Diagnostic>,
-  ): Promise<Array<CodeAction>>
+    diagnostics: Diagnostic[],
+  ): Promise<CodeAction[]>;
 }
 
 export interface BusySignalOptions {
   // Can say that a busy signal will only appear when a given file is open.
   // Default = null, meaning the busy signal applies to all files.
-  onlyForFile?: IdeUri,
+  onlyForFile?: IdeUri;
   // Is user waiting for computer to finish a task? (traditional busy spinner)
   // or is the computer waiting for user to finish a task? (action required)
   // Default = spinner.
-  waitingFor?: 'computer' | 'user',
+  waitingFor?: 'computer' | 'user';
   // Debounce it? default = true for busy-signal, and false for action-required.
-  debounce?: boolean,
+  debounce?: boolean;
   // If onClick is set, then the tooltip will be clickable. Default = null.
-  onDidClick?: () => void
+  onDidClick?: () => void;
 }
 
 export interface BusySignalService {
@@ -204,22 +204,22 @@ export interface BusySignalService {
     title: string,
     f: () => Promise<T>,
     options?: BusySignalOptions,
-  ): Promise<T>,
+  ): Promise<T>;
 
   // Activates the busy signal. Set the title in the returned BusySignal
   // object (you can update the title multiple times) and dispose it when done.
-  reportBusy(title: string, options?: BusySignalOptions): BusyMessage,
+  reportBusy(title: string, options?: BusySignalOptions): BusyMessage;
 
   // This is a no-op. When someone consumes the busy service, they get back a
   // reference to the single shared instance, so disposing of it would be wrong.
-  dispose(): void,
+  dispose(): void;
 }
 
 export interface BusyMessage {
   // You can set/update the title.
-  setTitle(title: string): void,
+  setTitle(title: string): void;
   // Dispose of the signal when done to make it go away.
-  dispose(): void
+  dispose(): void;
 }
 
 export type SignatureHelpRegistry = (provider: SignatureHelpProvider) => Disposable;
@@ -238,29 +238,29 @@ export type SignatureHelpRegistry = (provider: SignatureHelpProvider) => Disposa
  * The highest-priority provider with a non-null result will be used.
  */
 export interface SignatureHelpProvider {
-  priority: number,
-  grammarScopes: Array<string>,
+  priority: number;
+  grammarScopes: string[];
 
   // A set of characters that will trigger signature help when typed.
   // If a null/empty set is provided, only manual activation of the command works.
-  triggerCharacters?: Set<string>,
+  triggerCharacters?: Set<string>;
 
-  getSignatureHelp(editor: TextEditor, point: Point): Promise<SignatureHelp | null>
+  getSignatureHelp(editor: TextEditor, point: Point): Promise<SignatureHelp | null>;
 }
 
 export interface SignatureHelp {
-  signatures: Array<Signature>,
-  activeSignature?: number,
-  activeParameter?: number
+  signatures: Signature[];
+  activeSignature?: number;
+  activeParameter?: number;
 }
 
 export interface Signature {
-  label: string,
-  documentation?: string,
-  parameters?: Array<SignatureParameter>,
+  label: string;
+  documentation?: string;
+  parameters?: SignatureParameter[];
 }
 
 export interface SignatureParameter {
-  label: string,
-  documentation?: string
+  label: string;
+  documentation?: string;
 }
