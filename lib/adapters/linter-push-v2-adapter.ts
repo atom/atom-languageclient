@@ -8,7 +8,7 @@ import {
 } from '../languageclient';
 import Convert from '../convert';
 
-type DiagnosticCode = number | string;
+export type DiagnosticCode = number | string;
 
 // Public: Listen to diagnostics messages from the language server and publish them
 // to the user by way of the Linter Push (Indie) v2 API supported by Atom IDE UI.

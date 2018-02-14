@@ -4,9 +4,9 @@
         "target": "es6",
         "outDir": "build",
         "lib": ["es7", "dom"],
+        "declaration": true,
         "inlineSources": true,
         "inlineSourceMap": true,
-        "allowJs": true,
         "baseUrl": "./",
         "paths": {
             "atom-ide": [

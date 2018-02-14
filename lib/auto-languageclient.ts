@@ -32,7 +32,7 @@ import NotificationsAdapter from './adapters/notifications-adapter';
 import OutlineViewAdapter from './adapters/outline-view-adapter';
 import SignatureHelpAdapter from './adapters/signature-help-adapter';
 
-type ConnectionType = 'stdio' | 'socket' | 'ipc';
+export type ConnectionType = 'stdio' | 'socket' | 'ipc';
 
 // Public: AutoLanguageClient provides a simple way to have all the supported
 // Atom-IDE services wired up entirely for you by just subclassing it and

@@ -5,6 +5,7 @@
   "repository": "https://github.com/atom/atom-languageclient",
   "license": "MIT",
   "main": "./build/lib/main",
+  "types": "./build/lib/main.d.ts",
   "scripts": {
     "clean": "rm -rf build",
     "install": "npm run compile",

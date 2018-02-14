@@ -137,7 +137,7 @@ export default class DocumentSyncAdapter {
 }
 
 // Public: Keep a single {TextEditor} in sync with a given language server.
-class TextEditorSyncAdapter {
+export class TextEditorSyncAdapter {
   private _disposable = new CompositeDisposable();
   private _editor: TextEditor;
   private _currentUri: string;
