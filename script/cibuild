@@ -100,8 +100,5 @@ fi
 echo "Running lint..."
 npm run lint
 
-echo "Running flow..."
-npm run flow
-
 echo "Running specs..."
 "$ATOM_SCRIPT_PATH" --test build/test

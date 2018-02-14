@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es6",
+        "outDir": "build",
+        "lib": ["es7", "dom"],
+        "declaration": true,
+        "inlineSources": true,
+        "inlineSourceMap": true,
+        "baseUrl": "./",
+        "paths": {
+            "atom-ide": [
+                "./typings/atom-ide/index.d.ts"
+            ],
+            "atom-linter": [
+                "./typings/atom-linter/index.d.ts"
+            ]
+        }
+    },
+    "include": [
+        "lib/**/*.ts",
+        "test/**/*.ts"
+    ]
+}
