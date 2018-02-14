@@ -61,30 +61,32 @@ export default class DatatipAdapter {
   }
 
   private static convertMarkedString(
-    editor: TextEditor, markedString: MarkedString | MarkupContent): atomIde.MarkedString {
+    editor: TextEditor,
+    markedString: MarkedString | MarkupContent,
+  ): atomIde.MarkedString {
     if (typeof markedString === 'string') {
       return { type: 'markdown', value: markedString };
     }
-    else {
-      if ((markedString as MarkupContent).kind) {
-        return {
-          type: 'markdown',
-          value: markedString.value,
-        };
-      }
-      // Must check as <{language: string}> to disambiguate between
-      // string and the more explicit object type because MarkedString
-      // is a union of the two types
-      else if ((markedString as {language: string}).language) {
-        return {
-          type: 'snippet',
-          // TODO: find a better mapping from language -> grammar
-          grammar:
-            atom.grammars.grammarForScopeName(
-              `source.${(markedString as {language: string}).language}`) || editor.getGrammar(),
-          value: markedString.value,
-        };
-      }
+
+    if ((markedString as MarkupContent).kind) {
+      return {
+        type: 'markdown',
+        value: markedString.value,
+      };
+    }
+
+    // Must check as <{language: string}> to disambiguate between
+    // string and the more explicit object type because MarkedString
+    // is a union of the two types
+    if ((markedString as {language: string}).language) {
+      return {
+        type: 'snippet',
+        // TODO: find a better mapping from language -> grammar
+        grammar:
+          atom.grammars.grammarForScopeName(
+            `source.${(markedString as {language: string}).language}`) || editor.getGrammar(),
+        value: markedString.value,
+      };
     }
   }
 }

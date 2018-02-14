@@ -48,7 +48,7 @@ describe('Convert', () => {
   });
 
   describe('uriToPath', () => {
-    it('does not convert http: and https: uri\'s', () => {
+    it("does not convert http: and https: uri's", () => {
       setProcessPlatform('darwin');
       expect(Convert.uriToPath('http://atom.io/a')).equals('http://atom.io/a');
       expect(Convert.uriToPath('https://atom.io/b')).equals('https://atom.io/b');

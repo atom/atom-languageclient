@@ -252,8 +252,10 @@ export default class AutocompleteAdapter {
 
     if (typeof item.documentation === 'object') {
       suggestion.descriptionMarkdown = item.documentation.value;
+      suggestion.description = item.documentation.value;
     }
     else {
+      suggestion.descriptionMarkdown = item.documentation;
       suggestion.description = item.documentation;
     }
   }

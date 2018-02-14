@@ -1,3 +1,5 @@
+ // tslint:disable:no-console
+
 export interface Logger {
   warn(...args: any[]): void;
   error(...args: any[]): void;
@@ -5,8 +7,6 @@ export interface Logger {
   log(...args: any[]): void;
   debug(...args: any[]): void;
 }
-
-/* eslint-disable no-console */
 
 export class ConsoleLogger {
   public prefix: string;
@@ -16,27 +16,22 @@ export class ConsoleLogger {
   }
 
   public warn(...args: any[]) {
-    // tslint:disable-next-line:no-console
     console.warn(...this.format(args));
   }
 
   public error(...args: any[]) {
-    // tslint:disable-next-line:no-console
     console.error(...this.format(args));
   }
 
   public info(...args: any[]) {
-    // tslint:disable-next-line:no-console
     console.info(...this.format(args));
   }
 
   public debug(...args: any[]) {
-    // tslint:disable-next-line:no-console
     console.debug(...this.format(args));
   }
 
   public log(...args: any[]) {
-    // tslint:disable-next-line:no-console
     console.log(...this.format(args));
   }
 

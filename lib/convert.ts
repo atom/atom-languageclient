@@ -137,7 +137,7 @@ export default class Convert {
       '<': '&lt;',
       '>': '&gt;',
       '"': '&quot;',
-      '\'': '&apos;',
+      "'": '&apos;',
     };
     return s.replace(/[&<>'"]/g, (c) => attributeMap[c]);
   }

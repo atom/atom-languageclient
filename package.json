@@ -8,7 +8,6 @@
   "types": "./build/lib/main.d.ts",
   "scripts": {
     "clean": "rm -rf build",
-    "install": "npm run compile",
     "compile": "tsc",
     "watch": "tsc -watch",
     "lint": "tslint -c tslint.json 'lib/**/*.ts' 'test/**/*.ts' 'typings/**/*.d.ts'",

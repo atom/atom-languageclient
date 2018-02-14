@@ -3,7 +3,7 @@ import {
   ApplyWorkspaceEditParams,
   ApplyWorkspaceEditResponse,
 } from '../languageclient';
-import { TextBuffer } from 'atom';
+import { TextBuffer, TextEditor } from 'atom';
 import * as atomIde from 'atom-ide';
 import Convert from '../convert';
 
@@ -43,13 +43,13 @@ export default class ApplyEditAdapter {
     const checkpoints = [];
     try {
       for (let i = 0; i < editors.length; i++) {
-        const editor = editors[i];
+        const editor = editors[i] as TextEditor;
         const uri = uris[i];
         // Get an existing editor for the file, or open a new one if it doesn't exist.
         const edits = Convert.convertLsTextEdits(changes[uri]);
         // Sort edits in reverse order to prevent edit conflicts.
         edits.sort((edit1, edit2) => -edit1.oldRange.compare(edit2.oldRange));
-        const buffer = (editor as any).getBuffer() as TextBuffer;
+        const buffer = editor.getBuffer();
         const checkpoint = buffer.createCheckpoint();
         checkpoints.push({buffer, checkpoint});
         let prevEdit = null;

@@ -39,19 +39,6 @@ import SignatureHelpAdapter from './adapters/signature-help-adapter';
 
 export type ConnectionType = 'stdio' | 'socket' | 'ipc';
 
-// Public: Defines the minimum surface area for an object that resembles a
-// ChildProcess.  This is used so that language packages with alternative
-// language server process hosting strategies can return something compatible
-// with AutoLanguageClient.startServerProcess.
-export interface LanguageServerProcess extends EventEmitter {
-  stderr: stream.Readable;
-  pid: number;
-
-  kill(signal?: string): void;
-  on(event: 'error', listener: (err: Error) => void): this;
-  on(event: 'exit', listener: (code: number, signal: string) => void): this;
-}
-
 // Public: AutoLanguageClient provides a simple way to have all the supported
 // Atom-IDE services wired up entirely for you by just subclassing it and
 // implementing startServerProcess/getGrammarScopes/getLanguageName and
@@ -98,7 +85,7 @@ export default class AutoLanguageClient {
   }
 
   // Start your server process
-  protected startServerProcess(projectPath: string): LanguageServerProcess | Promise<LanguageServerProcess> {
+  protected startServerProcess(projectPath: string): cp.ChildProcess | Promise<cp.ChildProcess> {
     throw Error('Must override startServerProcess to start language server process when extending AutoLanguageClient');
   }
 
@@ -220,7 +207,7 @@ export default class AutoLanguageClient {
   // ---------------------------------------------------------------------------
 
   // Gets a LanguageClientConnection for a given TextEditor
-  protected async getConnectionForEditor(editor: TextEditor): Promise<ls.LanguageClientConnection> {
+  protected async getConnectionForEditor(editor: TextEditor): Promise<ls.LanguageClientConnection | null> {
     const server = await this._serverManager.getServer(editor);
     return server ? server.connection : null;
   }
@@ -397,9 +384,10 @@ export default class AutoLanguageClient {
 
     if (DocumentSyncAdapter.canAdapt(server.capabilities)) {
       server.docSyncAdapter =
-        new DocumentSyncAdapter(server.connection, server.capabilities.textDocumentSync, (editor) =>
-        this.shouldSyncForEditor(editor, server.projectPath),
-      );
+        new DocumentSyncAdapter(
+          server.connection,
+          server.capabilities.textDocumentSync,
+          (editor) => this.shouldSyncForEditor(editor, server.projectPath));
       server.disposable.add(server.docSyncAdapter);
     }
 
@@ -441,7 +429,7 @@ export default class AutoLanguageClient {
     };
   }
 
-  private async getSuggestions(
+  protected async getSuggestions(
     request: AutocompleteRequest,
   ): Promise<AutocompleteSuggestion[]> {
     const server = await this._serverManager.getServer(request.editor);
@@ -454,7 +442,7 @@ export default class AutoLanguageClient {
     return this.autoComplete.getSuggestions(server, request, this.onDidConvertAutocomplete);
   }
 
-  private async getSuggestionDetailsOnSelect(
+  protected async getSuggestionDetailsOnSelect(
     suggestion: AutocompleteSuggestion): Promise<AutocompleteSuggestion | null> {
     const request = this._lastAutocompleteRequest;
     if (request == null) { return null; }
@@ -485,7 +473,7 @@ export default class AutoLanguageClient {
     };
   }
 
-  private async getDefinition(editor: TextEditor, point: Point): Promise<atomIde.DefinitionQueryResult | null> {
+  protected async getDefinition(editor: TextEditor, point: Point): Promise<atomIde.DefinitionQueryResult | null> {
     const server = await this._serverManager.getServer(editor);
     if (server == null || !DefinitionAdapter.canAdapt(server.capabilities)) {
       return null;
@@ -511,7 +499,7 @@ export default class AutoLanguageClient {
     };
   }
 
-  private async getOutline(editor: TextEditor): Promise<atomIde.Outline | null> {
+  protected async getOutline(editor: TextEditor): Promise<atomIde.Outline | null> {
     const server = await this._serverManager.getServer(editor);
     if (server == null || !OutlineViewAdapter.canAdapt(server.capabilities)) {
       return null;
@@ -543,7 +531,7 @@ export default class AutoLanguageClient {
     };
   }
 
-  private async getReferences(editor: TextEditor, point: Point): Promise<atomIde.FindReferencesReturn | null> {
+  protected async getReferences(editor: TextEditor, point: Point): Promise<atomIde.FindReferencesReturn | null> {
     const server = await this._serverManager.getServer(editor);
     if (server == null || !FindReferencesAdapter.canAdapt(server.capabilities)) {
       return null;
@@ -568,7 +556,7 @@ export default class AutoLanguageClient {
     );
   }
 
-  private async getDatatip(editor: TextEditor, point: Point): Promise<atomIde.Datatip | null> {
+  protected async getDatatip(editor: TextEditor, point: Point): Promise<atomIde.Datatip | null> {
     const server = await this._serverManager.getServer(editor);
     if (server == null || !DatatipAdapter.canAdapt(server.capabilities)) {
       return null;
@@ -587,7 +575,7 @@ export default class AutoLanguageClient {
     };
   }
 
-  private async getCodeFormat(editor: TextEditor, range: Range): Promise<atomIde.TextEdit[]> {
+  protected async getCodeFormat(editor: TextEditor, range: Range): Promise<atomIde.TextEdit[]> {
     const server = await this._serverManager.getServer(editor);
     if (server == null || !CodeFormatAdapter.canAdapt(server.capabilities)) {
       return [];
@@ -606,7 +594,7 @@ export default class AutoLanguageClient {
     };
   }
 
-  private async getCodeHighlight(editor: TextEditor, position: Point): Promise<Range[] | null> {
+  protected async getCodeHighlight(editor: TextEditor, position: Point): Promise<Range[] | null> {
     const server = await this._serverManager.getServer(editor);
     if (server == null || !CodeHighlightAdapter.canAdapt(server.capabilities)) {
       return null;
@@ -625,7 +613,7 @@ export default class AutoLanguageClient {
     };
   }
 
-  private async getCodeActions(editor: TextEditor, range: Range, diagnostics: atomIde.Diagnostic[]) {
+  protected async getCodeActions(editor: TextEditor, range: Range, diagnostics: atomIde.Diagnostic[]) {
     const server = await this._serverManager.getServer(editor);
     if (server == null || !CodeActionAdapter.canAdapt(server.capabilities)) {
       return null;

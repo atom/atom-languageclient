@@ -111,7 +111,7 @@ describe('OutlineViewAdapter', () => {
       expect(result[1].children[0].representativeName).to.equal('main');
     });
 
-    it('does not become it\'s own parent', () => {
+    it("does not become it's own parent", () => {
       const sourceItems = [
         {kind: ls.SymbolKind.Namespace, name: 'duplicate', location: createLocation(1, 0, 10, 0)},
         {

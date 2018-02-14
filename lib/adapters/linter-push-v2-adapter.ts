@@ -1,14 +1,13 @@
 import * as linter from 'atom-linter';
 import * as atom from 'atom';
 import {
+  Diagnostic,
+  DiagnosticCode,
   DiagnosticSeverity,
   LanguageClientConnection,
-  Diagnostic,
   PublishDiagnosticsParams,
 } from '../languageclient';
 import Convert from '../convert';
-
-export type DiagnosticCode = number | string;
 
 // Public: Listen to diagnostics messages from the language server and publish them
 // to the user by way of the Linter Push (Indie) v2 API supported by Atom IDE UI.

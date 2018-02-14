@@ -410,6 +410,8 @@ export class LanguageClientConnection extends EventEmitter {
   }
 }
 
+export type DiagnosticCode = number | string;
+
 /**
  * Contains additional information about the context in which a completion request is triggered.
  */
