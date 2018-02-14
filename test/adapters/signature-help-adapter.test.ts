@@ -1,7 +1,7 @@
-import {Disposable, Point} from 'atom';
+import { Disposable, Point } from 'atom';
 import SignatureHelpAdapter from '../../lib/adapters/signature-help-adapter';
-import {createFakeEditor, createSpyConnection} from '../helpers';
-import {expect} from 'chai';
+import { createFakeEditor, createSpyConnection } from '../helpers';
+import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { ActiveServer } from '../../lib/server-manager';
 
@@ -15,40 +15,37 @@ describe('SignatureHelpAdapter', () => {
 
   describe('can attach to a server', () => {
     it('subscribes to onPublishDiagnostics', async () => {
-      // const connection = createSpyConnection();
-      // (<any>connection).signatureHelp = sinon.stub().resolves({signatures: []});
+      const connection = createSpyConnection();
+      (connection as any).signatureHelp = sinon.stub().resolves({signatures: []});
 
-      // const adapter = new SignatureHelpAdapter(
-      //   {
-      //     connection,
-      //     capabilities: {
-      //       signatureHelpProvider: {
-      //         triggerCharacters: ['(', ','],
-      //       },
-      //     },
-      //     disposable: null,
-      //     projectPath: '',
-      //     process: null
-      //   },
-      //   ['source.js'],
-      // );
-      // const spy = sinon.stub().returns(new Disposable());
-      // adapter.attach(spy);
-      // expect(spy.calledOnce).to.be.true;
-      // const provider = spy.firstCall.args[0];
-      // expect(provider.priority).to.equal(1);
-      // expect(provider.grammarScopes).to.deep.equal(['source.js']);
-      // expect(provider.triggerCharacters).to.deep.equal(new Set(['(', ',']));
-      // expect(typeof provider.getSignatureHelp).to.equal('function');
+      const adapter = new SignatureHelpAdapter(
+        {
+          connection,
+          capabilities: {
+            signatureHelpProvider: {
+              triggerCharacters: ['(', ','],
+            },
+          },
+        } as any,
+        ['source.js'],
+      );
+      const spy = sinon.stub().returns(new Disposable());
+      adapter.attach(spy);
+      expect(spy.calledOnce).to.be.true;
+      const provider = spy.firstCall.args[0];
+      expect(provider.priority).to.equal(1);
+      expect(provider.grammarScopes).to.deep.equal(['source.js']);
+      expect(provider.triggerCharacters).to.deep.equal(new Set(['(', ',']));
+      expect(typeof provider.getSignatureHelp).to.equal('function');
 
-      // const result = await provider.getSignatureHelp(createFakeEditor('test.txt'), new Point(0, 1));
-      // expect((<any>connection).signatureHelp.calledOnce).to.be.true;
-      // const params = (<any>connection).signatureHelp.firstCall.args[0];
-      // expect(params).to.deep.equal({
-      //   textDocument: {uri: 'file:///test.txt'},
-      //   position: {line: 0, character: 1},
-      // });
-      // expect(result).to.deep.equal({signatures: []});
+      const result = await provider.getSignatureHelp(createFakeEditor('test.txt'), new Point(0, 1));
+      expect((connection as any).signatureHelp.calledOnce).to.be.true;
+      const params = (connection as any).signatureHelp.firstCall.args[0];
+      expect(params).to.deep.equal({
+        textDocument: {uri: 'file:///test.txt'},
+        position: {line: 0, character: 1},
+      });
+      expect(result).to.deep.equal({signatures: []});
     });
   });
 });
