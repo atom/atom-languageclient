@@ -10,8 +10,12 @@ import {
   ServerCapabilities,
   TextEdit,
 } from '../languageclient';
-import { Point, TextEditor } from 'atom';
-import { AutocompleteSuggestion, AutocompleteRequest } from 'atom2';
+import {
+  AutocompleteSuggestion,
+  AutocompleteRequest,
+  Point,
+  TextEditor,
+} from 'atom';
 import { CancellationTokenSource } from 'vscode-jsonrpc';
 import { ActiveServer } from '../server-manager';
 import Convert from '../convert';

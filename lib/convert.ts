@@ -1,7 +1,6 @@
 
 import * as ls from './languageclient';
-import { Point, Range, TextEditor } from 'atom';
-import { ProjectFileEvent } from 'atom2';
+import { Point, ProjectFileEvent, Range, TextEditor } from 'atom';
 import { Diagnostic, DiagnosticType, TextEdit } from 'atom-ide';
 import * as URL from 'url';
 

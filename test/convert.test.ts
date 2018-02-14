@@ -1,8 +1,7 @@
 import * as ls from '../lib/languageclient';
 import Convert from '../lib/convert';
-import { Point, Range, TextEditor } from 'atom';
+import { Point, ProjectFileEvent, Range, TextEditor } from 'atom';
 import { expect } from 'chai';
-import { ProjectFileEvent } from 'atom2';
 
 let originalPlatform;
 const setProcessPlatform = (platform) => {

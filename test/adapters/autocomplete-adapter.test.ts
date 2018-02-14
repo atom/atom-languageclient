@@ -1,9 +1,15 @@
 import AutoCompleteAdapter from '../../lib/adapters/autocomplete-adapter';
 import { ActiveServer } from '../../lib/server-manager.js';
 import * as ls from '../../lib/languageclient';
-import * as atom2 from 'atom2';
 import * as sinon from 'sinon';
-import { CompositeDisposable, Point, Range, TextEditor } from 'atom';
+import {
+  AutocompleteRequest,
+  AutocompleteSuggestion,
+  CompositeDisposable,
+  Point,
+  Range,
+  TextEditor,
+} from 'atom';
 import { expect } from 'chai';
 import { createSpyConnection, createFakeEditor } from '../helpers.js';
 import { ChildProcess } from 'child_process';
@@ -26,7 +32,7 @@ describe('AutoCompleteAdapter', () => {
     (global as any).sinon.restore();
   });
 
-  const request: atom2.AutocompleteRequest = {
+  const request: AutocompleteRequest = {
     editor: createFakeEditor(),
     bufferPosition: new Point(123, 456),
     prefix: 'def',
@@ -100,7 +106,7 @@ describe('AutoCompleteAdapter', () => {
 
     it('resolves suggestions via LSP given an AutoCompleteRequest', async () => {
       const autoCompleteAdapter = new AutoCompleteAdapter();
-      const results: atom2.AutocompleteSuggestion[] = await autoCompleteAdapter.getSuggestions(server, request);
+      const results: AutocompleteSuggestion[] = await autoCompleteAdapter.getSuggestions(server, request);
       expect(results[2].description).equals(undefined);
       const resolvedItem = await autoCompleteAdapter.completeSuggestion(server, results[2], request);
       expect(resolvedItem && resolvedItem.description).equals('a very exciting variable');
@@ -176,7 +182,7 @@ describe('AutoCompleteAdapter', () => {
         detail: 'keyword',
         documentation: 'a truly useful keyword',
       };
-      const result: atom2.AutocompleteSuggestion = { };
+      const result: AutocompleteSuggestion = { };
       AutoCompleteAdapter.completionItemToSuggestion(completionItem, result, request);
       expect(result.text).equals('insert');
       expect(result.displayText).equals('label');
@@ -202,7 +208,7 @@ describe('AutoCompleteAdapter', () => {
           newText: 'newText',
         },
       };
-      const autocompleteRequest: atom2.AutocompleteRequest = {
+      const autocompleteRequest: AutocompleteRequest = {
         editor: createFakeEditor(),
         bufferPosition: new Point(123, 456),
         prefix: 'def',
@@ -272,7 +278,7 @@ describe('AutoCompleteAdapter', () => {
     };
 
     it('does not do anything if there is no textEdit', () => {
-      const completionItem: atom2.AutocompleteSuggestion = {};
+      const completionItem: AutocompleteSuggestion = {};
       AutoCompleteAdapter.applyTextEditToSuggestion(null, new TextEditor(), completionItem);
       expect(completionItem).deep.equals({});
     });
@@ -288,7 +294,7 @@ describe('AutoCompleteAdapter', () => {
       const editor = new TextEditor();
       sinon.stub(editor, 'getTextInBufferRange').returns('replacementPrefix');
 
-      const completionItem: atom2.AutocompleteSuggestion = {};
+      const completionItem: AutocompleteSuggestion = {};
       AutoCompleteAdapter.applyTextEditToSuggestion(textEdit, editor, completionItem);
       expect(completionItem.replacementPrefix).equals('replacementPrefix');
       expect(completionItem.text).equals('newText');

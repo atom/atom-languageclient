@@ -8,7 +8,7 @@ export default class Utils {
    */
   public static getWordAtPosition(editor: TextEditor, position: Point): Range {
     const scopeDescriptor = editor.scopeDescriptorForBufferPosition(position);
-    const nonWordCharacters = Utils.escapeRegExp((editor as any).getNonWordCharacters(scopeDescriptor));
+    const nonWordCharacters = Utils.escapeRegExp(editor.getNonWordCharacters(scopeDescriptor));
     const range = Utils._getRegexpRangeAtPosition(
       editor.getBuffer(),
       position,

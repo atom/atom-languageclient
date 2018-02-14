@@ -5,8 +5,11 @@ import {
   ShowMessageParams,
   ShowMessageRequestParams,
 } from '../languageclient';
-import { Notification, NotificationOptions } from 'atom';
-import { NotificationButton } from 'atom2';
+import {
+  Notification,
+  NotificationButton,
+  NotificationOptions,
+} from 'atom';
 
 // Public: Adapts Atom's user notifications to those of the language server protocol.
 export default class NotificationsAdapter {

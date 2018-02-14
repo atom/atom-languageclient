@@ -12,9 +12,6 @@
             "atom-ide": [
                 "./typings/atom-ide/index.d.ts"
             ],
-            "atom2": [
-                "./typings/atom/index.d.ts"
-            ],
             "atom-linter": [
                 "./typings/atom-linter/index.d.ts"
             ]

@@ -3,7 +3,6 @@ import * as ls from './languageclient';
 import * as rpc from 'vscode-jsonrpc';
 import * as path from 'path';
 import * as atomIde from 'atom-ide';
-import * as atom2 from 'atom2';
 import * as linter from 'atom-linter';
 import { Socket } from 'net';
 import { ConsoleLogger, NullLogger, Logger } from './logger';
@@ -11,6 +10,10 @@ import { ServerManager, ActiveServer } from './server-manager.js';
 import Convert from './convert.js';
 
 import {
+  AutocompleteDidInsert,
+  AutocompleteProvider,
+  AutocompleteRequest,
+  AutocompleteSuggestion,
   CompositeDisposable,
   Disposable,
   Point,
@@ -43,7 +46,7 @@ export default class AutoLanguageClient {
   private _serverManager: ServerManager;
   private _linterDelegate: linter.V2IndieDelegate;
   private _signatureHelpRegistry: atomIde.SignatureHelpRegistry;
-  private _lastAutocompleteRequest: atom2.AutocompleteRequest;
+  private _lastAutocompleteRequest: AutocompleteRequest;
   private _isDeactivating: boolean;
 
   // Available if consumeBusySignal is setup
@@ -405,11 +408,11 @@ export default class AutoLanguageClient {
   }
 
   protected isFileInProject(editor: TextEditor, projectPath: string): boolean {
-    return ((editor as any).getURI() || '').startsWith(projectPath);
+    return (editor.getURI() || '').startsWith(projectPath);
   }
 
   // Autocomplete+ via LS completion---------------------------------------
-  public provideAutocomplete(): atom2.AutocompleteProvider {
+  public provideAutocomplete(): AutocompleteProvider {
     return {
       selector: this.getGrammarScopes()
         .map((g) => '.' + g)
@@ -424,8 +427,8 @@ export default class AutoLanguageClient {
   }
 
   private async getSuggestions(
-    request: atom2.AutocompleteRequest,
-  ): Promise<atom2.AutocompleteSuggestion[]> {
+    request: AutocompleteRequest,
+  ): Promise<AutocompleteSuggestion[]> {
     const server = await this._serverManager.getServer(request.editor);
     if (server == null || !AutocompleteAdapter.canAdapt(server.capabilities)) {
       return [];
@@ -437,7 +440,7 @@ export default class AutoLanguageClient {
   }
 
   private async getSuggestionDetailsOnSelect(
-    suggestion: atom2.AutocompleteSuggestion): Promise<atom2.AutocompleteSuggestion | null> {
+    suggestion: AutocompleteSuggestion): Promise<AutocompleteSuggestion | null> {
     const request = this._lastAutocompleteRequest;
     if (request == null) { return null; }
     const server = await this._serverManager.getServer(request.editor);
@@ -450,12 +453,12 @@ export default class AutoLanguageClient {
 
   protected onDidConvertAutocomplete(
     completionItem: ls.CompletionItem,
-    suggestion: atom2.AutocompleteSuggestion,
-    request: atom2.AutocompleteRequest,
+    suggestion: AutocompleteSuggestion,
+    request: AutocompleteRequest,
   ): void {
   }
 
-  protected onDidInsertSuggestion(arg: atom2.AutocompleteDidInsert): void {}
+  protected onDidInsertSuggestion(arg: AutocompleteDidInsert): void {}
 
   // Definitions via LS documentHighlight and gotoDefinition------------
   public provideDefinitions(): atomIde.DefinitionProvider {

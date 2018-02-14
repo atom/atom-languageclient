@@ -7,9 +7,8 @@ import * as path from 'path';
 import * as cp from 'child_process';
 import * as ls from './languageclient';
 import * as atomIde from 'atom-ide';
-import * as atom2 from 'atom2';
 import Convert from './convert';
-import { CompositeDisposable, TextEditor } from 'atom';
+import { CompositeDisposable, ProjectFileEvent, TextEditor } from 'atom';
 
 // The necessary elements for a server that has started or is starting.
 export interface ActiveServer {
@@ -288,7 +287,7 @@ export class ServerManager {
     this.updateNormalizedProjectPaths();
   }
 
-  public projectFilesChanged(fileEvents: atom2.ProjectFileEvent[]): void {
+  public projectFilesChanged(fileEvents: ProjectFileEvent[]): void {
     if (this._activeServers.length === 0) {
       return;
     }

@@ -12,12 +12,10 @@ import {
 import {
   CompositeDisposable,
   Disposable,
-  TextEditor,
-} from 'atom';
-import {
   DidStopChangingEvent,
   TextEditEvent,
-} from 'atom2';
+  TextEditor,
+} from 'atom';
 
 // Public: Synchronizes the documents between Atom and the language server by notifying
 // each end of changes, opening, closing and other events as well as sending and applying
