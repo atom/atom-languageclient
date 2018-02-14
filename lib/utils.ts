@@ -1,16 +1,14 @@
-// @flow
-
-import {Range} from 'atom';
-import {CancellationTokenSource} from 'vscode-jsonrpc';
+import { Point, TextBuffer, TextEditor, Range } from 'atom';
+import { CancellationToken, CancellationTokenSource } from 'vscode-jsonrpc';
 
 export default class Utils {
   /**
    * Obtain the range of the word at the given editor position.
    * Uses the non-word characters from the position's grammar scope.
    */
-  static getWordAtPosition(editor: TextEditor, position: atom$Point): Range {
+  static getWordAtPosition(editor: TextEditor, position: Point): Range {
     const scopeDescriptor = editor.scopeDescriptorForBufferPosition(position);
-    const nonWordCharacters = Utils.escapeRegExp(editor.getNonWordCharacters(scopeDescriptor));
+    const nonWordCharacters = Utils.escapeRegExp((<any>editor).getNonWordCharacters(scopeDescriptor));
     const range = Utils._getRegexpRangeAtPosition(
       editor.getBuffer(),
       position,
@@ -27,9 +25,9 @@ export default class Utils {
     return string.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
   }
 
-  static _getRegexpRangeAtPosition(buffer: atom$TextBuffer, position: atom$Point, wordRegex: RegExp): ?Range {
+  static _getRegexpRangeAtPosition(buffer: TextBuffer, position: Point, wordRegex: RegExp): Range | null {
     const {row, column} = position;
-    const rowRange = buffer.rangeForRow(row);
+    const rowRange = buffer.rangeForRow(row, false);
     let matchData;
     // Extract the expression from the row text.
     buffer.scanInRange(wordRegex, rowRange, data => {
@@ -56,7 +54,7 @@ export default class Utils {
    * CancellationToken for that connection then create and store a new
    * CancellationToken to be used for the current request.
    */
-  static cancelAndRefreshCancellationToken<T>(
+  static cancelAndRefreshCancellationToken<T extends object>(
     key: T,
     cancellationTokens: WeakMap<T, CancellationTokenSource>): CancellationToken {
 
@@ -70,7 +68,7 @@ export default class Utils {
     return cancellationToken.token;
   }
 
-  static async doWithCancellationToken<T1, T2>(
+  static async doWithCancellationToken<T1 extends object, T2>(
     key: T1,
     cancellationTokens: WeakMap<T1, CancellationTokenSource>,
     work: (CancellationToken) => Promise<T2>,

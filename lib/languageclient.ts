@@ -223,7 +223,7 @@ export class LanguageClientConnection extends EventEmitter {
   // * `params` The {TextDocumentPositionParams} of a symbol for which one or more {Location}s
   // that define that symbol are required.
   // Returns a {Promise} containing either a single {Location} or an {Array} of many {Location}s.
-  gotoDefinition(params: lsp.TextDocumentPositionParams): Promise<Location | Array<Location>> {
+  gotoDefinition(params: lsp.TextDocumentPositionParams): Promise<lsp.Location | Array<lsp.Location>> {
     return this._sendRequest('textDocument/definition', params);
   }
 
@@ -232,7 +232,7 @@ export class LanguageClientConnection extends EventEmitter {
   // * `params` The {TextDocumentPositionParams} of a symbol for which all referring {Location}s
   // are desired.
   // Returns a {Promise} containing an {Array} of {Location}s that reference this symbol.
-  findReferences(params: lsp.TextDocumentPositionParams): Promise<Array<Location>> {
+  findReferences(params: lsp.ReferenceParams): Promise<Array<lsp.Location>> {
     return this._sendRequest('textDocument/references', params);
   }
 

@@ -1,9 +1,8 @@
-// @flow
-
-import {LanguageClientConnection, type Location, type ServerCapabilities} from '../languageclient';
+import {LanguageClientConnection, Location, ServerCapabilities} from '../languageclient';
 import Convert from '../convert';
 import Utils from '../utils';
-import {Range} from 'atom';
+import { Point, TextEditor, Range } from 'atom';
+import * as atomIde from 'atom-ide';
 
 // Public: Adapts the language server definition provider to the
 // Atom IDE UI Definitions package for 'Go To Definition' functionality.
@@ -37,8 +36,8 @@ export default class DefinitionAdapter {
     serverCapabilities: ServerCapabilities,
     languageName: string,
     editor: TextEditor,
-    point: atom$Point,
-  ): Promise<?atomIde$DefinitionQueryResult> {
+    point: Point,
+  ): Promise<atomIde.DefinitionQueryResult | null> {
     const documentPositionParams = Convert.editorToTextDocumentPositionParams(editor, point);
     const definitionLocations = DefinitionAdapter.normalizeLocations(
       await connection.gotoDefinition(documentPositionParams),
@@ -67,7 +66,7 @@ export default class DefinitionAdapter {
   // * `locationResult` either a single {Location} object or an {Array} of {Locations}
   //
   // Returns an {Array} of {Location}s or {null} if the locationResult was null.
-  static normalizeLocations(locationResult: Location | Array<Location>): ?Array<Location> {
+  static normalizeLocations(locationResult: Location | Array<Location>): Array<Location> | null {
     if (locationResult == null) {
       return null;
     }
@@ -80,7 +79,7 @@ export default class DefinitionAdapter {
   // * `languageName` The name of the language these objects are written in.
   //
   // Returns an {Array} of {Definition}s that represented the converted {Location}s.
-  static convertLocationsToDefinitions(locations: Array<Location>, languageName: string): Array<atomIde$Definition> {
+  static convertLocationsToDefinitions(locations: Array<Location>, languageName: string): Array<atomIde.Definition> {
     return locations.map(d => ({
       path: Convert.uriToPath(d.uri),
       position: Convert.positionToPoint(d.range.start),

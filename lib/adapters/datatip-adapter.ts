@@ -1,6 +1,6 @@
-// @flow
-
-import {LanguageClientConnection, type MarkedString, type ServerCapabilities} from '../languageclient';
+import { LanguageClientConnection, MarkupContent, MarkedString, ServerCapabilities, MarkupKind } from '../languageclient';
+import { Point, TextEditor, Range } from 'atom';
+import * as atomIde from 'atom-ide';
 import Convert from '../convert';
 import Utils from '../utils';
 
@@ -29,17 +29,17 @@ export default class DatatipAdapter {
   // Returns a {Promise} containing the {Datatip} to display or {null} if no Datatip is available.
   async getDatatip(
     connection: LanguageClientConnection,
-    editor: atom$TextEditor,
-    point: atom$Point,
-  ): Promise<?atomIde$Datatip> {
+    editor: TextEditor,
+    point: Point,
+  ): Promise<atomIde.Datatip | null> {
     const documentPositionParams = Convert.editorToTextDocumentPositionParams(editor, point);
 
     const hover = await connection.hover(documentPositionParams);
     if (
       hover == null ||
       hover.contents == null ||
-      // This intentionally covers both empty strings and empty arrays.
-      hover.contents.length === 0
+      (typeof hover.contents === 'string' && hover.contents.length === 0) ||
+      (Array.isArray(hover.contents) && hover.contents.length === 0)
     ) {
       return null;
     }
@@ -51,18 +51,31 @@ export default class DatatipAdapter {
       DatatipAdapter.convertMarkedString(editor, str),
     );
 
-    return {range, markedStrings};
+    return { range, markedStrings };
   }
 
-  static convertMarkedString(editor: atom$TextEditor, markedString: MarkedString): atomIde$MarkedString {
-    if (typeof markedString === 'object') {
-      return {
-        type: 'snippet',
-        // TODO: find a better mapping from language -> grammar
-        grammar: atom.grammars.grammarForScopeName(`source.${markedString.language}`) || editor.getGrammar(),
-        value: markedString.value,
-      };
+  static convertMarkedString(editor: TextEditor, markedString: MarkedString | MarkupContent): atomIde.MarkedString {
+    if (typeof markedString === 'string') {
+      return { type: 'markdown', value: markedString };
     }
-    return {type: 'markdown', value: markedString};
+    else {
+      if ((<MarkupContent>markedString).kind) {
+        return {
+          type: 'markdown',
+          value: markedString.value
+        };
+      }
+      // Must check as <{language: string}> to disambiguate between
+      // string and the more explicit object type because MarkedString
+      // is a union of the two types
+      else if ((<{language: string}>markedString).language) {
+        return {
+          type: 'snippet',
+          // TODO: find a better mapping from language -> grammar
+          grammar: atom.grammars.grammarForScopeName(`source.${(<{language: string}>markedString).language}`) || editor.getGrammar(),
+          value: markedString.value,
+        };
+      }
+    }
   }
 }

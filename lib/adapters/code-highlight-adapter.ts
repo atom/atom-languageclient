@@ -1,7 +1,6 @@
-// @flow
-
-import invariant from 'assert';
-import {LanguageClientConnection, type ServerCapabilities} from '../languageclient';
+import assert = require('assert');
+import { Point, TextEditor, Range } from 'atom';
+import { LanguageClientConnection, ServerCapabilities } from '../languageclient';
 import Convert from '../convert';
 
 export default class CodeHighlightAdapter {
@@ -23,10 +22,10 @@ export default class CodeHighlightAdapter {
   static async highlight(
     connection: LanguageClientConnection,
     serverCapabilities: ServerCapabilities,
-    editor: atom$TextEditor,
-    position: atom$Point,
-  ): Promise<?Array<atom$Range>> {
-    invariant(serverCapabilities.documentHighlightProvider, 'Must have the documentHighlight capability');
+    editor: TextEditor,
+    position: Point,
+  ): Promise<Array<Range> | null> {
+    assert(serverCapabilities.documentHighlightProvider, 'Must have the documentHighlight capability');
     const highlights = await connection.documentHighlight(Convert.editorToTextDocumentPositionParams(editor, position));
     return highlights.map(highlight => {
       return Convert.lsRangeToAtomRange(highlight.range);

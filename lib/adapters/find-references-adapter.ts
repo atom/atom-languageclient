@@ -1,11 +1,11 @@
-// @flow
-
 import {
   LanguageClientConnection,
-  type Location,
-  type ServerCapabilities,
-  type TextDocumentPositionParams,
+  Location,
+  ServerCapabilities,
+  ReferenceParams
 } from '../languageclient';
+import { Point, TextEditor } from 'atom';
+import * as atomIde from 'atom-ide';
 import Convert from '../convert';
 
 // Public: Adapts the language server definition provider to the
@@ -34,18 +34,18 @@ export default class FindReferencesAdapter {
   // could find.
   async getReferences(
     connection: LanguageClientConnection,
-    editor: atom$TextEditor,
-    point: atom$Point,
-    projectRoot: ?string,
-  ): Promise<?atomIde$FindReferencesReturn> {
+    editor: TextEditor,
+    point: Point,
+    projectRoot: string | null,
+  ): Promise<atomIde.FindReferencesReturn | null> {
     const locations = await connection.findReferences(
-      FindReferencesAdapter.createTextDocumentPositionParams(editor, point),
+      FindReferencesAdapter.createReferenceParams(editor, point),
     );
     if (locations == null) {
       return null;
     }
 
-    const references = locations.map(FindReferencesAdapter.locationToReference);
+    const references: atomIde.Reference[] = locations.map(FindReferencesAdapter.locationToReference);
     return {
       type: 'data',
       baseUri: projectRoot || '',
@@ -54,13 +54,13 @@ export default class FindReferencesAdapter {
     };
   }
 
-  // Public: Create a {TextDocumentPositionParams} from a given {TextEditor} for a specific {Point}.
+  // Public: Create a {ReferenceParams} from a given {TextEditor} for a specific {Point}.
   //
   // * `editor` A {TextEditor} that represents the document.
   // * `point` A {Point} within the document.
   //
-  // Returns a {DocumentPositionParams} built from the given parameters.
-  static createTextDocumentPositionParams(editor: atom$TextEditor, point: atom$Point): TextDocumentPositionParams {
+  // Returns a {ReferenceParams} built from the given parameters.
+  static createReferenceParams(editor: TextEditor, point: Point): ReferenceParams {
     return {
       textDocument: Convert.editorToTextDocumentIdentifier(editor),
       position: Convert.pointToPosition(point),
@@ -73,7 +73,7 @@ export default class FindReferencesAdapter {
   // * `location` A {Location} to convert.
   //
   // Returns a {Reference} equivalent to the given {Location}.
-  static locationToReference(location: Location): atomIde$Reference {
+  static locationToReference(location: Location): atomIde.Reference {
     return {
       uri: Convert.uriToPath(location.uri),
       name: null,
@@ -83,9 +83,9 @@ export default class FindReferencesAdapter {
 
   // Public: Get a symbol name from a {TextEditor} for a specific {Point} in the document.
   static getReferencedSymbolName(
-    editor: atom$TextEditor,
-    point: atom$Point,
-    references: Array<atomIde$Reference>,
+    editor: TextEditor,
+    point: Point,
+    references: Array<atomIde.Reference>,
   ): string {
     if (references.length === 0) {
       return '';
