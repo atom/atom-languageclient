@@ -11,7 +11,7 @@ import * as fs from 'fs';
 //                      percentage on the callback can not be determined.
 //
 // Returns a {Promise} that will accept when complete.
-export default (async function downloadFile(
+export default (async function DownloadFile(
   sourceUrl: string,
   targetFile: string,
   progressCallback?: ByteProgressCallback,
@@ -81,4 +81,4 @@ async function streamWithProgress(
 
 // Public: Progress callback function signature indicating the bytesDone and
 // optional percentage when length is known.
-export type ByteProgressCallback = (bytesDone: number, percent?: number) => {};
+export type ByteProgressCallback = (bytesDone: number, percent?: number) => void;
