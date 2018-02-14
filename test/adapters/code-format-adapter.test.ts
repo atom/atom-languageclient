@@ -1,10 +1,10 @@
-import {Range} from 'atom';
-import {expect} from 'chai';
+import { Range } from 'atom';
+import { expect } from 'chai';
 import * as sinon from 'sinon';
 import Convert from '../../lib/convert';
 import * as ls from '../../lib/languageclient';
 import CodeFormatAdapter from '../../lib/adapters/code-format-adapter';
-import {createSpyConnection, createFakeEditor} from '../helpers.js';
+import { createSpyConnection, createFakeEditor } from '../helpers.js';
 
 describe('CodeFormatAdapter', () => {
   let fakeEditor;

@@ -13,7 +13,7 @@ export default class Convert {
   // * `filePath` A file path to convert to a Uri.
   //
   // Returns the Uri corresponding to the path. e.g. file:///a/b/c.txt
-  static pathToUri(filePath: string): string {
+  public static pathToUri(filePath: string): string {
     let newPath = filePath.replace(/\\/g, '/');
     if (newPath[0] !== '/') {
       newPath = `/${newPath}`;
@@ -28,7 +28,7 @@ export default class Convert {
   // Returns a file path corresponding to the Uri. e.g. /a/b/c.txt
   // If the Uri does not begin file: then it is returned as-is to allow Atom
   // to deal with http/https sources in the future.
-  static uriToPath(uri: string): string {
+  public static uriToPath(uri: string): string {
     const url = URL.parse(uri);
     if (url.protocol !== 'file:' || url.path === undefined) {
       return uri;
@@ -50,7 +50,7 @@ export default class Convert {
   // * `point` An Atom {Point} to convert from.
   //
   // Returns the {Position} representation of the Atom {PointObject}.
-  static pointToPosition(point: Point): ls.Position {
+  public static pointToPosition(point: Point): ls.Position {
     return {line: point.row, character: point.column};
   }
 
@@ -59,7 +59,7 @@ export default class Convert {
   // * 'position' A language server {Position} to convert from.
   //
   // Returns the Atom {PointObject} representation of the given {Position}.
-  static positionToPoint(position: ls.Position): Point {
+  public static positionToPoint(position: ls.Position): Point {
     return new Point(position.line, position.character);
   }
 
@@ -68,7 +68,7 @@ export default class Convert {
   // * 'range' A language server {Range} to convert from.
   //
   // Returns the Atom {Range} representation of the given language server {Range}.
-  static lsRangeToAtomRange(range: ls.Range): Range {
+  public static lsRangeToAtomRange(range: ls.Range): Range {
     return new Range(Convert.positionToPoint(range.start), Convert.positionToPoint(range.end));
   }
 
@@ -77,7 +77,7 @@ export default class Convert {
   // * 'range' An Atom {Range} to convert from.
   //
   // Returns the language server {Range} representation of the given Atom {Range}.
-  static atomRangeToLSRange(range: Range): ls.Range {
+  public static atomRangeToLSRange(range: Range): ls.Range {
     return {
       start: Convert.pointToPosition(range.start),
       end: Convert.pointToPosition(range.end),
@@ -90,7 +90,7 @@ export default class Convert {
   //
   // Returns a {TextDocumentIdentifier} that has a `uri` property with the Uri for the
   // given editor's path.
-  static editorToTextDocumentIdentifier(editor: TextEditor): ls.TextDocumentIdentifier {
+  public static editorToTextDocumentIdentifier(editor: TextEditor): ls.TextDocumentIdentifier {
     return {uri: Convert.pathToUri(editor.getPath() || '')};
   }
 
@@ -102,7 +102,7 @@ export default class Convert {
   //
   // Returns a {TextDocumentPositionParams} that has textDocument property with the editors {TextDocumentIdentifier}
   // and a position property with the supplied point (or current cursor position when not specified).
-  static editorToTextDocumentPositionParams(
+  public static editorToTextDocumentPositionParams(
     editor: TextEditor,
     point?: Point,
   ): ls.TextDocumentPositionParams {
@@ -119,9 +119,9 @@ export default class Convert {
   //
   // Returns a single comma-separated list of CSS selectors targetting the grammars of Atom text editors.
   // e.g. `['c', 'cpp']` => `'atom-text-editor[data-grammar='c'], atom-text-editor[data-grammar='cpp']`
-  static grammarScopesToTextEditorScopes(grammarScopes: Array<string>): string {
+  public static grammarScopesToTextEditorScopes(grammarScopes: string[]): string {
     return grammarScopes
-      .map(g => `atom-text-editor[data-grammar="${Convert.encodeHTMLAttribute(g.replace(/\./g, ' '))}"]`)
+      .map((g) => `atom-text-editor[data-grammar="${Convert.encodeHTMLAttribute(g.replace(/\./g, ' '))}"]`)
       .join(', ');
   }
 
@@ -132,15 +132,15 @@ export default class Convert {
   //
   // Returns a string that is HTML attribute encoded by replacing &, <, >, " and ' with their HTML entity
   // named equivalents.
-  static encodeHTMLAttribute(s: string): string {
+  public static encodeHTMLAttribute(s: string): string {
     const attributeMap = {
       '&': '&amp;',
       '<': '&lt;',
       '>': '&gt;',
       '"': '&quot;',
-      "'": '&apos;',
+      '\'': '&apos;',
     };
-    return s.replace(/[&<>'"]/g, c => attributeMap[c]);
+    return s.replace(/[&<>'"]/g, (c) => attributeMap[c]);
   }
 
   // Public: Convert an Atom File Event as received from atom.project.onDidChangeFiles and convert
@@ -151,7 +151,7 @@ export default class Convert {
   // * 'fileEvent' An {atom$ProjectFileEvent} to be converted.
   //
   // Returns an array of LSP {ls.FileEvent} objects that equivalent conversions to the fileEvent parameter.
-  static atomFileEventToLSFileEvents(fileEvent: ProjectFileEvent): ls.FileEvent[] {
+  public static atomFileEventToLSFileEvents(fileEvent: ProjectFileEvent): ls.FileEvent[] {
     switch (fileEvent.action) {
       case 'created':
         return [{uri: Convert.pathToUri(fileEvent.path), type: ls.FileChangeType.Created}];
@@ -174,7 +174,7 @@ export default class Convert {
     }
   }
 
-  static atomIdeDiagnosticToLSDiagnostic(diagnostic: Diagnostic): ls.Diagnostic {
+  public static atomIdeDiagnosticToLSDiagnostic(diagnostic: Diagnostic): ls.Diagnostic {
     return {
       range: Convert.atomRangeToLSRange(diagnostic.range),
       severity: Convert.diagnosticTypeToLSSeverity(diagnostic.type),
@@ -183,7 +183,7 @@ export default class Convert {
     };
   }
 
-  static diagnosticTypeToLSSeverity(type: DiagnosticType): ls.DiagnosticSeverity {
+  public static diagnosticTypeToLSSeverity(type: DiagnosticType): ls.DiagnosticSeverity {
     switch (type) {
       case 'Error':
         return ls.DiagnosticSeverity.Error;
@@ -202,7 +202,7 @@ export default class Convert {
   // * `textEdits` The language server protocol {TextEdit} objects to convert.
   //
   // Returns an {Array} of Atom {TextEdit} objects.
-  static convertLsTextEdits(textEdits: Array<ls.TextEdit>): Array<TextEdit> {
+  public static convertLsTextEdits(textEdits: ls.TextEdit[]): TextEdit[] {
     return (textEdits || []).map(Convert.convertLsTextEdit);
   }
 
@@ -212,7 +212,7 @@ export default class Convert {
   // * `textEdits` The language server protocol {TextEdit} objects to convert.
   //
   // Returns an Atom {TextEdit} object.
-  static convertLsTextEdit(textEdit: ls.TextEdit): TextEdit {
+  public static convertLsTextEdit(textEdit: ls.TextEdit): TextEdit {
     return {
       oldRange: Convert.lsRangeToAtomRange(textEdit.range),
       newText: textEdit.newText,

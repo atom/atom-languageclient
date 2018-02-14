@@ -1,4 +1,4 @@
-import {expect} from 'chai';
+import { expect } from 'chai';
 import * as path from 'path';
 import * as sinon from 'sinon';
 import ApplyEditAdapter from '../../lib/adapters/apply-edit-adapter';
@@ -17,11 +17,11 @@ describe('ApplyEditAdapter', () => {
     });
 
     afterEach(() => {
-      (<any>atom).notifications.addError.restore();
+      (atom as any).notifications.addError.restore();
     });
 
     it('works for open files', async () => {
-      const editor = <TextEditor>await atom.workspace.open(TEST_PATH1);
+      const editor = await atom.workspace.open(TEST_PATH1) as TextEditor;
       editor.setText('abc\ndef\n');
 
       const result = await ApplyEditAdapter.onApplyEdit({
@@ -56,7 +56,7 @@ describe('ApplyEditAdapter', () => {
     });
 
     it('works with TextDocumentEdits', async () => {
-      const editor = <TextEditor>await atom.workspace.open(TEST_PATH1);
+      const editor = await atom.workspace.open(TEST_PATH1) as TextEditor;
       editor.setText('abc\ndef\n');
 
       const result = await ApplyEditAdapter.onApplyEdit({
@@ -112,12 +112,12 @@ describe('ApplyEditAdapter', () => {
       });
 
       expect(result.applied).to.equal(true);
-      const editor = <TextEditor>await atom.workspace.open(TEST_PATH2);
+      const editor = await atom.workspace.open(TEST_PATH2) as TextEditor;
       expect(editor.getText()).to.equal('abc');
     });
 
     it('fails with overlapping edits', async () => {
-      const editor = <TextEditor>await atom.workspace.open(TEST_PATH3);
+      const editor = await atom.workspace.open(TEST_PATH3) as TextEditor;
       editor.setText('abcdef\n');
 
       const result = await ApplyEditAdapter.onApplyEdit({
@@ -145,7 +145,7 @@ describe('ApplyEditAdapter', () => {
 
       expect(result.applied).to.equal(false);
       expect(
-        (<any>atom).notifications.addError.calledWith('workspace/applyEdits failed', {
+        (atom as any).notifications.addError.calledWith('workspace/applyEdits failed', {
           description: 'Failed to apply edits.',
           detail: `Found overlapping edit ranges in ${TEST_PATH3}`,
         }),
@@ -172,7 +172,7 @@ describe('ApplyEditAdapter', () => {
       });
 
       expect(result.applied).to.equal(false);
-      const errorCalls = (<any>atom).notifications.addError.getCalls();
+      const errorCalls = (atom as any).notifications.addError.getCalls();
       expect(errorCalls.length).to.equal(1);
       expect(errorCalls[0].args[1].detail).to.equal(`Out of range edit on ${TEST_PATH4}:1:2`);
     });

@@ -1,13 +1,13 @@
 import LinterPushV2Adapter from '../../lib/adapters/linter-push-v2-adapter';
 import * as ls from '../../lib/languageclient';
-import {expect} from 'chai';
-import {Point, Range} from 'atom';
+import { expect } from 'chai';
+import { Point, Range } from 'atom';
 
 const messageUrl = 'dummy';
-const messageSolutions: Array<any> = ['dummy'];
+const messageSolutions: any[] = ['dummy'];
 
 class CustomLinterPushV2Adapter extends LinterPushV2Adapter {
-  diagnosticToV2Message(path, diagnostic) {
+  public diagnosticToV2Message(path, diagnostic) {
     const message = super.diagnosticToV2Message(path, diagnostic);
     message.url = messageUrl;
     message.solutions = messageSolutions;
@@ -27,7 +27,7 @@ describe('CustomLinterPushV2Adapter', () => {
         },
         source: 'source',
         code: 'code',
-        severity: ls.DiagnosticSeverity.Information
+        severity: ls.DiagnosticSeverity.Information,
       };
 
       const connection: any = {onPublishDiagnostics() {}};

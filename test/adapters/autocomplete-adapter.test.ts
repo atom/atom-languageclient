@@ -1,12 +1,12 @@
 import AutoCompleteAdapter from '../../lib/adapters/autocomplete-adapter';
-import {ActiveServer} from '../../lib/server-manager.js';
+import { ActiveServer } from '../../lib/server-manager.js';
 import * as ls from '../../lib/languageclient';
 import * as atom2 from 'atom2';
 import * as sinon from 'sinon';
-import {CompositeDisposable, Point, Range, TextEditor} from 'atom';
-import {expect} from 'chai';
-import {createSpyConnection, createFakeEditor} from '../helpers.js';
-import {ChildProcess} from 'child_process';
+import { CompositeDisposable, Point, Range, TextEditor } from 'atom';
+import { expect } from 'chai';
+import { createSpyConnection, createFakeEditor } from '../helpers.js';
+import { ChildProcess } from 'child_process';
 
 describe('AutoCompleteAdapter', () => {
   function createActiveServerSpy() {
@@ -20,10 +20,10 @@ describe('AutoCompleteAdapter', () => {
   }
 
   beforeEach(() => {
-    (<any>global).sinon = sinon.sandbox.create();
+    (global as any).sinon = sinon.sandbox.create();
   });
   afterEach(() => {
-    (<any>global).sinon.restore();
+    (global as any).sinon.restore();
   });
 
   const request: atom2.AutocompleteRequest = {
@@ -100,7 +100,7 @@ describe('AutoCompleteAdapter', () => {
 
     it('resolves suggestions via LSP given an AutoCompleteRequest', async () => {
       const autoCompleteAdapter = new AutoCompleteAdapter();
-      const results: Array<atom2.AutocompleteSuggestion> = await autoCompleteAdapter.getSuggestions(server, request);
+      const results: atom2.AutocompleteSuggestion[] = await autoCompleteAdapter.getSuggestions(server, request);
       expect(results[2].description).equals(undefined);
       const resolvedItem = await autoCompleteAdapter.completeSuggestion(server, results[2], request);
       expect(resolvedItem && resolvedItem.description).equals('a very exciting variable');
@@ -147,10 +147,13 @@ describe('AutoCompleteAdapter', () => {
     it('converts LSP CompletionList to AutoComplete Suggestions array using the onDidConvertCompletionItem', () => {
       const completionList = {items: completionItems, isIncomplete: false};
       const autoCompleteAdapter = new AutoCompleteAdapter();
-      const results = Array.from(autoCompleteAdapter.completionItemsToSuggestions(completionList, request, (c, a, r) => {
-        a.text = c.label + ' ok';
-        a.displayText = r.scopeDescriptor;
-      }));
+      const results =
+        Array.from(
+          autoCompleteAdapter.completionItemsToSuggestions(completionList, request, (c, a, r) => {
+            a.text = c.label + ' ok';
+            a.displayText = r.scopeDescriptor;
+          }));
+
       expect(results.length).equals(3);
       expect(results[0][0].displayText).equals('some.scope');
       expect(results[1][0].text).equals('label3 ok');
@@ -215,8 +218,8 @@ describe('AutoCompleteAdapter', () => {
       // expect(result.descriptionMarkdown).equals('a truly useful variable');
       expect(result.replacementPrefix).equals('replacementPrefix');
       expect(result.text).equals('newText');
-      expect((<any>autocompleteRequest).editor.getTextInBufferRange.calledOnce).equals(true);
-      expect((<any>autocompleteRequest).editor.getTextInBufferRange.getCall(0).args).deep.equals([
+      expect((autocompleteRequest as any).editor.getTextInBufferRange.calledOnce).equals(true);
+      expect((autocompleteRequest as any).editor.getTextInBufferRange.getCall(0).args).deep.equals([
         new Range(new Point(10, 20), new Point(30, 40)),
       ]);
     });
@@ -289,8 +292,9 @@ describe('AutoCompleteAdapter', () => {
       AutoCompleteAdapter.applyTextEditToSuggestion(textEdit, editor, completionItem);
       expect(completionItem.replacementPrefix).equals('replacementPrefix');
       expect(completionItem.text).equals('newText');
-      expect((<any>editor).getTextInBufferRange.calledOnce).equals(true);
-      expect((<any>editor).getTextInBufferRange.getCall(0).args).deep.equals([new Range(new Point(1, 2), new Point(3, 4))]);
+      expect((editor as any).getTextInBufferRange.calledOnce).equals(true);
+      expect((editor as any).getTextInBufferRange.getCall(0).args).deep.equals(
+        [new Range(new Point(1, 2), new Point(3, 4))]);
     });
   });
 

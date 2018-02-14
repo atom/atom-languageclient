@@ -1,30 +1,30 @@
 import * as ls from '../lib/languageclient';
-import {NullLogger} from '../lib/logger';
+import { NullLogger } from '../lib/logger';
 import * as sinon from 'sinon';
-import {expect} from 'chai';
-import {createSpyConnection} from './helpers.js';
+import { expect } from 'chai';
+import { createSpyConnection } from './helpers.js';
 
 describe('LanguageClientConnection', () => {
   beforeEach(() => {
-    (<any>global).sinon = sinon.sandbox.create();
+    (global as any).sinon = sinon.sandbox.create();
   });
   afterEach(() => {
-    (<any>global).sinon.restore();
+    (global as any).sinon.restore();
   });
 
   it('listens to the RPC connection it is given', () => {
     const rpc = createSpyConnection();
 
     new ls.LanguageClientConnection(rpc, new NullLogger());
-    expect((<any>rpc).listen.called).equals(true);
+    expect((rpc as any).listen.called).equals(true);
   });
 
   it('disposes of the connection when it is disposed', () => {
     const rpc = createSpyConnection();
     const lc = new ls.LanguageClientConnection(rpc, new NullLogger());
-    expect((<any>rpc).dispose.called).equals(false);
+    expect((rpc as any).dispose.called).equals(false);
     lc.dispose();
-    expect((<any>rpc).dispose.called).equals(true);
+    expect((rpc as any).dispose.called).equals(true);
   });
 
   describe('send requests', () => {

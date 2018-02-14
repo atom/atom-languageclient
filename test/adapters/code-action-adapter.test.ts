@@ -1,10 +1,10 @@
-import {Range} from 'atom';
-import {expect} from 'chai';
+import { Range } from 'atom';
+import { expect } from 'chai';
 import * as sinon from 'sinon';
 import * as ls from '../../lib/languageclient';
 import CodeActionAdapter from '../../lib/adapters/code-action-adapter';
 import LinterPushV2Adapter from '../../lib/adapters/linter-push-v2-adapter';
-import {createSpyConnection, createFakeEditor} from '../helpers.js';
+import { createSpyConnection, createFakeEditor } from '../helpers.js';
 
 describe('CodeActionAdapter', () => {
   describe('canAdapt', () => {
@@ -54,8 +54,8 @@ describe('CodeActionAdapter', () => {
         ],
       );
 
-      expect((<any>languageClient).codeAction.called).to.be.true;
-      const args = (<any>languageClient).codeAction.getCalls()[0].args;
+      expect((languageClient as any).codeAction.called).to.be.true;
+      const args = (languageClient as any).codeAction.getCalls()[0].args;
       const params: ls.CodeActionParams = args[0];
       expect(params.textDocument.uri).to.equal('file://' + testPath);
       expect(params.range).to.deep.equal({
@@ -79,8 +79,8 @@ describe('CodeActionAdapter', () => {
       const codeAction = actions[0];
       expect(await codeAction.getTitle()).to.equal('Test Command');
       await codeAction.apply();
-      expect((<any>languageClient).executeCommand.called).to.be.true;
-      expect((<any>languageClient).executeCommand.getCalls()[0].args).to.deep.equal([
+      expect((languageClient as any).executeCommand.called).to.be.true;
+      expect((languageClient as any).executeCommand.getCalls()[0].args).to.deep.equal([
         {
           command: 'testCommand',
           arguments: ['a', 'b'],

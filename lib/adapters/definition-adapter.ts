@@ -1,4 +1,4 @@
-import {LanguageClientConnection, Location, ServerCapabilities} from '../languageclient';
+import { LanguageClientConnection, Location, ServerCapabilities } from '../languageclient';
 import Convert from '../convert';
 import Utils from '../utils';
 import { Point, TextEditor, Range } from 'atom';
@@ -14,7 +14,7 @@ export default class DefinitionAdapter {
   //
   // Returns a {Boolean} indicating adapter can adapt the server based on the
   // given serverCapabilities.
-  static canAdapt(serverCapabilities: ServerCapabilities): boolean {
+  public static canAdapt(serverCapabilities: ServerCapabilities): boolean {
     return serverCapabilities.definitionProvider === true;
   }
 
@@ -31,7 +31,7 @@ export default class DefinitionAdapter {
   //
   // Returns a {Promise} indicating adapter can adapt the server based on the
   // given serverCapabilities.
-  async getDefinition(
+  public async getDefinition(
     connection: LanguageClientConnection,
     serverCapabilities: ServerCapabilities,
     languageName: string,
@@ -50,7 +50,7 @@ export default class DefinitionAdapter {
     if (serverCapabilities.documentHighlightProvider) {
       const highlights = await connection.documentHighlight(documentPositionParams);
       if (highlights != null && highlights.length > 0) {
-        queryRange = highlights.map(h => Convert.lsRangeToAtomRange(h.range));
+        queryRange = highlights.map((h) => Convert.lsRangeToAtomRange(h.range));
       }
     }
 
@@ -66,11 +66,11 @@ export default class DefinitionAdapter {
   // * `locationResult` either a single {Location} object or an {Array} of {Locations}
   //
   // Returns an {Array} of {Location}s or {null} if the locationResult was null.
-  static normalizeLocations(locationResult: Location | Array<Location>): Array<Location> | null {
+  public static normalizeLocations(locationResult: Location | Location[]): Location[] | null {
     if (locationResult == null) {
       return null;
     }
-    return (Array.isArray(locationResult) ? locationResult : [locationResult]).filter(d => d.range.start != null);
+    return (Array.isArray(locationResult) ? locationResult : [locationResult]).filter((d) => d.range.start != null);
   }
 
   // Public: Convert an {Array} of {Location} objects into an Array of {Definition}s.
@@ -79,8 +79,8 @@ export default class DefinitionAdapter {
   // * `languageName` The name of the language these objects are written in.
   //
   // Returns an {Array} of {Definition}s that represented the converted {Location}s.
-  static convertLocationsToDefinitions(locations: Array<Location>, languageName: string): Array<atomIde.Definition> {
-    return locations.map(d => ({
+  public static convertLocationsToDefinitions(locations: Location[], languageName: string): atomIde.Definition[] {
+    return locations.map((d) => ({
       path: Convert.uriToPath(d.uri),
       position: Convert.positionToPoint(d.range.start),
       range: Range.fromObject(Convert.lsRangeToAtomRange(d.range)),

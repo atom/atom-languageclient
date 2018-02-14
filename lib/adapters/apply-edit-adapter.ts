@@ -10,17 +10,17 @@ import Convert from '../convert';
 // Public: Adapts workspace/applyEdit commands to editors.
 export default class ApplyEditAdapter {
   // Public: Attach to a {LanguageClientConnection} to receive edit events.
-  static attach(connection: LanguageClientConnection) {
-    connection.onApplyEdit(m => ApplyEditAdapter.onApplyEdit(m));
+  public static attach(connection: LanguageClientConnection) {
+    connection.onApplyEdit((m) => ApplyEditAdapter.onApplyEdit(m));
   }
 
-  static async onApplyEdit(params: ApplyWorkspaceEditParams): Promise<ApplyWorkspaceEditResponse> {
+  public static async onApplyEdit(params: ApplyWorkspaceEditParams): Promise<ApplyWorkspaceEditResponse> {
 
     let changes = params.edit.changes || {};
 
     if (params.edit.documentChanges) {
       changes = {};
-      params.edit.documentChanges.forEach(change => {
+      params.edit.documentChanges.forEach((change) => {
         if (change && change.textDocument) {
           changes[change.textDocument.uri] = change.edits;
         }
@@ -30,7 +30,7 @@ export default class ApplyEditAdapter {
     const uris = Object.keys(changes);
     const paths = uris.map(Convert.uriToPath);
     const editors = await Promise.all(
-      paths.map(path => {
+      paths.map((path) => {
         return atom.workspace.open(path, {
           searchAllPanes: true,
           // Open new editors in the background.
@@ -49,7 +49,7 @@ export default class ApplyEditAdapter {
         const edits = Convert.convertLsTextEdits(changes[uri]);
         // Sort edits in reverse order to prevent edit conflicts.
         edits.sort((edit1, edit2) => -edit1.oldRange.compare(edit2.oldRange));
-        const buffer = <TextBuffer>(<any>editor).getBuffer();
+        const buffer = (editor as any).getBuffer() as TextBuffer;
         const checkpoint = buffer.createCheckpoint();
         checkpoints.push({buffer, checkpoint});
         let prevEdit = null;
@@ -74,7 +74,7 @@ export default class ApplyEditAdapter {
   }
 
   // Private: Do some basic sanity checking on the edit ranges.
-  static validateEdit(buffer: TextBuffer, edit: atomIde.TextEdit, prevEdit: atomIde.TextEdit | null): void {
+  private static validateEdit(buffer: TextBuffer, edit: atomIde.TextEdit, prevEdit: atomIde.TextEdit | null): void {
     const path = buffer.getPath() || '';
     if (prevEdit != null && edit.oldRange.end.compare(prevEdit.oldRange.start) > 0) {
       throw Error(`Found overlapping edit ranges in ${path}`);

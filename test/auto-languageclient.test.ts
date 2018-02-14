@@ -1,10 +1,10 @@
 import AutoLanguageClient from '../lib/auto-languageclient';
-import {expect} from 'chai';
+import { expect } from 'chai';
 
 describe('AutoLanguageClient', () => {
   describe('shouldSyncForEditor', () => {
     class CustomAutoLanguageClient extends AutoLanguageClient {
-      getGrammarScopes() {
+      public getGrammarScopes() {
         return ['Java', 'Python'];
       }
     }

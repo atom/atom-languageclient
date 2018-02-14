@@ -12,19 +12,22 @@ import { NotificationButton } from 'atom2';
 export default class NotificationsAdapter {
   // Public: Attach to a {LanguageClientConnection} to recieve events indicating
   // when user notifications should be displayed.
-  static attach(connection: LanguageClientConnection, name: string) {
-    connection.onShowMessage(m => NotificationsAdapter.onShowMessage(m, name));
-    connection.onShowMessageRequest(m => NotificationsAdapter.onShowMessageRequest(m, name));
+  public static attach(connection: LanguageClientConnection, name: string) {
+    connection.onShowMessage((m) => NotificationsAdapter.onShowMessage(m, name));
+    connection.onShowMessageRequest((m) => NotificationsAdapter.onShowMessageRequest(m, name));
   }
 
-  static onShowMessageRequest(params: ShowMessageRequestParams, name: string): Promise<MessageActionItem | null> {
+  public static onShowMessageRequest(
+    params: ShowMessageRequestParams,
+    name: string,
+  ): Promise<MessageActionItem | null> {
     return new Promise((resolve, reject) => {
       const options: NotificationOptions = {
         dismissable: true,
         detail: name,
       };
       if (params.actions) {
-        options.buttons = params.actions.map(a => ({
+        options.buttons = params.actions.map((a) => ({
           text: a.title,
           onDidClick: () => {
             resolve(a);
@@ -54,7 +57,7 @@ export default class NotificationsAdapter {
   //            indicating the details of the notification to be displayed.
   // * `name`   The name of the language server so the user can identify the
   //            context of the message.
-  static onShowMessage(params: ShowMessageParams, name: string): void {
+  public static onShowMessage(params: ShowMessageParams, name: string): void {
     addNotificationForMessage(params.type, params.message, {
       dismissable: true,
       detail: name,
@@ -67,7 +70,7 @@ export default class NotificationsAdapter {
   // * `actionItem` The {MessageActionItem} to be converted.
   //
   // Returns a {NotificationButton} equivalent to the {MessageActionItem} given.
-  static actionItemToNotificationButton(actionItem: MessageActionItem): NotificationButton {
+  public static actionItemToNotificationButton(actionItem: MessageActionItem): NotificationButton {
     return {
       text: actionItem.title,
     };

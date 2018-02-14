@@ -1,10 +1,10 @@
 import * as invariant from 'assert';
-import {Point, Range} from 'atom';
-import {expect} from 'chai';
+import { Point, Range } from 'atom';
+import { expect } from 'chai';
 import * as sinon from 'sinon';
 import * as ls from '../../lib/languageclient';
 import CodeHighlightAdapter from '../../lib/adapters/code-highlight-adapter';
-import {createSpyConnection, createFakeEditor} from '../helpers.js';
+import { createSpyConnection, createFakeEditor } from '../helpers.js';
 
 describe('CodeHighlightAdapter', () => {
   let fakeEditor;
@@ -56,7 +56,7 @@ describe('CodeHighlightAdapter', () => {
 
     it('throws if document highlights are not supported', async () => {
       const result = await CodeHighlightAdapter.highlight(connection, {}, fakeEditor, new Point(0, 0)).catch(
-        err => err,
+        (err) => err,
       );
       expect(result).to.be.an.instanceof(Error);
       invariant(result instanceof Error);

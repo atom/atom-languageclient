@@ -6,7 +6,7 @@ import Convert from '../convert';
 export default class CodeHighlightAdapter {
   // Returns a {Boolean} indicating this adapter can adapt the server based on the
   // given serverCapabilities.
-  static canAdapt(serverCapabilities: ServerCapabilities): boolean {
+  public static canAdapt(serverCapabilities: ServerCapabilities): boolean {
     return serverCapabilities.documentHighlightProvider === true;
   }
 
@@ -19,15 +19,15 @@ export default class CodeHighlightAdapter {
   // * `position` The Atom {Point} to fetch highlights for.
   //
   // Returns a {Promise} of an {Array} of {Range}s to be turned into highlights.
-  static async highlight(
+  public static async highlight(
     connection: LanguageClientConnection,
     serverCapabilities: ServerCapabilities,
     editor: TextEditor,
     position: Point,
-  ): Promise<Array<Range> | null> {
+  ): Promise<Range[] | null> {
     assert(serverCapabilities.documentHighlightProvider, 'Must have the documentHighlight capability');
     const highlights = await connection.documentHighlight(Convert.editorToTextDocumentPositionParams(editor, position));
-    return highlights.map(highlight => {
+    return highlights.map((highlight) => {
       return Convert.lsRangeToAtomRange(highlight.range);
     });
   }

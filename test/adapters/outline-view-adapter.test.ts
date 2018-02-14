@@ -1,7 +1,7 @@
 import OutlineViewAdapter from '../../lib/adapters/outline-view-adapter';
 import * as ls from '../../lib/languageclient';
 import * as sinon from 'sinon';
-import {expect} from 'chai';
+import { expect } from 'chai';
 
 describe('OutlineViewAdapter', () => {
   const createLocation = (a, b, c, d) => ({
@@ -10,10 +10,10 @@ describe('OutlineViewAdapter', () => {
   });
 
   beforeEach(() => {
-    (<any>global).sinon = sinon.sandbox.create();
+    (global as any).sinon = sinon.sandbox.create();
   });
   afterEach(() => {
-    (<any>global).sinon.restore();
+    (global as any).sinon.restore();
   });
 
   describe('canAdapt', () => {
@@ -57,6 +57,7 @@ describe('OutlineViewAdapter', () => {
       expect(result[0].children).to.deep.equal([expected]);
     });
 
+    // tslint:disable-next-line:max-line-length
     it('creates an empty root container with a single source item when containerName is missing and matches own name', () => {
       const sourceItem: ls.SymbolInformation = {
         kind: ls.SymbolKind.Class,
@@ -110,7 +111,7 @@ describe('OutlineViewAdapter', () => {
       expect(result[1].children[0].representativeName).to.equal('main');
     });
 
-    it("does not become it's own parent", () => {
+    it('does not become it\'s own parent', () => {
       const sourceItems = [
         {kind: ls.SymbolKind.Namespace, name: 'duplicate', location: createLocation(1, 0, 10, 0)},
         {

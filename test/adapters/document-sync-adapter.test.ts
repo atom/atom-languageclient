@@ -1,5 +1,5 @@
-import {expect} from 'chai';
-import {TextDocumentSyncKind} from '../../lib/languageclient';
+import { expect } from 'chai';
+import { TextDocumentSyncKind } from '../../lib/languageclient';
 import DocumentSyncAdapter from '../../lib/adapters/document-sync-adapter';
 
 describe('DocumentSyncAdapter', () => {

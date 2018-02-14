@@ -12,39 +12,39 @@ import Convert from './convert';
 import { CompositeDisposable, TextEditor } from 'atom';
 
 // The necessary elements for a server that has started or is starting.
-export type ActiveServer = {
-  disposable: CompositeDisposable,
-  projectPath: string,
-  process: cp.ChildProcess,
-  connection: ls.LanguageClientConnection,
-  capabilities: ls.ServerCapabilities,
-  linterPushV2?: LinterPushV2Adapter,
-  docSyncAdapter?: DocumentSyncAdapter,
-  signatureHelpAdapter?: SignatureHelpAdapter,
-};
+export interface ActiveServer {
+  disposable: CompositeDisposable;
+  projectPath: string;
+  process: cp.ChildProcess;
+  connection: ls.LanguageClientConnection;
+  capabilities: ls.ServerCapabilities;
+  linterPushV2?: LinterPushV2Adapter;
+  docSyncAdapter?: DocumentSyncAdapter;
+  signatureHelpAdapter?: SignatureHelpAdapter;
+}
 
-type RestartCounter = {
+interface RestartCounter {
   restarts: number;
   timerId: NodeJS.Timer;
-};
+}
 
 // Manages the language server lifecycles and their associated objects necessary
 // for adapting them to Atom IDE.
 export class ServerManager {
-  _activeServers: Array<ActiveServer> = [];
-  _startingServerPromises: Map<string, Promise<ActiveServer>> = new Map();
-  _restartCounterPerProject: Map<string, RestartCounter> = new Map();
-  _stoppingServers: Array<ActiveServer> = [];
-  _disposable: CompositeDisposable = new CompositeDisposable();
-  _editorToServer: Map<TextEditor, ActiveServer> = new Map();
-  _logger: Logger;
-  _normalizedProjectPaths: Array<string> = [];
-  _startForEditor: (editor: TextEditor) => boolean;
-  _startServer: (projectPath: string) => Promise<ActiveServer>;
-  _changeWatchedFileFilter: (filePath: string) => boolean;
-  _getBusySignalService: () => atomIde.BusySignalService | null;
-  _languageServerName: string;
-  _isStarted = false;
+  private _activeServers: ActiveServer[] = [];
+  private _startingServerPromises: Map<string, Promise<ActiveServer>> = new Map();
+  private _restartCounterPerProject: Map<string, RestartCounter> = new Map();
+  private _stoppingServers: ActiveServer[] = [];
+  private _disposable: CompositeDisposable = new CompositeDisposable();
+  private _editorToServer: Map<TextEditor, ActiveServer> = new Map();
+  private _logger: Logger;
+  private _normalizedProjectPaths: string[] = [];
+  private _startForEditor: (editor: TextEditor) => boolean;
+  private _startServer: (projectPath: string) => Promise<ActiveServer>;
+  private _changeWatchedFileFilter: (filePath: string) => boolean;
+  private _getBusySignalService: () => atomIde.BusySignalService | null;
+  private _languageServerName: string;
+  private _isStarted = false;
 
   constructor(
     startServer: (projectPath: string) => Promise<ActiveServer>,
@@ -63,7 +63,7 @@ export class ServerManager {
     this._getBusySignalService = busySignalServiceGetter;
   }
 
-  startListening(): void {
+  public startListening(): void {
     if (!this._isStarted) {
       this._disposable = new CompositeDisposable();
       this._disposable.add(atom.textEditors.observe(this.observeTextEditors.bind(this)));
@@ -74,22 +74,22 @@ export class ServerManager {
     }
   }
 
-  stopListening(): void {
+  public stopListening(): void {
     if (this._isStarted) {
       this._disposable.dispose();
       this._isStarted = false;
     }
   }
 
-  observeTextEditors(editor: TextEditor): void {
+  private observeTextEditors(editor: TextEditor): void {
     // Track grammar changes for opened editors
-    const listener = editor.observeGrammar(grammar => this._handleGrammarChange(editor));
+    const listener = editor.observeGrammar((grammar) => this._handleGrammarChange(editor));
     this._disposable.add(editor.onDidDestroy(() => listener.dispose()));
     // Try to see if editor can have LS connected to it
     this._handleTextEditor(editor);
   }
 
-  async _handleTextEditor(editor: TextEditor): Promise<void> {
+  private async _handleTextEditor(editor: TextEditor): Promise<void> {
     if (!this._editorToServer.has(editor)) {
       // editor hasn't been processed yet, so process it by allocating LS for it if necessary
       const server = await this.getServer(editor, {shouldStart: true});
@@ -106,7 +106,7 @@ export class ServerManager {
     }
   }
 
-  _handleGrammarChange(editor: TextEditor) {
+  private _handleGrammarChange(editor: TextEditor) {
     if (this._startForEditor(editor)) {
       // If editor is interesting for LS process the editor further to attempt to start LS if needed
       this._handleTextEditor(editor);
@@ -131,11 +131,11 @@ export class ServerManager {
     }
   }
 
-  getActiveServers(): Array<ActiveServer> {
+  public getActiveServers(): ActiveServer[] {
     return this._activeServers.slice();
   }
 
-  async getServer(
+  public async getServer(
     textEditor: TextEditor,
     {shouldStart}: {shouldStart?: boolean} = {shouldStart: false},
   ): Promise<ActiveServer | null> {
@@ -145,7 +145,7 @@ export class ServerManager {
       return null;
     }
 
-    const foundActiveServer = this._activeServers.find(s => finalProjectPath === s.projectPath);
+    const foundActiveServer = this._activeServers.find((s) => finalProjectPath === s.projectPath);
     if (foundActiveServer) {
       return foundActiveServer;
     }
@@ -158,7 +158,7 @@ export class ServerManager {
     return shouldStart && this._startForEditor(textEditor) ? await this.startServer(finalProjectPath) : null;
   }
 
-  async startServer(projectPath: string): Promise<ActiveServer> {
+  public async startServer(projectPath: string): Promise<ActiveServer> {
     this._logger.debug(`Server starting "${projectPath}"`);
     const startingPromise = this._startServer(projectPath);
     this._startingServerPromises.set(projectPath, startingPromise);
@@ -174,32 +174,32 @@ export class ServerManager {
     }
   }
 
-  async stopUnusedServers(): Promise<void> {
+  public async stopUnusedServers(): Promise<void> {
     const usedServers = new Set(this._editorToServer.values());
-    const unusedServers = this._activeServers.filter(s => !usedServers.has(s));
+    const unusedServers = this._activeServers.filter((s) => !usedServers.has(s));
     if (unusedServers.length > 0) {
       this._logger.debug(`Stopping ${unusedServers.length} unused servers`);
-      await Promise.all(unusedServers.map(s => this.stopServer(s)));
+      await Promise.all(unusedServers.map((s) => this.stopServer(s)));
     }
   }
 
-  async stopAllServers(): Promise<void> {
+  public async stopAllServers(): Promise<void> {
     for (const [projectPath, restartCounter] of this._restartCounterPerProject) {
       clearTimeout(restartCounter.timerId);
       this._restartCounterPerProject.delete(projectPath);
     }
 
-    await Promise.all(this._activeServers.map(s => this.stopServer(s)));
+    await Promise.all(this._activeServers.map((s) => this.stopServer(s)));
   }
 
-  async restartAllServers(): Promise<void> {
+  public async restartAllServers(): Promise<void> {
     this.stopListening();
     await this.stopAllServers();
     this._editorToServer = new Map();
     this.startListening();
   }
 
-  hasServerReachedRestartLimit(server: ActiveServer) {
+  public hasServerReachedRestartLimit(server: ActiveServer) {
     let restartCounter = this._restartCounterPerProject.get(server.projectPath);
 
     if (!restartCounter) {
@@ -216,7 +216,7 @@ export class ServerManager {
     return ++restartCounter.restarts > 5;
   }
 
-  async stopServer(server: ActiveServer): Promise<void> {
+  public async stopServer(server: ActiveServer): Promise<void> {
     const busySignalService = this._getBusySignalService();
     const signal = busySignalService && busySignalService.reportBusy(
       `Stopping ${this._languageServerName} for ${path.basename(server.projectPath)}`,
@@ -245,7 +245,7 @@ export class ServerManager {
     }
   }
 
-  exitServer(server: ActiveServer): void {
+  public exitServer(server: ActiveServer): void {
     const pid = server.process.pid;
     try {
       if (server.connection.isConnected) {
@@ -258,37 +258,37 @@ export class ServerManager {
     this._logger.debug(`Server stopped "${server.projectPath}" (pid ${pid})`);
   }
 
-  terminate(): void {
-    this._stoppingServers.forEach(server => {
+  public terminate(): void {
+    this._stoppingServers.forEach((server) => {
       this._logger.debug(`Server terminating "${server.projectPath}"`);
       this.exitServer(server);
     });
   }
 
-  determineProjectPath(textEditor: TextEditor): string | null {
+  public determineProjectPath(textEditor: TextEditor): string | null {
     const filePath = textEditor.getPath();
     if (filePath == null) {
       return null;
     }
-    return this._normalizedProjectPaths.find(d => filePath.startsWith(d));
+    return this._normalizedProjectPaths.find((d) => filePath.startsWith(d));
   }
 
-  updateNormalizedProjectPaths(): void {
-    this._normalizedProjectPaths = atom.project.getDirectories().map(d => this.normalizePath(d.getPath()));
+  public updateNormalizedProjectPaths(): void {
+    this._normalizedProjectPaths = atom.project.getDirectories().map((d) => this.normalizePath(d.getPath()));
   }
 
-  normalizePath(projectPath: string): string {
+  public normalizePath(projectPath: string): string {
     return !projectPath.endsWith(path.sep) ? path.join(projectPath, path.sep) : projectPath;
   }
 
-  projectPathsChanged(projectPaths: Array<string>): void {
+  public projectPathsChanged(projectPaths: string[]): void {
     const pathsSet = new Set(projectPaths.map(this.normalizePath));
-    const serversToStop = this._activeServers.filter(s => !pathsSet.has(s.projectPath));
-    Promise.all(serversToStop.map(s => this.stopServer(s)));
+    const serversToStop = this._activeServers.filter((s) => !pathsSet.has(s.projectPath));
+    Promise.all(serversToStop.map((s) => this.stopServer(s)));
     this.updateNormalizedProjectPaths();
   }
 
-  projectFilesChanged(fileEvents: Array<atom2.ProjectFileEvent>): void {
+  public projectFilesChanged(fileEvents: atom2.ProjectFileEvent[]): void {
     if (this._activeServers.length === 0) {
       return;
     }

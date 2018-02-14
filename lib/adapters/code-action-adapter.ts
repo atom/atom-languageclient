@@ -9,7 +9,7 @@ import * as atomIde from 'atom-ide';
 export default class CodeActionAdapter {
   // Returns a {Boolean} indicating this adapter can adapt the server based on the
   // given serverCapabilities.
-  static canAdapt(serverCapabilities: ServerCapabilities): boolean {
+  public static canAdapt(serverCapabilities: ServerCapabilities): boolean {
     return serverCapabilities.codeActionProvider === true;
   }
 
@@ -24,14 +24,14 @@ export default class CodeActionAdapter {
   //                 This is typically a list of diagnostics intersecting `range`.
   //
   // Returns a {Promise} of an {Array} of {atomIde$CodeAction}s to display.
-  static async getCodeActions(
+  public static async getCodeActions(
     connection: LanguageClientConnection,
     serverCapabilities: ServerCapabilities,
     linterAdapter: LinterPushV2Adapter | null,
     editor: TextEditor,
     range: Range,
-    diagnostics: Array<atomIde.Diagnostic>,
-  ): Promise<Array<atomIde.CodeAction>> {
+    diagnostics: atomIde.Diagnostic[],
+  ): Promise<atomIde.CodeAction[]> {
     if (linterAdapter == null) {
       return [];
     }
@@ -40,7 +40,7 @@ export default class CodeActionAdapter {
       textDocument: Convert.editorToTextDocumentIdentifier(editor),
       range: Convert.atomRangeToLSRange(range),
       context: {
-        diagnostics: diagnostics.map(diagnostic => {
+        diagnostics: diagnostics.map((diagnostic) => {
           // Retrieve the stored diagnostic code if it exists.
           // Until the Linter API provides a place to store the code,
           // there's no real way for the code actions API to give it back to us.
@@ -55,7 +55,7 @@ export default class CodeActionAdapter {
         }),
       },
     });
-    return commands.map(command => ({
+    return commands.map((command) => ({
       async apply() {
         await connection.executeCommand({
           command: command.command,
@@ -65,6 +65,7 @@ export default class CodeActionAdapter {
       getTitle() {
         return Promise.resolve(command.title);
       },
+      // tslint:disable-next-line:no-empty
       dispose() {},
     }));
   }

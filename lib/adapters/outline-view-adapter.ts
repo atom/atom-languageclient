@@ -9,7 +9,7 @@ import * as atomIde from 'atom-ide';
 // supplied by Atom IDE UI.
 export default class OutlineViewAdapter {
 
-  _cancellationTokens: WeakMap<LanguageClientConnection, CancellationTokenSource> = new WeakMap();
+  private _cancellationTokens: WeakMap<LanguageClientConnection, CancellationTokenSource> = new WeakMap();
 
   // Public: Determine whether this adapter can be used to adapt a language server
   // based on the serverCapabilities matrix containing a documentSymbolProvider.
@@ -18,7 +18,7 @@ export default class OutlineViewAdapter {
   //
   // Returns a {Boolean} indicating adapter can adapt the server based on the
   // given serverCapabilities.
-  static canAdapt(serverCapabilities: ServerCapabilities): boolean {
+  public static canAdapt(serverCapabilities: ServerCapabilities): boolean {
     return serverCapabilities.documentSymbolProvider === true;
   }
 
@@ -30,8 +30,8 @@ export default class OutlineViewAdapter {
   // * `editor` The Atom {TextEditor} containing the text the Outline should represent.
   //
   // Returns a {Promise} containing the {Outline} of this document.
-  async getOutline(connection: LanguageClientConnection, editor: TextEditor): Promise<atomIde.Outline | null> {
-    const results = await Utils.doWithCancellationToken(connection, this._cancellationTokens, cancellationToken =>
+  public async getOutline(connection: LanguageClientConnection, editor: TextEditor): Promise<atomIde.Outline | null> {
+    const results = await Utils.doWithCancellationToken(connection, this._cancellationTokens, (cancellationToken) =>
       connection.documentSymbol({textDocument: Convert.editorToTextDocumentIdentifier(editor)}, cancellationToken),
     );
     results.sort(
@@ -53,9 +53,9 @@ export default class OutlineViewAdapter {
   //             should be converted to an {OutlineTree}.
   //
   // Returns an {OutlineTree} containing the given symbols that the Outline View can display.
-  static createOutlineTrees(symbols: Array<SymbolInformation>): Array<atomIde.OutlineTree> {
+  public static createOutlineTrees(symbols: SymbolInformation[]): atomIde.OutlineTree[] {
     // Temporarily keep containerName through the conversion process
-    const allItems = symbols.map(symbol => ({
+    const allItems = symbols.map((symbol) => ({
       containerName: symbol.containerName,
       outline: OutlineViewAdapter.symbolToOutline(symbol),
     }));
@@ -74,7 +74,7 @@ export default class OutlineViewAdapter {
       return map;
     }, new Map());
 
-    const roots: Array<atomIde.OutlineTree> = [];
+    const roots: atomIde.OutlineTree[] = [];
 
     // Put each item within its parent and extract out the roots
     for (const item of allItems) {
@@ -107,7 +107,10 @@ export default class OutlineViewAdapter {
     return roots;
   }
 
-  static _getClosestParent(candidates: Array<atomIde.OutlineTree> | null, child: atomIde.OutlineTree): atomIde.OutlineTree | null {
+  private static _getClosestParent(
+    candidates: atomIde.OutlineTree[] | null,
+    child: atomIde.OutlineTree,
+  ): atomIde.OutlineTree | null {
     if (candidates == null || candidates.length === 0) {
       return null;
     }
@@ -138,7 +141,7 @@ export default class OutlineViewAdapter {
   // * `symbol` The {SymbolInformation} to convert to an {OutlineTree}.
   //
   // Returns the {OutlineTree} equivalent to the given {SymbolInformation}.
-  static symbolToOutline(symbol: SymbolInformation): atomIde.OutlineTree {
+  public static symbolToOutline(symbol: SymbolInformation): atomIde.OutlineTree {
     const icon = OutlineViewAdapter.symbolKindToEntityKind(symbol.kind);
     return {
       tokenizedText: [
@@ -161,7 +164,7 @@ export default class OutlineViewAdapter {
   // * `symbol` The numeric symbol kind received from the language server.
   //
   // Returns a string representing the equivalent OutlineView entity kind.
-  static symbolKindToEntityKind(symbol: number): string | null {
+  public static symbolKindToEntityKind(symbol: number): string | null {
     switch (symbol) {
       case SymbolKind.Array:
         return 'type-array';
@@ -210,7 +213,7 @@ export default class OutlineViewAdapter {
   // * `symbol` The numeric symbol kind received from the language server.
   //
   // Returns a string representing the equivalent syntax token kind.
-  static symbolKindToTokenKind(symbol: number): atomIde.TokenKind {
+  public static symbolKindToTokenKind(symbol: number): atomIde.TokenKind {
     switch (symbol) {
       case SymbolKind.Class:
         return 'type';

@@ -1,5 +1,3 @@
-// @flow
-
 import assert = require('assert');
 import { CompositeDisposable, Point, TextEditor } from 'atom';
 import { LanguageClientConnection, ServerCapabilities, SignatureHelp } from '../languageclient';
@@ -8,12 +6,12 @@ import { ActiveServer } from '../server-manager';
 import * as atomIde from 'atom-ide';
 
 export default class SignatureHelpAdapter {
-  _disposables: CompositeDisposable = new CompositeDisposable();
-  _connection: LanguageClientConnection;
-  _capabilities: ServerCapabilities;
-  _grammarScopes: Array<string>;
+  private _disposables: CompositeDisposable = new CompositeDisposable();
+  private _connection: LanguageClientConnection;
+  private _capabilities: ServerCapabilities;
+  private _grammarScopes: string[];
 
-  constructor(server: ActiveServer, grammarScopes: Array<string>) {
+  constructor(server: ActiveServer, grammarScopes: string[]) {
     this._connection = server.connection;
     this._capabilities = server.capabilities;
     this._grammarScopes = grammarScopes;
@@ -21,15 +19,15 @@ export default class SignatureHelpAdapter {
 
   // Returns a {Boolean} indicating this adapter can adapt the server based on the
   // given serverCapabilities.
-  static canAdapt(serverCapabilities: ServerCapabilities): boolean {
+  public static canAdapt(serverCapabilities: ServerCapabilities): boolean {
     return serverCapabilities.signatureHelpProvider != null;
   }
 
-  dispose() {
+  public dispose() {
     this._disposables.dispose();
   }
 
-  attach(register: atomIde.SignatureHelpRegistry): void {
+  public attach(register: atomIde.SignatureHelpRegistry): void {
     const {signatureHelpProvider} = this._capabilities;
     assert(signatureHelpProvider != null);
 
@@ -49,7 +47,7 @@ export default class SignatureHelpAdapter {
   }
 
   // Public: Retrieves signature help for a given editor and position.
-  getSignatureHelp(editor: TextEditor, point: Point): SignatureHelp | Promise<SignatureHelp> {
+  public getSignatureHelp(editor: TextEditor, point: Point): SignatureHelp | Promise<SignatureHelp> {
     return this._connection.signatureHelp(Convert.editorToTextDocumentPositionParams(editor, point));
   }
 }

@@ -1,8 +1,8 @@
 import Utils from '../lib/utils';
-import {createFakeEditor} from './helpers';
+import { createFakeEditor } from './helpers';
 
-import {Point} from 'atom';
-import {expect} from 'chai';
+import { Point } from 'atom';
+import { expect } from 'chai';
 
 describe('Utils', () => {
   describe('getWordAtPosition', () => {

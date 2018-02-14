@@ -1,42 +1,47 @@
 export interface Logger {
-  warn(...args: any[]): void,
-  error(...args: any[]): void,
-  info(...args: any[]): void,
-  log(...args: any[]): void,
-  debug(...args: any[]): void,
-};
+  warn(...args: any[]): void;
+  error(...args: any[]): void;
+  info(...args: any[]): void;
+  log(...args: any[]): void;
+  debug(...args: any[]): void;
+}
 
 /* eslint-disable no-console */
 
 export class ConsoleLogger {
-  prefix: string;
+  public prefix: string;
 
   constructor(prefix: string) {
     this.prefix = prefix;
   }
 
-  warn(...args: any[]) {
+  public warn(...args: any[]) {
+    // tslint:disable-next-line:no-console
     console.warn(...this.format(args));
   }
 
-  error(...args: any[]) {
+  public error(...args: any[]) {
+    // tslint:disable-next-line:no-console
     console.error(...this.format(args));
   }
 
-  info(...args: any[]) {
+  public info(...args: any[]) {
+    // tslint:disable-next-line:no-console
     console.info(...this.format(args));
   }
 
-  debug(...args: any[]) {
+  public debug(...args: any[]) {
+    // tslint:disable-next-line:no-console
     console.debug(...this.format(args));
   }
 
-  log(...args: any[]) {
+  public log(...args: any[]) {
+    // tslint:disable-next-line:no-console
     console.log(...this.format(args));
   }
 
-  format(args_: any): any {
-    const args = args_.filter(a => a != null);
+  public format(args_: any): any {
+    const args = args_.filter((a) => a != null);
     if (typeof args[0] === 'string') {
       if (args.length === 1) {
         return [`${this.prefix} ${args[0]}`];
@@ -52,9 +57,9 @@ export class ConsoleLogger {
 }
 
 export class NullLogger {
-  warn(...args: any[]): void {}
-  error(...args: any[]): void {}
-  info(...args: any[]): void {}
-  log(...args: any[]): void {}
-  debug(...args: any[]): void {}
+  public warn(...args: any[]): void {}
+  public error(...args: any[]): void {}
+  public info(...args: any[]): void {}
+  public log(...args: any[]): void {}
+  public debug(...args: any[]): void {}
 }

@@ -3,16 +3,16 @@ import Convert from '../../lib/convert';
 import * as ls from '../../lib/languageclient';
 import * as path from 'path';
 import * as sinon from 'sinon';
-import {expect} from 'chai';
-import {Point, Range} from 'atom';
-import {createSpyConnection, createFakeEditor} from '../helpers.js';
+import { expect } from 'chai';
+import { Point, Range } from 'atom';
+import { createSpyConnection, createFakeEditor } from '../helpers.js';
 
 describe('LinterPushV2Adapter', () => {
   beforeEach(() => {
-    (<any>global).sinon = sinon.sandbox.create();
+    (global as any).sinon = sinon.sandbox.create();
   });
   afterEach(() => {
-    (<any>global).sinon.restore();
+    (global as any).sinon.restore();
   });
 
   describe('constructor', () => {
@@ -20,7 +20,7 @@ describe('LinterPushV2Adapter', () => {
       const languageClient = new ls.LanguageClientConnection(createSpyConnection());
       sinon.spy(languageClient, 'onPublishDiagnostics');
       new LinterPushV2Adapter(languageClient);
-      expect((<any>languageClient).onPublishDiagnostics.called).equals(true);
+      expect((languageClient as any).onPublishDiagnostics.called).equals(true);
     });
   });
 
@@ -35,7 +35,7 @@ describe('LinterPushV2Adapter', () => {
         },
         source: 'source',
         code: 'code',
-        severity: ls.DiagnosticSeverity.Information
+        severity: ls.DiagnosticSeverity.Information,
       };
 
       const connection: any = {onPublishDiagnostics() {}};
@@ -88,7 +88,7 @@ describe('LinterPushV2Adapter', () => {
             },
             source: 'source',
             code: 'test code',
-            severity: ls.DiagnosticSeverity.Information
+            severity: ls.DiagnosticSeverity.Information,
           },
         ],
       });

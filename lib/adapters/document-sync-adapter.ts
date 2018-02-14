@@ -12,7 +12,7 @@ import {
 import {
   CompositeDisposable,
   Disposable,
-  TextEditor
+  TextEditor,
 } from 'atom';
 import {
   DidStopChangingEvent,
@@ -23,12 +23,12 @@ import {
 // each end of changes, opening, closing and other events as well as sending and applying
 // changes either in whole or in part depending on what the language server supports.
 export default class DocumentSyncAdapter {
-  _editorSelector: (editor: TextEditor) => boolean;
-  _disposable = new CompositeDisposable();
-  _documentSyncKind: number;
-  _editors: WeakMap<TextEditor, TextEditorSyncAdapter> = new WeakMap();
-  _connection: LanguageClientConnection;
-  _versions: Map<string, number> = new Map();
+  private _editorSelector: (editor: TextEditor) => boolean;
+  private _disposable = new CompositeDisposable();
+  public _documentSyncKind: number;
+  private _editors: WeakMap<TextEditor, TextEditorSyncAdapter> = new WeakMap();
+  private _connection: LanguageClientConnection;
+  private _versions: Map<string, number> = new Map();
 
   // Public: Determine whether this adapter can be used to adapt a language server
   // based on the serverCapabilities matrix textDocumentSync capability either being Full or
@@ -38,18 +38,18 @@ export default class DocumentSyncAdapter {
   //
   // Returns a {Boolean} indicating adapter can adapt the server based on the
   // given serverCapabilities.
-  static canAdapt(serverCapabilities: ServerCapabilities): boolean {
+  public static canAdapt(serverCapabilities: ServerCapabilities): boolean {
     return this.canAdaptV2(serverCapabilities) || this.canAdaptV3(serverCapabilities);
   }
 
-  static canAdaptV2(serverCapabilities: ServerCapabilities): boolean {
+  private static canAdaptV2(serverCapabilities: ServerCapabilities): boolean {
     return (
       serverCapabilities.textDocumentSync === TextDocumentSyncKind.Incremental ||
       serverCapabilities.textDocumentSync === TextDocumentSyncKind.Full
     );
   }
 
-  static canAdaptV3(serverCapabilities: ServerCapabilities): boolean {
+  private static canAdaptV3(serverCapabilities: ServerCapabilities): boolean {
     const options = serverCapabilities.textDocumentSync;
     return (
       options !== null &&
@@ -82,7 +82,7 @@ export default class DocumentSyncAdapter {
   }
 
   // Dispose this adapter ensuring any resources are freed and events unhooked.
-  dispose(): void {
+  public dispose(): void {
     this._disposable.dispose();
   }
 
@@ -90,8 +90,8 @@ export default class DocumentSyncAdapter {
   // when it is closed or otherwise destroyed.
   //
   // * `editor` A {TextEditor} to consider for observation.
-  observeTextEditor(editor: TextEditor): void {
-    const listener = editor.observeGrammar(grammar => this._handleGrammarChange(editor));
+  public observeTextEditor(editor: TextEditor): void {
+    const listener = editor.observeGrammar((grammar) => this._handleGrammarChange(editor));
     this._disposable.add(
       editor.onDidDestroy(() => {
         this._disposable.remove(listener);
@@ -104,7 +104,7 @@ export default class DocumentSyncAdapter {
     }
   }
 
-  _handleGrammarChange(editor: TextEditor): void {
+  private _handleGrammarChange(editor: TextEditor): void {
     const sync = this._editors.get(editor);
     if (sync != null && !this._editorSelector(editor)) {
       this._editors.delete(editor);
@@ -115,7 +115,7 @@ export default class DocumentSyncAdapter {
     }
   }
 
-  _handleNewEditor(editor: TextEditor): void {
+  private _handleNewEditor(editor: TextEditor): void {
     const sync = new TextEditorSyncAdapter(editor, this._connection, this._documentSyncKind, this._versions);
     this._editors.set(editor, sync);
     this._disposable.add(sync);
@@ -131,19 +131,19 @@ export default class DocumentSyncAdapter {
     );
   }
 
-  getEditorSyncAdapter(editor: TextEditor): TextEditorSyncAdapter | null {
+  public getEditorSyncAdapter(editor: TextEditor): TextEditorSyncAdapter | null {
     return this._editors.get(editor);
   }
 }
 
 // Public: Keep a single {TextEditor} in sync with a given language server.
 class TextEditorSyncAdapter {
-  _disposable = new CompositeDisposable();
-  _editor: TextEditor;
-  _currentUri: string;
-  _connection: LanguageClientConnection;
-  _fakeDidChangeWatchedFiles: boolean;
-  _versions: Map<string, number>;
+  private _disposable = new CompositeDisposable();
+  private _editor: TextEditor;
+  private _currentUri: string;
+  private _connection: LanguageClientConnection;
+  private _fakeDidChangeWatchedFiles: boolean;
+  private _versions: Map<string, number>;
 
   // Public: Create a {TextEditorSyncAdapter} in sync with a given language server.
   //
@@ -179,7 +179,7 @@ class TextEditorSyncAdapter {
 
   // The change tracking disposable listener that will ensure that changes are sent to the
   // language server as appropriate.
-  setupChangeTracking(documentSyncKind: number): Disposable | null {
+  public setupChangeTracking(documentSyncKind: number): Disposable | null {
     switch (documentSyncKind) {
       case TextDocumentSyncKind.Full:
         return this._editor.onDidChange(this.sendFullChanges.bind(this));
@@ -190,19 +190,19 @@ class TextEditorSyncAdapter {
   }
 
   // Dispose this adapter ensuring any resources are freed and events unhooked.
-  dispose(): void {
+  public dispose(): void {
     this._disposable.dispose();
   }
 
   // Get the languageId field that will be sent to the language server by simply
   // using the grammar name.
-  getLanguageId(): string {
+  public getLanguageId(): string {
     return this._editor.getGrammar().name;
   }
 
   // Public: Create a {VersionedTextDocumentIdentifier} for the document observed by
   // this adapter including both the Uri and the current Version.
-  getVersionedTextDocumentIdentifier(): VersionedTextDocumentIdentifier {
+  public getVersionedTextDocumentIdentifier(): VersionedTextDocumentIdentifier {
     return {
       uri: this.getEditorUri(),
       version: this._getVersion(this._editor.getPath() || ''),
@@ -211,7 +211,7 @@ class TextEditorSyncAdapter {
 
   // Public: Send the entire document to the language server. This is used when
   // operating in Full (1) sync mode.
-  sendFullChanges(): void {
+  public sendFullChanges(): void {
     if (!this._isPrimaryAdapter()) { return; } // Multiple editors, we are not first
 
     this._bumpVersion();
@@ -229,7 +229,7 @@ class TextEditorSyncAdapter {
   //           text editor.
   // Note: The order of changes in the event is guaranteed top to bottom.  Language server
   // expects this in reverse.
-  sendIncrementalChanges(event: DidStopChangingEvent): void {
+  public sendIncrementalChanges(event: DidStopChangingEvent): void {
     if (event.changes.length > 0) {
       if (!this._isPrimaryAdapter()) { return; } // Multiple editors, we are not first
 
@@ -247,7 +247,7 @@ class TextEditorSyncAdapter {
   // * `change` The Atom {TextEditEvent} to convert.
   //
   // Returns a {TextDocumentContentChangeEvent} that represents the converted {TextEditEvent}.
-  static textEditToContentChange(change: TextEditEvent): TextDocumentContentChangeEvent {
+  public static textEditToContentChange(change: TextEditEvent): TextDocumentContentChangeEvent {
     return {
       range: Convert.atomRangeToLSRange(change.oldRange),
       rangeLength: change.oldText.length,
@@ -255,17 +255,17 @@ class TextEditorSyncAdapter {
     };
   }
 
-  _isPrimaryAdapter(): boolean {
+  private _isPrimaryAdapter(): boolean {
     const lowestIdForBuffer = Math.min(
       ...atom.workspace
         .getTextEditors()
-        .filter(t => t.getBuffer() === this._editor.getBuffer())
-        .map(t => t.id),
+        .filter((t) => t.getBuffer() === this._editor.getBuffer())
+        .map((t) => t.id),
     );
     return lowestIdForBuffer === this._editor.id;
   }
 
-  _bumpVersion(): void {
+  private _bumpVersion(): void {
     const filePath = this._editor.getPath();
     if (filePath == null) { return; }
     this._versions.set(filePath, this._getVersion(filePath) + 1);
@@ -273,7 +273,7 @@ class TextEditorSyncAdapter {
 
   // Ensure when the document is opened we send notification to the language server
   // so it can load it in and keep track of diagnostics etc.
-  didOpen(): void {
+  private didOpen(): void {
     const filePath = this._editor.getPath();
     if (filePath == null) { return; } // Not yet saved
 
@@ -289,16 +289,16 @@ class TextEditorSyncAdapter {
     });
   }
 
-  _getVersion(filePath: string): number {
+  private _getVersion(filePath: string): number {
     return this._versions.get(filePath) || 1;
   }
 
   // Called when the {TextEditor} is closed and sends the 'didCloseTextDocument' notification to
   // the connected language server.
-  didClose(): void {
+  public didClose(): void {
     if (this._editor.getPath() == null) { return; } // Not yet saved
 
-    const fileStillOpen = atom.workspace.getTextEditors().find(t => t.getBuffer() === this._editor.getBuffer());
+    const fileStillOpen = atom.workspace.getTextEditors().find((t) => t.getBuffer() === this._editor.getBuffer());
     if (fileStillOpen) {
       return; // Other windows or editors still have this file open
     }
@@ -308,7 +308,7 @@ class TextEditorSyncAdapter {
 
   // Called just before the {TextEditor} saves and sends the 'willSaveTextDocument' notification to
   // the connected language server.
-  willSave(): void {
+  public willSave(): void {
     if (!this._isPrimaryAdapter()) { return; }
 
     const uri = this.getEditorUri();
@@ -322,7 +322,7 @@ class TextEditorSyncAdapter {
   // the connected language server.
   // Note: Right now this also sends the `didChangeWatchedFiles` notification as well but that
   // will be sent from elsewhere soon.
-  didSave(): void {
+  public didSave(): void {
     if (!this._isPrimaryAdapter()) { return; }
 
     const uri = this.getEditorUri();
@@ -334,7 +334,7 @@ class TextEditorSyncAdapter {
     }
   }
 
-  didRename(): void {
+  public didRename(): void {
     if (!this._isPrimaryAdapter()) { return; }
 
     const oldUri = this._currentUri;
@@ -359,7 +359,7 @@ class TextEditorSyncAdapter {
   }
 
   // Public: Obtain the current {TextEditor} path and convert it to a Uri.
-  getEditorUri(): string {
+  public getEditorUri(): string {
     return Convert.pathToUri(this._editor.getPath() || '');
   }
 }

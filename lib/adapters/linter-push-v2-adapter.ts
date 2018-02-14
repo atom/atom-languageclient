@@ -13,9 +13,9 @@ type DiagnosticCode = number | string;
 // Public: Listen to diagnostics messages from the language server and publish them
 // to the user by way of the Linter Push (Indie) v2 API supported by Atom IDE UI.
 export default class LinterPushV2Adapter {
-  _diagnosticMap: Map<string, Array<linter.V2Message>> = new Map();
-  _diagnosticCodes: Map<string, Map<string, DiagnosticCode | null>> = new Map();
-  _indies: Set<linter.V2IndieDelegate> = new Set();
+  private _diagnosticMap: Map<string, linter.V2Message[]> = new Map();
+  private _diagnosticCodes: Map<string, Map<string, DiagnosticCode | null>> = new Map();
+  private _indies: Set<linter.V2IndieDelegate> = new Set();
 
   // Public: Create a new {LinterPushV2Adapter} that will listen for diagnostics
   // via the supplied {LanguageClientConnection}.
@@ -26,14 +26,14 @@ export default class LinterPushV2Adapter {
   }
 
   // Dispose this adapter ensuring any resources are freed and events unhooked.
-  dispose(): void {
+  public dispose(): void {
     this.detachAll();
   }
 
   // Public: Attach this {LinterPushV2Adapter} to a given {V2IndieDelegate} registry.
   //
   // * `indie` A {V2IndieDelegate} that wants to receive messages.
-  attach(indie: linter.V2IndieDelegate): void {
+  public attach(indie: linter.V2IndieDelegate): void {
     this._indies.add(indie);
     this._diagnosticMap.forEach((value, key) => indie.setMessages(key, value));
     indie.onDidDestroy(() => {
@@ -44,8 +44,8 @@ export default class LinterPushV2Adapter {
   // Public: Remove all {V2IndieDelegate} registries attached to this adapter and clear them.
   //
   // * `indie` A {V2IndieDelegate} that wants to receive messages.
-  detachAll(): void {
-    this._indies.forEach(i => i.clearMessages());
+  public detachAll(): void {
+    this._indies.forEach((i) => i.clearMessages());
     this._indies.clear();
   }
 
@@ -54,17 +54,17 @@ export default class LinterPushV2Adapter {
   //
   // * `params` The {PublishDiagnosticsParams} received from the language server that should
   //            be captured and forwarded on to any attached {V2IndieDelegate}s.
-  captureDiagnostics(params: PublishDiagnosticsParams): void {
+  public captureDiagnostics(params: PublishDiagnosticsParams): void {
     const path = Convert.uriToPath(params.uri);
     const codeMap = new Map();
-    const messages = params.diagnostics.map(d => {
+    const messages = params.diagnostics.map((d) => {
       const linterMessage = this.diagnosticToV2Message(path, d);
       codeMap.set(getCodeKey(linterMessage.location.position, d.message), d.code);
       return linterMessage;
     });
     this._diagnosticMap.set(path, messages);
     this._diagnosticCodes.set(path, codeMap);
-    this._indies.forEach(i => i.setMessages(path, messages));
+    this._indies.forEach((i) => i.setMessages(path, messages));
   }
 
   // Public: Convert a single {Diagnostic} received from a language server into a single
@@ -74,7 +74,7 @@ export default class LinterPushV2Adapter {
   // * `diagnostics` A {Diagnostic} object received from the language server.
   //
   // Returns a {V2Message} equivalent to the {Diagnostic} object supplied by the language server.
-  diagnosticToV2Message(path: string, diagnostic: Diagnostic): linter.V2Message {
+  public diagnosticToV2Message(path: string, diagnostic: Diagnostic): linter.V2Message {
     return {
       location: {
         file: path,
@@ -92,7 +92,7 @@ export default class LinterPushV2Adapter {
   // * `severity` A number representing the severity of the diagnostic.
   //
   // Returns a string of 'error', 'warning' or 'info' depending on the severity.
-  static diagnosticSeverityToSeverity(severity: number): 'error' | 'warning' | 'info' {
+  public static diagnosticSeverityToSeverity(severity: number): 'error' | 'warning' | 'info' {
     switch (severity) {
       case DiagnosticSeverity.Error:
         return 'error';
@@ -109,7 +109,7 @@ export default class LinterPushV2Adapter {
   // Diagnostic codes are tricky because there's no suitable place in the Linter API for them.
   // For now, we'll record the original code for each range/message combination and retrieve it
   // when needed (e.g. for passing back into code actions)
-  getDiagnosticCode(editor: atom.TextEditor, range: atom.Range, text: string): DiagnosticCode | null {
+  public getDiagnosticCode(editor: atom.TextEditor, range: atom.Range, text: string): DiagnosticCode | null {
     const path = editor.getPath();
     if (path != null) {
       const diagnosticCodes = this._diagnosticCodes.get(path);

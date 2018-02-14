@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import { ProjectFileEvent } from 'atom2';
 
 let originalPlatform;
-const setProcessPlatform = platform => {
+const setProcessPlatform = (platform) => {
   Object.defineProperty(process, 'platform', {value: platform});
 };
 
@@ -49,7 +49,7 @@ describe('Convert', () => {
   });
 
   describe('uriToPath', () => {
-    it("does not convert http: and https: uri's", () => {
+    it('does not convert http: and https: uri\'s', () => {
       setProcessPlatform('darwin');
       expect(Convert.uriToPath('http://atom.io/a')).equals('http://atom.io/a');
       expect(Convert.uriToPath('https://atom.io/b')).equals('https://atom.io/b');

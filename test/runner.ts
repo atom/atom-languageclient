@@ -1,4 +1,4 @@
-const {createRunner} = require('atom-mocha-test-runner');
+import { createRunner } from 'atom-mocha-test-runner';
 
 module.exports = createRunner(
   {
@@ -7,7 +7,7 @@ module.exports = createRunner(
     colors: process.platform !== 'win32',
     overrideTestPaths: [/spec$/, /test/],
   },
-  mocha => {
+  (mocha) => {
     mocha.timeout(parseInt(process.env.MOCHA_TIMEOUT || '5000', 10));
     if (process.env.APPVEYOR_API_URL) {
       mocha.reporter(require('mocha-appveyor-reporter'));

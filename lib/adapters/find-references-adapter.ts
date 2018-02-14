@@ -2,7 +2,7 @@ import {
   LanguageClientConnection,
   Location,
   ServerCapabilities,
-  ReferenceParams
+  ReferenceParams,
 } from '../languageclient';
 import { Point, TextEditor } from 'atom';
 import * as atomIde from 'atom-ide';
@@ -18,7 +18,7 @@ export default class FindReferencesAdapter {
   //
   // Returns a {Boolean} indicating adapter can adapt the server based on the
   // given serverCapabilities.
-  static canAdapt(serverCapabilities: ServerCapabilities): boolean {
+  public static canAdapt(serverCapabilities: ServerCapabilities): boolean {
     return serverCapabilities.referencesProvider === true;
   }
 
@@ -32,7 +32,7 @@ export default class FindReferencesAdapter {
   //
   // Returns a {Promise} containing a {FindReferencesReturn} with all the references the language server
   // could find.
-  async getReferences(
+  public async getReferences(
     connection: LanguageClientConnection,
     editor: TextEditor,
     point: Point,
@@ -60,7 +60,7 @@ export default class FindReferencesAdapter {
   // * `point` A {Point} within the document.
   //
   // Returns a {ReferenceParams} built from the given parameters.
-  static createReferenceParams(editor: TextEditor, point: Point): ReferenceParams {
+  public static createReferenceParams(editor: TextEditor, point: Point): ReferenceParams {
     return {
       textDocument: Convert.editorToTextDocumentIdentifier(editor),
       position: Convert.pointToPosition(point),
@@ -73,7 +73,7 @@ export default class FindReferencesAdapter {
   // * `location` A {Location} to convert.
   //
   // Returns a {Reference} equivalent to the given {Location}.
-  static locationToReference(location: Location): atomIde.Reference {
+  public static locationToReference(location: Location): atomIde.Reference {
     return {
       uri: Convert.uriToPath(location.uri),
       name: null,
@@ -82,15 +82,15 @@ export default class FindReferencesAdapter {
   }
 
   // Public: Get a symbol name from a {TextEditor} for a specific {Point} in the document.
-  static getReferencedSymbolName(
+  public static getReferencedSymbolName(
     editor: TextEditor,
     point: Point,
-    references: Array<atomIde.Reference>,
+    references: atomIde.Reference[],
   ): string {
     if (references.length === 0) {
       return '';
     }
-    const currentReference = references.find(r => r.range.containsPoint(point)) || references[0];
+    const currentReference = references.find((r) => r.range.containsPoint(point)) || references[0];
     return editor.getBuffer().getTextInRange(currentReference.range);
   }
 }

@@ -1,4 +1,4 @@
-;import {
+import {
   LanguageClientConnection,
   DocumentFormattingParams,
   DocumentRangeFormattingParams,
@@ -6,7 +6,7 @@
   ServerCapabilities,
 } from '../languageclient';
 import { TextEditor, Range } from 'atom';
-import * as atomIde from 'atom-ide'
+import * as atomIde from 'atom-ide';
 import Convert from '../convert';
 
 // Public: Adapts the language server protocol "textDocument/completion" to the
@@ -20,7 +20,7 @@ export default class CodeFormatAdapter {
   //
   // Returns a {Boolean} indicating this adapter can adapt the server based on the
   // given serverCapabilities.
-  static canAdapt(serverCapabilities: ServerCapabilities): boolean {
+  public static canAdapt(serverCapabilities: ServerCapabilities): boolean {
     return (
       serverCapabilities.documentRangeFormattingProvider === true ||
       serverCapabilities.documentFormattingProvider === true
@@ -37,12 +37,12 @@ export default class CodeFormatAdapter {
   //
   // Returns a {Promise} of an {Array} of {Object}s containing the AutoComplete+
   // suggestions to display.
-  static format(
+  public static format(
     connection: LanguageClientConnection,
     serverCapabilities: ServerCapabilities,
     editor: TextEditor,
     range: Range,
-  ): Promise<Array<atomIde.TextEdit>> {
+  ): Promise<atomIde.TextEdit[]> {
     if (serverCapabilities.documentRangeFormattingProvider) {
       return CodeFormatAdapter.formatRange(connection, editor, range);
     }
@@ -61,10 +61,10 @@ export default class CodeFormatAdapter {
   //
   // Returns a {Promise} of an {Array} of {TextEdit} objects that can be applied to the Atom TextEditor
   // to format the document.
-  static async formatDocument(
+  public static async formatDocument(
     connection: LanguageClientConnection,
     editor: TextEditor,
-  ): Promise<Array<atomIde.TextEdit>> {
+  ): Promise<atomIde.TextEdit[]> {
     const edits = await connection.documentFormatting(CodeFormatAdapter.createDocumentFormattingParams(editor));
     return Convert.convertLsTextEdits(edits);
   }
@@ -76,7 +76,7 @@ export default class CodeFormatAdapter {
   //
   // Returns {DocumentFormattingParams} containing the identity of the text document as well as
   // options to be used in formatting the document such as tab size and tabs vs spaces.
-  static createDocumentFormattingParams(editor: TextEditor): DocumentFormattingParams {
+  public static createDocumentFormattingParams(editor: TextEditor): DocumentFormattingParams {
     return {
       textDocument: Convert.editorToTextDocumentIdentifier(editor),
       options: CodeFormatAdapter.getFormatOptions(editor),
@@ -91,11 +91,11 @@ export default class CodeFormatAdapter {
   //
   // Returns a {Promise} of an {Array} of {TextEdit} objects that can be applied to the Atom TextEditor
   // to format the document.
-  static async formatRange(
+  public static async formatRange(
     connection: LanguageClientConnection,
     editor: TextEditor,
     range: Range,
-  ): Promise<Array<atomIde.TextEdit>> {
+  ): Promise<atomIde.TextEdit[]> {
     const edits = await connection.documentRangeFormatting(
       CodeFormatAdapter.createDocumentRangeFormattingParams(editor, range),
     );
@@ -111,7 +111,7 @@ export default class CodeFormatAdapter {
   // Returns {DocumentRangeFormattingParams} containing the identity of the text document, the
   // range of the text to be formatted as well as the options to be used in formatting the
   // document such as tab size and tabs vs spaces.
-  static createDocumentRangeFormattingParams(
+  public static createDocumentRangeFormattingParams(
     editor: TextEditor,
     range: Range,
   ): DocumentRangeFormattingParams {
@@ -131,7 +131,7 @@ export default class CodeFormatAdapter {
   // Returns the {FormattingOptions} to be used containing the keys:
   //  * `tabSize` The number of spaces a tab represents.
   //  * `insertSpaces` {True} if spaces should be used, {False} for tab characters.
-  static getFormatOptions(editor: TextEditor): FormattingOptions {
+  public static getFormatOptions(editor: TextEditor): FormattingOptions {
     return {
       tabSize: editor.getTabLength(),
       insertSpaces: editor.getSoftTabs(),

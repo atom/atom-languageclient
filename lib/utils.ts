@@ -6,9 +6,9 @@ export default class Utils {
    * Obtain the range of the word at the given editor position.
    * Uses the non-word characters from the position's grammar scope.
    */
-  static getWordAtPosition(editor: TextEditor, position: Point): Range {
+  public static getWordAtPosition(editor: TextEditor, position: Point): Range {
     const scopeDescriptor = editor.scopeDescriptorForBufferPosition(position);
-    const nonWordCharacters = Utils.escapeRegExp((<any>editor).getNonWordCharacters(scopeDescriptor));
+    const nonWordCharacters = Utils.escapeRegExp((editor as any).getNonWordCharacters(scopeDescriptor));
     const range = Utils._getRegexpRangeAtPosition(
       editor.getBuffer(),
       position,
@@ -20,17 +20,17 @@ export default class Utils {
     return range;
   }
 
-  static escapeRegExp(string: string): string {
+  public static escapeRegExp(string: string): string {
     // From atom/underscore-plus.
     return string.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
   }
 
-  static _getRegexpRangeAtPosition(buffer: TextBuffer, position: Point, wordRegex: RegExp): Range | null {
+  private static _getRegexpRangeAtPosition(buffer: TextBuffer, position: Point, wordRegex: RegExp): Range | null {
     const {row, column} = position;
     const rowRange = buffer.rangeForRow(row, false);
     let matchData;
     // Extract the expression from the row text.
-    buffer.scanInRange(wordRegex, rowRange, data => {
+    buffer.scanInRange(wordRegex, rowRange, (data) => {
       const {range} = data;
       if (
         position.isGreaterThanOrEqual(range.start) &&
@@ -54,7 +54,7 @@ export default class Utils {
    * CancellationToken for that connection then create and store a new
    * CancellationToken to be used for the current request.
    */
-  static cancelAndRefreshCancellationToken<T extends object>(
+  public static cancelAndRefreshCancellationToken<T extends object>(
     key: T,
     cancellationTokens: WeakMap<T, CancellationTokenSource>): CancellationToken {
 
@@ -68,13 +68,13 @@ export default class Utils {
     return cancellationToken.token;
   }
 
-  static async doWithCancellationToken<T1 extends object, T2>(
+  public static async doWithCancellationToken<T1 extends object, T2>(
     key: T1,
     cancellationTokens: WeakMap<T1, CancellationTokenSource>,
     work: (CancellationToken) => Promise<T2>,
   ): Promise<T2> {
     const token = Utils.cancelAndRefreshCancellationToken(key, cancellationTokens);
-    const result:T2 = await work(token);
+    const result: T2 = await work(token);
     cancellationTokens.delete(key);
     return result;
   }

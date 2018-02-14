@@ -1,22 +1,22 @@
 import invariant = require('assert');
-import {Point} from 'atom';
-import {expect} from 'chai';
+import { Point } from 'atom';
+import { expect } from 'chai';
 import * as sinon from 'sinon';
 import * as ls from '../../lib/languageclient';
 import DatatipAdapter from '../../lib/adapters/datatip-adapter';
-import {createSpyConnection, createFakeEditor} from '../helpers.js';
+import { createSpyConnection, createFakeEditor } from '../helpers.js';
 
 describe('DatatipAdapter', () => {
   let fakeEditor;
   let connection;
 
   beforeEach(() => {
-    (<any>global).sinon = sinon.sandbox.create();
+    (global as any).sinon = sinon.sandbox.create();
     connection = new ls.LanguageClientConnection(createSpyConnection());
     fakeEditor = createFakeEditor();
   });
   afterEach(() => {
-    (<any>global).sinon.restore();
+    (global as any).sinon.restore();
   });
 
   describe('canAdapt', () => {
@@ -59,7 +59,7 @@ describe('DatatipAdapter', () => {
       const snippet = datatip.markedStrings[1];
       expect(snippet.type).equal('snippet');
       invariant(snippet.type === 'snippet');
-      expect((<any>snippet).grammar.scopeName).equal('text.plain.null-grammar');
+      expect((snippet as any).grammar.scopeName).equal('text.plain.null-grammar');
       expect(snippet.value).equal('test snippet');
 
       expect(grammarSpy.calledWith('source.testlang')).to.be.true;
