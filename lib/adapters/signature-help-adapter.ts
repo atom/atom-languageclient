@@ -47,7 +47,7 @@ export default class SignatureHelpAdapter {
   }
 
   // Public: Retrieves signature help for a given editor and position.
-  public getSignatureHelp(editor: TextEditor, point: Point): SignatureHelp | Promise<SignatureHelp> {
+  public getSignatureHelp(editor: TextEditor, point: Point): Promise<SignatureHelp | null> {
     return this._connection.signatureHelp(Convert.editorToTextDocumentPositionParams(editor, point));
   }
 }
