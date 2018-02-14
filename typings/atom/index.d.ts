@@ -49,7 +49,7 @@ export interface AutocompleteSuggestion {
 }
 
 export interface AutocompleteRequest {
-  editor: TextEditor,
+  editor: TextEditorCore,
   bufferPosition: Point,
   scopeDescriptor: string,
   prefix: string,

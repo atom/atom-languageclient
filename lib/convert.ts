@@ -104,7 +104,7 @@ export default class Convert {
   // and a position property with the supplied point (or current cursor position when not specified).
   static editorToTextDocumentPositionParams(
     editor: TextEditor,
-    point: Point | null,
+    point?: Point,
   ): ls.TextDocumentPositionParams {
     return {
       textDocument: Convert.editorToTextDocumentIdentifier(editor),

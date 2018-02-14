@@ -12,7 +12,7 @@ export class LanguageClientConnection extends EventEmitter {
   _log: Logger;
   isConnected: boolean;
 
-  constructor(rpc: jsonrpc.MessageConnection, logger: Logger) {
+  constructor(rpc: jsonrpc.MessageConnection, logger?: Logger) {
     super();
     this._rpc = rpc;
     this._log = logger || new NullLogger();

@@ -1,16 +1,15 @@
-// @flow
-
 import * as ls from '../lib/languageclient';
 import Convert from '../lib/convert';
-import {Point, Range, TextEditor} from 'atom';
-import {expect} from 'chai';
+import { Point, Range, TextEditor } from 'atom';
+import { expect } from 'chai';
+import { ProjectFileEvent } from 'atom2';
 
 let originalPlatform;
 const setProcessPlatform = platform => {
   Object.defineProperty(process, 'platform', {value: platform});
 };
 
-const createFakeEditor = (path: string, text: ?string): atom$TextEditor => {
+const createFakeEditor = (path: string, text?: string): TextEditor => {
   const editor = new TextEditor();
   editor.getBuffer().setPath(path);
   if (text != null) {
@@ -89,7 +88,7 @@ describe('Convert', () => {
 
   describe('pointToPosition', () => {
     it('converts an Atom Point to a LSP position', () => {
-      const point = {row: 1, column: 2};
+      const point = new Point(1, 2);
       const position = Convert.pointToPosition(point);
       expect(position.line).equals(point.row);
       expect(position.character).equals(point.column);
@@ -193,25 +192,25 @@ describe('Convert', () => {
 
   describe('atomFileEventToLSFileEvents', () => {
     it('converts a created event', () => {
-      const source = {path: '/a/b/c/d.txt', action: 'created'};
+      const source: ProjectFileEvent = {path: '/a/b/c/d.txt', action: 'created'};
       const converted = Convert.atomFileEventToLSFileEvents(source);
       expect(converted[0]).deep.equals({uri: 'file:///a/b/c/d.txt', type: ls.FileChangeType.Created});
     });
 
     it('converts a modified event', () => {
-      const source = {path: '/a/b/c/d.txt', action: 'modified'};
+      const source: ProjectFileEvent = {path: '/a/b/c/d.txt', action: 'modified'};
       const converted = Convert.atomFileEventToLSFileEvents(source);
       expect(converted[0]).deep.equals({uri: 'file:///a/b/c/d.txt', type: ls.FileChangeType.Changed});
     });
 
     it('converts a deleted event', () => {
-      const source = {path: '/a/b/c/d.txt', action: 'deleted'};
+      const source: ProjectFileEvent = {path: '/a/b/c/d.txt', action: 'deleted'};
       const converted = Convert.atomFileEventToLSFileEvents(source);
       expect(converted[0]).deep.equals({uri: 'file:///a/b/c/d.txt', type: ls.FileChangeType.Deleted});
     });
 
     it('converts a renamed event', () => {
-      const source = {path: '/a/b/c/d.txt', oldPath: '/a/z/e.lst', action: 'renamed'};
+      const source: ProjectFileEvent = {path: '/a/b/c/d.txt', oldPath: '/a/z/e.lst', action: 'renamed'};
       const converted = Convert.atomFileEventToLSFileEvents(source);
       expect(converted[0]).deep.equals({uri: 'file:///a/z/e.lst', type: ls.FileChangeType.Deleted});
       expect(converted[1]).deep.equals({uri: 'file:///a/b/c/d.txt', type: ls.FileChangeType.Created});

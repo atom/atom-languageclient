@@ -1,8 +1,6 @@
-// @flow
-
 import {Range} from 'atom';
 import {expect} from 'chai';
-import sinon from 'sinon';
+import * as sinon from 'sinon';
 import * as ls from '../../lib/languageclient';
 import CodeActionAdapter from '../../lib/adapters/code-action-adapter';
 import LinterPushV2Adapter from '../../lib/adapters/linter-push-v2-adapter';
@@ -56,8 +54,8 @@ describe('CodeActionAdapter', () => {
         ],
       );
 
-      expect(languageClient.codeAction.called).to.be.true;
-      const args = languageClient.codeAction.getCalls()[0].args;
+      expect((<any>languageClient).codeAction.called).to.be.true;
+      const args = (<any>languageClient).codeAction.getCalls()[0].args;
       const params: ls.CodeActionParams = args[0];
       expect(params.textDocument.uri).to.equal('file://' + testPath);
       expect(params.range).to.deep.equal({
@@ -81,8 +79,8 @@ describe('CodeActionAdapter', () => {
       const codeAction = actions[0];
       expect(await codeAction.getTitle()).to.equal('Test Command');
       await codeAction.apply();
-      expect(languageClient.executeCommand.called).to.be.true;
-      expect(languageClient.executeCommand.getCalls()[0].args).to.deep.equal([
+      expect((<any>languageClient).executeCommand.called).to.be.true;
+      expect((<any>languageClient).executeCommand.getCalls()[0].args).to.deep.equal([
         {
           command: 'testCommand',
           arguments: ['a', 'b'],

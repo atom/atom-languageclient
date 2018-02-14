@@ -1,5 +1,3 @@
-// @flow
-
 const {createRunner} = require('atom-mocha-test-runner');
 
 module.exports = createRunner(

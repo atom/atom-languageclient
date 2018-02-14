@@ -1,5 +1,3 @@
-// @flow
-
 import Utils from '../lib/utils';
 import {createFakeEditor} from './helpers';
 

@@ -1,5 +1,3 @@
-// @flow
-
 import {expect} from 'chai';
 import {TextDocumentSyncKind} from '../../lib/languageclient';
 import DocumentSyncAdapter from '../../lib/adapters/document-sync-adapter';
@@ -51,7 +49,7 @@ describe('DocumentSyncAdapter', () => {
 
   describe('constructor', () => {
     function create(textDocumentSync) {
-      return new DocumentSyncAdapter((null: any), textDocumentSync, () => false);
+      return new DocumentSyncAdapter(null, textDocumentSync, () => false);
     }
 
     it('sets _documentSyncKind correctly Incremental for v2 capabilities', () => {

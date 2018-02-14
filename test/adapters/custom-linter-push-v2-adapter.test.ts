@@ -1,5 +1,3 @@
-// @flow
-
 import LinterPushV2Adapter from '../../lib/adapters/linter-push-v2-adapter';
 import * as ls from '../../lib/languageclient';
 import {expect} from 'chai';
@@ -29,8 +27,7 @@ describe('CustomLinterPushV2Adapter', () => {
         },
         source: 'source',
         code: 'code',
-        severity: ls.DiagnosticSeverity.Information,
-        type: ls.DiagnosticSeverity.Information,
+        severity: ls.DiagnosticSeverity.Information
       };
 
       const connection: any = {onPublishDiagnostics() {}};

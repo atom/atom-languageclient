@@ -1,8 +1,6 @@
-// @flow
-
 import OutlineViewAdapter from '../../lib/adapters/outline-view-adapter';
 import * as ls from '../../lib/languageclient';
-import sinon from 'sinon';
+import * as sinon from 'sinon';
 import {expect} from 'chai';
 
 describe('OutlineViewAdapter', () => {
@@ -12,10 +10,10 @@ describe('OutlineViewAdapter', () => {
   });
 
   beforeEach(() => {
-    global.sinon = sinon.sandbox.create();
+    (<any>global).sinon = sinon.sandbox.create();
   });
   afterEach(() => {
-    global.sinon.restore();
+    (<any>global).sinon.restore();
   });
 
   describe('canAdapt', () => {
@@ -124,10 +122,9 @@ describe('OutlineViewAdapter', () => {
       ];
       const result = OutlineViewAdapter.createOutlineTrees(sourceItems);
       expect(result.length).to.equal(1);
-      const r = (result: any);
-      expect(r[0].endPosition.row).to.equal(10);
-      expect(r[0].children.length).to.equal(1);
-      expect(r[0].children[0].endPosition.row).to.equal(7);
+      expect(result[0].endPosition.row).to.equal(10);
+      expect(result[0].children.length).to.equal(1);
+      expect(result[0].children[0].endPosition.row).to.equal(7);
     });
 
     it('parents to the innnermost named container', () => {
@@ -143,12 +140,11 @@ describe('OutlineViewAdapter', () => {
       ];
       const result = OutlineViewAdapter.createOutlineTrees(sourceItems);
       expect(result.length).to.equal(1);
-      const r = (result: any);
-      expect(r[0].endPosition.row).to.equal(10);
-      expect(r[0].children.length).to.equal(1);
-      expect(r[0].children[0].endPosition.row).to.equal(8);
-      expect(r[0].children[0].children.length).to.equal(1);
-      expect(r[0].children[0].children[0].endPosition.row).to.equal(5);
+      expect(result[0].endPosition.row).to.equal(10);
+      expect(result[0].children.length).to.equal(1);
+      expect(result[0].children[0].endPosition.row).to.equal(8);
+      expect(result[0].children[0].children.length).to.equal(1);
+      expect(result[0].children[0].children[0].endPosition.row).to.equal(5);
     });
   });
 
@@ -159,13 +155,12 @@ describe('OutlineViewAdapter', () => {
       expect(result.icon).to.equal('type-class');
       expect(result.representativeName).to.equal('Program');
       expect(result.children).to.deep.equal([]);
-      const r = (result: any);
-      expect(r.tokenizedText[0].kind).to.equal('type');
-      expect(r.tokenizedText[0].value).to.equal('Program');
-      expect(r.startPosition.row).to.equal(1);
-      expect(r.startPosition.column).to.equal(2);
-      expect(r.endPosition.row).to.equal(3);
-      expect(r.endPosition.column).to.equal(4);
+      expect(result.tokenizedText[0].kind).to.equal('type');
+      expect(result.tokenizedText[0].value).to.equal('Program');
+      expect(result.startPosition.row).to.equal(1);
+      expect(result.startPosition.column).to.equal(2);
+      expect(result.endPosition.row).to.equal(3);
+      expect(result.endPosition.column).to.equal(4);
     });
   });
 });

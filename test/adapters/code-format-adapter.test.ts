@@ -1,8 +1,6 @@
-// @flow
-
 import {Range} from 'atom';
 import {expect} from 'chai';
-import sinon from 'sinon';
+import * as sinon from 'sinon';
 import Convert from '../../lib/convert';
 import * as ls from '../../lib/languageclient';
 import CodeFormatAdapter from '../../lib/adapters/code-format-adapter';

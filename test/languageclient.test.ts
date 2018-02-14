@@ -1,32 +1,30 @@
-// @flow
-
 import * as ls from '../lib/languageclient';
 import {NullLogger} from '../lib/logger';
-import sinon from 'sinon';
+import * as sinon from 'sinon';
 import {expect} from 'chai';
 import {createSpyConnection} from './helpers.js';
 
 describe('LanguageClientConnection', () => {
   beforeEach(() => {
-    global.sinon = sinon.sandbox.create();
+    (<any>global).sinon = sinon.sandbox.create();
   });
   afterEach(() => {
-    global.sinon.restore();
+    (<any>global).sinon.restore();
   });
 
   it('listens to the RPC connection it is given', () => {
     const rpc = createSpyConnection();
 
     new ls.LanguageClientConnection(rpc, new NullLogger());
-    expect(rpc.listen.called).equals(true);
+    expect((<any>rpc).listen.called).equals(true);
   });
 
   it('disposes of the connection when it is disposed', () => {
     const rpc = createSpyConnection();
     const lc = new ls.LanguageClientConnection(rpc, new NullLogger());
-    expect(rpc.dispose.called).equals(false);
+    expect((<any>rpc).dispose.called).equals(false);
     lc.dispose();
-    expect(rpc.dispose.called).equals(true);
+    expect((<any>rpc).dispose.called).equals(true);
   });
 
   describe('send requests', () => {
@@ -42,7 +40,7 @@ describe('LanguageClientConnection', () => {
     });
 
     it('sends a request for initialize', async () => {
-      const params: ls.InitializeParams = {capabilities: {}};
+      const params = {capabilities: {}};
       await lc.initialize(params);
 
       expect(lc._sendRequest.called).equals(true);
@@ -263,8 +261,6 @@ describe('LanguageClientConnection', () => {
     };
     const versionedTextDocumentIdentifier: ls.VersionedTextDocumentIdentifier = {
       uri: 'file:///best/bits.js',
-      languageId: 'javascript',
-      text: 'function a() { return "b"; };',
       version: 1,
     };
 

@@ -1,5 +1,3 @@
-// @flow
-
 import AutoLanguageClient from '../lib/auto-languageclient';
 import {expect} from 'chai';
 

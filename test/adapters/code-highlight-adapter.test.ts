@@ -1,9 +1,7 @@
-// @flow
-
-import invariant from 'assert';
+import * as invariant from 'assert';
 import {Point, Range} from 'atom';
 import {expect} from 'chai';
-import sinon from 'sinon';
+import * as sinon from 'sinon';
 import * as ls from '../../lib/languageclient';
 import CodeHighlightAdapter from '../../lib/adapters/code-highlight-adapter';
 import {createSpyConnection, createFakeEditor} from '../helpers.js';
