@@ -1,20 +1,37 @@
 import { Logger } from './logger';
+import { EventEmitter } from 'events';
 import LinterPushV2Adapter from './adapters/linter-push-v2-adapter';
 import DocumentSyncAdapter from './adapters/document-sync-adapter';
 import SignatureHelpAdapter from './adapters/signature-help-adapter';
 
 import * as path from 'path';
+import * as stream from 'stream';
 import * as cp from 'child_process';
 import * as ls from './languageclient';
 import * as atomIde from 'atom-ide';
 import Convert from './convert';
 import { CompositeDisposable, ProjectFileEvent, TextEditor } from 'atom';
 
+// Public: Defines the minimum surface area for an object that resembles a
+// ChildProcess.  This is used so that language packages with alternative
+// language server process hosting strategies can return something compatible
+// with AutoLanguageClient.startServerProcess.
+export interface LanguageServerProcess extends EventEmitter {
+  stdin: stream.Writable;
+  stdout: stream.Readable;
+  stderr: stream.Readable;
+  pid: number;
+
+  kill(signal?: string): void;
+  on(event: 'error', listener: (err: Error) => void): this;
+  on(event: 'exit', listener: (code: number, signal: string) => void): this;
+}
+
 // The necessary elements for a server that has started or is starting.
 export interface ActiveServer {
   disposable: CompositeDisposable;
   projectPath: string;
-  process: cp.ChildProcess;
+  process: LanguageServerProcess;
   connection: ls.LanguageClientConnection;
   capabilities: ls.ServerCapabilities;
   linterPushV2?: LinterPushV2Adapter;
