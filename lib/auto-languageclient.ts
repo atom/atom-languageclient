@@ -395,7 +395,7 @@ export default class AutoLanguageClient {
   // Start adapters that are not shared between servers
   private startExclusiveAdapters(server: ActiveServer): void {
     ApplyEditAdapter.attach(server.connection);
-    NotificationsAdapter.attach(server.connection, this.name);
+    NotificationsAdapter.attach(server.connection, this.name, server.projectPath);
 
     if (DocumentSyncAdapter.canAdapt(server.capabilities)) {
       server.docSyncAdapter =

@@ -1,4 +1,4 @@
-import { Point, Range, TextBuffer, TextEditor as TextEditorCore, ScopeDescriptor } from 'atom';
+import { Point, Range, TextBuffer, TextEditor as TextEditorCore, ScopeDescriptor, Notification } from 'atom';
 
 declare module 'atom' {
   interface TextEditor {
@@ -80,5 +80,11 @@ declare module 'atom' {
     className?: string;
     onDidClick?(event: MouseEvent): void;
     text?: string;
+  }
+
+  // Non-public Notification api
+  interface NotificationExt extends Notification {
+    isDismissed?: () => boolean;
+    getOptions?: () => NotificationOptions | null;
   }
 }

@@ -9,20 +9,22 @@ import {
   Notification,
   NotificationButton,
   NotificationOptions,
+  NotificationExt,
 } from 'atom';
 
 // Public: Adapts Atom's user notifications to those of the language server protocol.
 export default class NotificationsAdapter {
   // Public: Attach to a {LanguageClientConnection} to recieve events indicating
   // when user notifications should be displayed.
-  public static attach(connection: LanguageClientConnection, name: string) {
-    connection.onShowMessage((m) => NotificationsAdapter.onShowMessage(m, name));
-    connection.onShowMessageRequest((m) => NotificationsAdapter.onShowMessageRequest(m, name));
+  public static attach(connection: LanguageClientConnection, name: string, projectPath: string) {
+    connection.onShowMessage((m) => NotificationsAdapter.onShowMessage(m, name, projectPath));
+    connection.onShowMessageRequest((m) => NotificationsAdapter.onShowMessageRequest(m, name, projectPath));
   }
 
   public static onShowMessageRequest(
     params: ShowMessageRequestParams,
     name: string,
+    projectPath: string,
   ): Promise<MessageActionItem | null> {
     return new Promise((resolve, reject) => {
       const options: NotificationOptions = {
@@ -43,7 +45,7 @@ export default class NotificationsAdapter {
 
       const notification = addNotificationForMessage(params.type, params.message, {
         dismissable: true,
-        detail: name,
+        detail: `${name} ${projectPath}`,
       });
 
       if (notification != null) {
@@ -60,10 +62,10 @@ export default class NotificationsAdapter {
   //            indicating the details of the notification to be displayed.
   // * `name`   The name of the language server so the user can identify the
   //            context of the message.
-  public static onShowMessage(params: ShowMessageParams, name: string): void {
+  public static onShowMessage(params: ShowMessageParams, name: string, projectPath: string): void {
     addNotificationForMessage(params.type, params.message, {
       dismissable: true,
-      detail: name,
+      detail: `${name} ${projectPath}`,
     });
   }
 
@@ -80,11 +82,30 @@ export default class NotificationsAdapter {
   }
 }
 
+function messageTypeToString(messageType: number): string {
+  switch (messageType) {
+    case MessageType.Error: return 'error';
+    case MessageType.Warning: return 'warning';
+    default: return 'info';
+  }
+}
+
 function addNotificationForMessage(
   messageType: number,
   message: string,
   options: NotificationOptions,
 ): Notification | null {
+  function isDuplicate(note: NotificationExt): boolean {
+    const noteDismissed = note.isDismissed && note.isDismissed();
+    const noteOptions = note.getOptions && note.getOptions() || {};
+    return !noteDismissed &&
+      note.getType() === messageTypeToString(messageType) &&
+      noteOptions.detail === options.detail;
+  }
+  if (atom.notifications.getNotifications().some(isDuplicate)) {
+    return null;
+  }
+
   switch (messageType) {
     case MessageType.Error:
       return atom.notifications.addError(message, options);
