@@ -31,7 +31,7 @@ export default (async function downloadFile(
     throw Error('No response body');
   }
 
-  const finalLength = length || parseInt(response.headers.get('Content-Length' || '0'), 10);
+  const finalLength = length || parseInt(response.headers.get('Content-Length') || '0', 10);
   const reader = body.getReader();
   const writer = fs.createWriteStream(targetFile);
 
@@ -72,7 +72,7 @@ async function streamWithProgress(
       writer.write(Buffer.from(chunk));
       if (progressCallback != null) {
         bytesDone += chunk.byteLength;
-        const percent: number = length === 0 ? null : Math.floor(bytesDone / length * 100);
+        const percent: number | undefined = length === 0 ? undefined : Math.floor(bytesDone / length * 100);
         progressCallback(bytesDone, percent);
       }
     }

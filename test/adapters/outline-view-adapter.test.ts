@@ -121,11 +121,22 @@ describe('OutlineViewAdapter', () => {
           containerName: 'duplicate',
         },
       ];
+
       const result = OutlineViewAdapter.createOutlineTrees(sourceItems);
       expect(result.length).to.equal(1);
-      expect(result[0].endPosition.row).to.equal(10);
-      expect(result[0].children.length).to.equal(1);
-      expect(result[0].children[0].endPosition.row).to.equal(7);
+
+      const outline = result[0];
+      expect(outline.endPosition).to.not.be.undefined;
+      if (outline.endPosition) {
+        expect(outline.endPosition.row).to.equal(10);
+        expect(outline.children.length).to.equal(1);
+
+        const outlineChild = outline.children[0];
+        expect(outlineChild.endPosition).to.not.be.undefined;
+        if (outlineChild.endPosition) {
+          expect(outlineChild.endPosition.row).to.equal(7);
+        }
+      }
     });
 
     it('parents to the innnermost named container', () => {
@@ -141,11 +152,29 @@ describe('OutlineViewAdapter', () => {
       ];
       const result = OutlineViewAdapter.createOutlineTrees(sourceItems);
       expect(result.length).to.equal(1);
-      expect(result[0].endPosition.row).to.equal(10);
-      expect(result[0].children.length).to.equal(1);
-      expect(result[0].children[0].endPosition.row).to.equal(8);
-      expect(result[0].children[0].children.length).to.equal(1);
-      expect(result[0].children[0].children[0].endPosition.row).to.equal(5);
+
+      const outline = result[0];
+      expect(outline).to.not.be.undefined;
+      if (outline) {
+        expect(outline.endPosition).to.not.be.undefined;
+        if (outline.endPosition) {
+          expect(outline.endPosition.row).to.equal(10);
+          expect(outline.children.length).to.equal(1);
+
+          const outlineChild = outline.children[0];
+          expect(outlineChild.endPosition).to.not.be.undefined;
+          if (outlineChild.endPosition) {
+            expect(outlineChild.endPosition.row).to.equal(8);
+            expect(outlineChild.children.length).to.equal(1);
+
+            const outlineGrandChild = outlineChild.children[0];
+            expect(outlineGrandChild.endPosition).to.not.be.undefined;
+            if (outlineGrandChild.endPosition) {
+              expect(outlineGrandChild.endPosition.row).to.equal(5);
+            }
+          }
+        }
+      }
     });
   });
 
@@ -156,12 +185,19 @@ describe('OutlineViewAdapter', () => {
       expect(result.icon).to.equal('type-class');
       expect(result.representativeName).to.equal('Program');
       expect(result.children).to.deep.equal([]);
-      expect(result.tokenizedText[0].kind).to.equal('type');
-      expect(result.tokenizedText[0].value).to.equal('Program');
-      expect(result.startPosition.row).to.equal(1);
-      expect(result.startPosition.column).to.equal(2);
-      expect(result.endPosition.row).to.equal(3);
-      expect(result.endPosition.column).to.equal(4);
+      expect(result.tokenizedText).to.not.be.undefined;
+      if (result.tokenizedText) {
+        const resultTokenixedText = result.tokenizedText[0];
+        expect(result.tokenizedText[0].kind).to.equal('type');
+        expect(result.tokenizedText[0].value).to.equal('Program');
+        expect(result.startPosition.row).to.equal(1);
+        expect(result.startPosition.column).to.equal(2);
+        expect(result.endPosition).to.not.be.undefined;
+        if (result.endPosition) {
+          expect(result.endPosition.row).to.equal(3);
+          expect(result.endPosition.column).to.equal(4);
+        }
+      }
     });
   });
 });

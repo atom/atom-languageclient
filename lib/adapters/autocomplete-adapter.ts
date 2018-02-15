@@ -267,11 +267,11 @@ export default class AutocompleteAdapter {
   // * `editor` An Atom {TextEditor} used to obtain the necessary text replacement.
   // * `suggestion` An {atom$AutocompleteSuggestion} to set the replacementPrefix and text properties of.
   public static applyTextEditToSuggestion(
-    textEdit: TextEdit | null,
+    textEdit: TextEdit | undefined,
     editor: TextEditor,
     suggestion: AutocompleteSuggestion,
   ): void {
-    if (textEdit != null) {
+    if (textEdit) {
       suggestion.replacementPrefix = editor.getTextInBufferRange(Convert.lsRangeToAtomRange(textEdit.range));
       suggestion.text = textEdit.newText;
     }
@@ -296,7 +296,7 @@ export default class AutocompleteAdapter {
   //
   // Returns a {String} containing the AutoComplete+ suggestion type equivalent
   // to the given completion kind.
-  public static completionKindToSuggestionType(kind: number | null): string {
+  public static completionKindToSuggestionType(kind: number | undefined): string {
     switch (kind) {
       case CompletionItemKind.Constant:
         return 'constant';

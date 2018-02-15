@@ -113,7 +113,7 @@ export default class LinterPushV2Adapter {
     if (path != null) {
       const diagnosticCodes = this._diagnosticCodes.get(path);
       if (diagnosticCodes != null) {
-        return diagnosticCodes.get(getCodeKey(range, text));
+        return diagnosticCodes.get(getCodeKey(range, text)) || null;
       }
     }
     return null;
@@ -121,5 +121,5 @@ export default class LinterPushV2Adapter {
 }
 
 function getCodeKey(range: atom.Range, text: string): string {
-  return [].concat(...range.serialize(), text).join(',');
+  return ([] as any[]).concat(...range.serialize(), text).join(',');
 }

@@ -62,7 +62,7 @@ export default class AutoLanguageClient {
   private _disposable = new CompositeDisposable();
   private _serverManager: ServerManager;
   private _linterDelegate: linter.V2IndieDelegate;
-  private _signatureHelpRegistry: atomIde.SignatureHelpRegistry;
+  private _signatureHelpRegistry: atomIde.SignatureHelpRegistry | null;
   private _lastAutocompleteRequest: AutocompleteRequest;
   private _isDeactivating: boolean;
 

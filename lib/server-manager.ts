@@ -269,7 +269,7 @@ export class ServerManager {
     if (filePath == null) {
       return null;
     }
-    return this._normalizedProjectPaths.find((d) => filePath.startsWith(d));
+    return this._normalizedProjectPaths.find((d) => filePath.startsWith(d)) || null;
   }
 
   public updateNormalizedProjectPaths(): void {
@@ -293,7 +293,7 @@ export class ServerManager {
     }
 
     for (const activeServer of this._activeServers) {
-      const changes = [];
+      const changes: ls.FileEvent[] = [];
       for (const fileEvent of fileEvents) {
         if (fileEvent.path.startsWith(activeServer.projectPath) && this._changeWatchedFileFilter(fileEvent.path)) {
           changes.push(Convert.atomFileEventToLSFileEvents(fileEvent)[0]);
