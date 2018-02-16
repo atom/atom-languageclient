@@ -178,7 +178,7 @@ export interface CodeActionProvider {
     editor: TextEditor,
     range: Range,
     diagnostics: Diagnostic[],
-  ): Promise<CodeAction[]>;
+  ): Promise<CodeAction[] | null>;
 }
 
 export interface BusySignalOptions {

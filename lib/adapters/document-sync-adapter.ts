@@ -64,7 +64,7 @@ export default class DocumentSyncAdapter {
   //                    indicating whether this adapter should care about the contents of the editor.
   constructor(
     connection: LanguageClientConnection,
-    documentSyncKind: TextDocumentSyncOptions | number | null,
+    documentSyncKind: TextDocumentSyncOptions | number | undefined,
     editorSelector: (editor: TextEditor) => boolean,
   ) {
     this._connection = connection;
@@ -129,7 +129,7 @@ export default class DocumentSyncAdapter {
     );
   }
 
-  public getEditorSyncAdapter(editor: TextEditor): TextEditorSyncAdapter | null {
+  public getEditorSyncAdapter(editor: TextEditor): TextEditorSyncAdapter | undefined {
     return this._editors.get(editor);
   }
 }

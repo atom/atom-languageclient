@@ -88,5 +88,8 @@ export default class DatatipAdapter {
         value: markedString.value,
       };
     }
+
+    // Catch-all case
+    return { type: 'markdown', value: markedString.toString() };
   }
 }

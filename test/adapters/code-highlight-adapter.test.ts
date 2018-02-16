@@ -50,8 +50,10 @@ describe('CodeHighlightAdapter', () => {
       expect(highlightStub.called).to.be.true;
 
       invariant(result != null);
-      expect(result.length).to.equal(1);
-      expect(result[0].isEqual(new Range([0, 1], [0, 2]))).to.be.true;
+      if (result) {
+        expect(result.length).to.equal(1);
+        expect(result[0].isEqual(new Range([0, 1], [0, 2]))).to.be.true;
+      }
     });
 
     it('throws if document highlights are not supported', async () => {

@@ -20,7 +20,7 @@ describe('AutoCompleteAdapter', () => {
       capabilities: {completionProvider: { }},
       connection: new ls.LanguageClientConnection(createSpyConnection()),
       disposable: new CompositeDisposable(),
-      process: undefined,
+      process: undefined as any,
       projectPath: '/',
     };
   }
@@ -279,7 +279,7 @@ describe('AutoCompleteAdapter', () => {
 
     it('does not do anything if there is no textEdit', () => {
       const completionItem: AutocompleteSuggestion = {};
-      AutoCompleteAdapter.applyTextEditToSuggestion(null, new TextEditor(), completionItem);
+      AutoCompleteAdapter.applyTextEditToSuggestion(undefined, new TextEditor(), completionItem);
       expect(completionItem).deep.equals({});
     });
 
@@ -315,7 +315,7 @@ describe('AutoCompleteAdapter', () => {
     });
 
     it('defaults to "value"', () => {
-      const result = AutoCompleteAdapter.completionKindToSuggestionType(null);
+      const result = AutoCompleteAdapter.completionKindToSuggestionType(undefined);
       expect(result).equals('value');
     });
   });

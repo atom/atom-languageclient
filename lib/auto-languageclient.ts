@@ -4,12 +4,12 @@ import * as rpc from 'vscode-jsonrpc';
 import * as path from 'path';
 import * as atomIde from 'atom-ide';
 import * as linter from 'atom-linter';
-import * as stream from 'stream';
 import { Socket } from 'net';
-import { EventEmitter } from 'events';
 import { ConsoleLogger, NullLogger, Logger } from './logger';
-import { ServerManager, ActiveServer } from './server-manager.js';
+import { LanguageServerProcess, ServerManager, ActiveServer } from './server-manager.js';
 import Convert from './convert.js';
+
+export { LanguageServerProcess };
 
 import {
   AutocompleteDidInsert,
@@ -39,21 +39,6 @@ import SignatureHelpAdapter from './adapters/signature-help-adapter';
 
 export type ConnectionType = 'stdio' | 'socket' | 'ipc';
 
-// Public: Defines the minimum surface area for an object that resembles a
-// ChildProcess.  This is used so that language packages with alternative
-// language server process hosting strategies can return something compatible
-// with AutoLanguageClient.startServerProcess.
-export interface LanguageServerProcess extends EventEmitter {
-  stdin: stream.Writable;
-  stdout: stream.Readable;
-  stderr: stream.Readable;
-  pid: number;
-
-  kill(signal?: string): void;
-  on(event: 'error', listener: (err: Error) => void): this;
-  on(event: 'exit', listener: (code: number, signal: string) => void): this;
-}
-
 // Public: AutoLanguageClient provides a simple way to have all the supported
 // Atom-IDE services wired up entirely for you by just subclassing it and
 // implementing startServerProcess/getGrammarScopes/getLanguageName and
@@ -62,7 +47,7 @@ export default class AutoLanguageClient {
   private _disposable = new CompositeDisposable();
   private _serverManager: ServerManager;
   private _linterDelegate: linter.V2IndieDelegate;
-  private _signatureHelpRegistry: atomIde.SignatureHelpRegistry;
+  private _signatureHelpRegistry: atomIde.SignatureHelpRegistry | null;
   private _lastAutocompleteRequest: AutocompleteRequest;
   private _isDeactivating: boolean;
 

@@ -40,7 +40,7 @@ export default class ApplyEditAdapter {
       }),
     );
 
-    const checkpoints = [];
+    const checkpoints: Array<{ buffer: TextBuffer, checkpoint: number}> = [];
     try {
       for (let i = 0; i < editors.length; i++) {
         const editor = editors[i] as TextEditor;
@@ -52,7 +52,7 @@ export default class ApplyEditAdapter {
         const buffer = editor.getBuffer();
         const checkpoint = buffer.createCheckpoint();
         checkpoints.push({buffer, checkpoint});
-        let prevEdit = null;
+        let prevEdit: atomIde.TextEdit | null = null;
         for (const edit of edits) {
           ApplyEditAdapter.validateEdit(buffer, edit, prevEdit);
           buffer.setTextInRange(edit.oldRange, edit.newText);
@@ -74,9 +74,13 @@ export default class ApplyEditAdapter {
   }
 
   // Private: Do some basic sanity checking on the edit ranges.
-  private static validateEdit(buffer: TextBuffer, edit: atomIde.TextEdit, prevEdit: atomIde.TextEdit | null): void {
+  private static validateEdit(
+    buffer: TextBuffer,
+    edit: atomIde.TextEdit,
+    prevEdit: atomIde.TextEdit | null,
+  ): void {
     const path = buffer.getPath() || '';
-    if (prevEdit != null && edit.oldRange.end.compare(prevEdit.oldRange.start) > 0) {
+    if (prevEdit && edit.oldRange.end.compare(prevEdit.oldRange.start) > 0) {
       throw Error(`Found overlapping edit ranges in ${path}`);
     }
     const startRow = edit.oldRange.start.row;

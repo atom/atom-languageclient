@@ -31,8 +31,8 @@ export default class SignatureHelpAdapter {
     const {signatureHelpProvider} = this._capabilities;
     assert(signatureHelpProvider != null);
 
-    let triggerCharacters = null;
-    if (Array.isArray(signatureHelpProvider.triggerCharacters)) {
+    let triggerCharacters: Set<string> | undefined;
+    if (signatureHelpProvider && Array.isArray(signatureHelpProvider.triggerCharacters)) {
       triggerCharacters = new Set(signatureHelpProvider.triggerCharacters);
     }
 

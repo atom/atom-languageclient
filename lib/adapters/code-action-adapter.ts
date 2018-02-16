@@ -27,7 +27,7 @@ export default class CodeActionAdapter {
   public static async getCodeActions(
     connection: LanguageClientConnection,
     serverCapabilities: ServerCapabilities,
-    linterAdapter: LinterPushV2Adapter | null,
+    linterAdapter: LinterPushV2Adapter | undefined ,
     editor: TextEditor,
     range: Range,
     diagnostics: atomIde.Diagnostic[],

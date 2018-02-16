@@ -115,24 +115,27 @@ export default class OutlineViewAdapter {
       return null;
     }
 
-    let parent = null;
+    let parent: atomIde.OutlineTree | undefined;
     for (const candidate of candidates) {
       if (
         candidate !== child &&
         candidate.startPosition.isLessThanOrEqual(child.startPosition) &&
-        (candidate.endPosition == null || candidate.endPosition.isGreaterThanOrEqual(child.endPosition))
+        (candidate.endPosition === undefined ||
+          (child.endPosition && candidate.endPosition.isGreaterThanOrEqual(child.endPosition)))
       ) {
         if (
-          parent == null ||
+          parent === undefined ||
           (parent.startPosition.isLessThanOrEqual(candidate.startPosition) ||
-            (parent.endPosition != null && parent.endPosition.isGreaterThanOrEqual(candidate.endPosition)))
+            (parent.endPosition != null &&
+              candidate.endPosition &&
+              parent.endPosition.isGreaterThanOrEqual(candidate.endPosition)))
         ) {
           parent = candidate;
         }
       }
     }
 
-    return parent;
+    return parent || null;
   }
 
   // Public: Convert an individual {SymbolInformation} from the language server
