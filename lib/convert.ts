@@ -132,7 +132,7 @@ export default class Convert {
   // Returns a string that is HTML attribute encoded by replacing &, <, >, " and ' with their HTML entity
   // named equivalents.
   public static encodeHTMLAttribute(s: string): string {
-    const attributeMap = {
+    const attributeMap: { [key: string]: string } = {
       '&': '&amp;',
       '<': '&lt;',
       '>': '&gt;',

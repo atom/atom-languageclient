@@ -3,8 +3,8 @@ import Convert from '../lib/convert';
 import { Point, ProjectFileEvent, Range, TextEditor } from 'atom';
 import { expect } from 'chai';
 
-let originalPlatform;
-const setProcessPlatform = (platform) => {
+let originalPlatform: NodeJS.Platform;
+const setProcessPlatform = (platform: any) => {
   Object.defineProperty(process, 'platform', {value: platform});
 };
 

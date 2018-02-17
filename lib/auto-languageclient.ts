@@ -36,6 +36,7 @@ import LinterPushV2Adapter from './adapters/linter-push-v2-adapter';
 import NotificationsAdapter from './adapters/notifications-adapter';
 import OutlineViewAdapter from './adapters/outline-view-adapter';
 import SignatureHelpAdapter from './adapters/signature-help-adapter';
+import Utils from './utils';
 
 export type ConnectionType = 'stdio' | 'socket' | 'ipc';
 
@@ -350,7 +351,8 @@ export default class AutoLanguageClient {
 
   // Creates the RPC connection which can be ipc, socket or stdio
   private createRpcConnection(process: cp.ChildProcess): rpc.MessageConnection {
-    let reader, writer;
+    let reader: rpc.MessageReader;
+    let writer: rpc.MessageWriter;
     const connectionType = this.getConnectionType();
     switch (connectionType) {
       case 'ipc':
@@ -365,14 +367,16 @@ export default class AutoLanguageClient {
         reader = new rpc.StreamMessageReader(process.stdout);
         writer = new rpc.StreamMessageWriter(process.stdin);
         break;
+      default:
+        return Utils.assertUnreachable(connectionType);
     }
 
     return rpc.createMessageConnection(reader, writer, {
-      log: (m) => {},
-      warn: (m) => {},
-      info: (m) => {},
-      error: (m) => {
-        this.logger.error(m);
+      log: (...args: any[]) => {},
+      warn: (...args: any[]) => {},
+      info: (...args: any[]) => {},
+      error: (...args: any[]) => {
+        this.logger.error(args);
       },
     });
   }
@@ -510,7 +514,7 @@ export default class AutoLanguageClient {
   }
 
   // Linter push v2 API via LS publishDiagnostics
-  public consumeLinterV2(registerIndie: ({name: string}) => linter.V2IndieDelegate): void {
+  public consumeLinterV2(registerIndie: (params: {name: string}) => linter.V2IndieDelegate): void {
     this._linterDelegate = registerIndie({name: this.name});
     if (this._linterDelegate == null) {
       return;

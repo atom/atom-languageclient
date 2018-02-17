@@ -56,7 +56,8 @@ export default class AutocompleteAdapter {
   public async getSuggestions(
     server: ActiveServer,
     request: AutocompleteRequest,
-    onDidConvertCompletionItem?: (CompletionItem, AutocompleteSuggestion, AutocompleteRequest) => void,
+    onDidConvertCompletionItem?: (item: CompletionItem, suggestion: AutocompleteSuggestion,
+                                  request: AutocompleteRequest) => void,
   ): Promise<AutocompleteSuggestion[]> {
     const triggerChars =
       server.capabilities.completionProvider != null ?
@@ -102,7 +103,8 @@ export default class AutocompleteAdapter {
     server: ActiveServer,
     suggestion: AutocompleteSuggestion,
     request: AutocompleteRequest,
-    onDidConvertCompletionItem?: (CompletionItem, AutocompleteSuggestion, AutocompleteRequest) => void,
+    onDidConvertCompletionItem?: (item: CompletionItem, suggestion: AutocompleteSuggestion,
+                                  request: AutocompleteRequest) => void,
   ): Promise<AutocompleteSuggestion> {
     const cache = this._suggestionCache.get(server);
     if (cache) {
@@ -203,7 +205,8 @@ export default class AutocompleteAdapter {
   public completionItemsToSuggestions(
     completionItems: CompletionItem[] | CompletionList,
     request: AutocompleteRequest,
-    onDidConvertCompletionItem?: (CompletionItem, AutocompleteSuggestion, AutocompleteRequest) => void,
+    onDidConvertCompletionItem?: (item: CompletionItem, suggestion: AutocompleteSuggestion,
+                                  request: AutocompleteRequest) => void,
   ): Map<AutocompleteSuggestion, [CompletionItem, boolean]> {
     return new Map((Array.isArray(completionItems) ? completionItems : completionItems.items || [])
       .sort((a, b) => (a.sortText || a.label).localeCompare(b.sortText || b.label))
@@ -226,7 +229,8 @@ export default class AutocompleteAdapter {
     item: CompletionItem,
     suggestion: AutocompleteSuggestion,
     request: AutocompleteRequest,
-    onDidConvertCompletionItem?: (CompletionItem, AutocompleteSuggestion, AutocompleteRequest) => void,
+    onDidConvertCompletionItem?: (item: CompletionItem, suggestion: AutocompleteSuggestion,
+                                  request: AutocompleteRequest) => void,
   ): AutocompleteSuggestion {
     AutocompleteAdapter.applyCompletionItemToSuggestion(item, suggestion);
     AutocompleteAdapter.applyTextEditToSuggestion(item.textEdit, request.editor, suggestion);

@@ -6,7 +6,7 @@ import { expect } from 'chai';
 
 describe('Utils', () => {
   describe('getWordAtPosition', () => {
-    let editor;
+    let editor: any;
     beforeEach(() => {
       editor = createFakeEditor('test.txt');
       editor.setText('blah test1234 test-two');

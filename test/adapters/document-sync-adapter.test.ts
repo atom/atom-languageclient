@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { TextDocumentSyncKind } from '../../lib/languageclient';
+import { TextDocumentSyncKind, TextDocumentSyncOptions } from '../../lib/languageclient';
 import DocumentSyncAdapter from '../../lib/adapters/document-sync-adapter';
 
 describe('DocumentSyncAdapter', () => {
@@ -48,7 +48,7 @@ describe('DocumentSyncAdapter', () => {
   });
 
   describe('constructor', () => {
-    function create(textDocumentSync) {
+    function create(textDocumentSync: TextDocumentSyncKind | TextDocumentSyncOptions) {
       return new DocumentSyncAdapter(null as any, textDocumentSync, () => false);
     }
 

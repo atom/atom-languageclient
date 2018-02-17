@@ -32,7 +32,7 @@ describe('LanguageClientConnection', () => {
       textDocument: {uri: 'file:///1/z80.asm'},
       position: {line: 24, character: 32},
     };
-    let lc;
+    let lc: any;
 
     beforeEach(() => {
       lc = new ls.LanguageClientConnection(createSpyConnection(), new NullLogger());
@@ -264,7 +264,7 @@ describe('LanguageClientConnection', () => {
       version: 1,
     };
 
-    let lc;
+    let lc: any;
 
     beforeEach(() => {
       lc = new ls.LanguageClientConnection(createSpyConnection(), new NullLogger());
@@ -355,8 +355,8 @@ describe('LanguageClientConnection', () => {
   });
 
   describe('notification methods', () => {
-    let lc;
-    const eventMap = {};
+    let lc: any;
+    const eventMap: { [key: string]: any } = {};
 
     beforeEach(() => {
       lc = new ls.LanguageClientConnection(createSpyConnection(), new NullLogger());

@@ -8,6 +8,7 @@
         "inlineSources": true,
         "inlineSourceMap": true,
         "strictNullChecks": true,
+        "noImplicitAny": true,
         "baseUrl": "./",
         "paths": {
             "atom-ide": [
