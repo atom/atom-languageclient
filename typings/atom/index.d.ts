@@ -4,7 +4,7 @@ declare module 'atom' {
   interface TextEditor {
     getURI(): string | null;
     getBuffer(): TextBuffer;
-    getNonWordCharacters(scope: ScopeDescriptor);
+    getNonWordCharacters(scope: ScopeDescriptor): string;
   }
 
   export interface ProjectFileEvent {

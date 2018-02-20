@@ -1,3 +1,4 @@
+import { TestRunnerParams } from "atom";
 import { createRunner } from 'atom-mocha-test-runner';
 
 const testRunner = createRunner(
@@ -13,7 +14,7 @@ const testRunner = createRunner(
   },
 );
 
-export = function runnerWrapper(options) {
+export = function runnerWrapper(options: TestRunnerParams) {
   // Replace the test path with the current path since Atom's internal runner
   // picks the wrong one by default
   options.testPaths = [__dirname];

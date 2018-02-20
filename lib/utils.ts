@@ -1,4 +1,4 @@
-import { Point, TextBuffer, TextEditor, Range } from 'atom';
+import { Point, TextBuffer, TextEditor, Range, BufferScanResult } from 'atom';
 import { CancellationToken, CancellationTokenSource } from 'vscode-jsonrpc';
 
 export default class Utils {
@@ -28,7 +28,7 @@ export default class Utils {
   private static _getRegexpRangeAtPosition(buffer: TextBuffer, position: Point, wordRegex: RegExp): Range | null {
     const {row, column} = position;
     const rowRange = buffer.rangeForRow(row, false);
-    let matchData;
+    let matchData: BufferScanResult | undefined | null;
     // Extract the expression from the row text.
     buffer.scanInRange(wordRegex, rowRange, (data) => {
       const {range} = data;
@@ -71,11 +71,15 @@ export default class Utils {
   public static async doWithCancellationToken<T1 extends object, T2>(
     key: T1,
     cancellationTokens: WeakMap<T1, CancellationTokenSource>,
-    work: (CancellationToken) => Promise<T2>,
+    work: (token: CancellationToken) => Promise<T2>,
   ): Promise<T2> {
     const token = Utils.cancelAndRefreshCancellationToken(key, cancellationTokens);
     const result: T2 = await work(token);
     cancellationTokens.delete(key);
     return result;
+  }
+
+  public static assertUnreachable(_: never): never {
+    return _;
   }
 }

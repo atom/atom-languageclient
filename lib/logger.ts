@@ -36,7 +36,7 @@ export class ConsoleLogger {
   }
 
   public format(args_: any): any {
-    const args = args_.filter((a) => a != null);
+    const args = args_.filter((a: any) => a != null);
     if (typeof args[0] === 'string') {
       if (args.length === 1) {
         return [`${this.prefix} ${args[0]}`];

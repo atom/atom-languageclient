@@ -36,6 +36,7 @@ import LinterPushV2Adapter from './adapters/linter-push-v2-adapter';
 import NotificationsAdapter from './adapters/notifications-adapter';
 import OutlineViewAdapter from './adapters/outline-view-adapter';
 import SignatureHelpAdapter from './adapters/signature-help-adapter';
+import Utils from './utils';
 
 export type ConnectionType = 'stdio' | 'socket' | 'ipc';
 
@@ -98,7 +99,7 @@ export default class AutoLanguageClient {
   }
 
   // Return the parameters used to initialize a client - you may want to extend capabilities
-  protected getInitializeParams(projectPath: string, process: cp.ChildProcess): ls.InitializeParams {
+  protected getInitializeParams(projectPath: string, process: LanguageServerProcess): ls.InitializeParams {
     return {
       processId: process.pid,
       rootPath: projectPath,
@@ -323,7 +324,7 @@ export default class AutoLanguageClient {
     return newServer;
   }
 
-  private captureServerErrors(childProcess: cp.ChildProcess, projectPath: string): void {
+  private captureServerErrors(childProcess: LanguageServerProcess, projectPath: string): void {
     childProcess.on('error', (err) => this.handleSpawnFailure(err));
     childProcess.on('exit', (code, signal) => this.logger.debug(`exit: code ${code} signal ${signal}`));
     childProcess.stderr.setEncoding('utf8');
@@ -349,13 +350,14 @@ export default class AutoLanguageClient {
   }
 
   // Creates the RPC connection which can be ipc, socket or stdio
-  private createRpcConnection(process: cp.ChildProcess): rpc.MessageConnection {
-    let reader, writer;
+  private createRpcConnection(process: LanguageServerProcess): rpc.MessageConnection {
+    let reader: rpc.MessageReader;
+    let writer: rpc.MessageWriter;
     const connectionType = this.getConnectionType();
     switch (connectionType) {
       case 'ipc':
-        reader = new rpc.IPCMessageReader(process);
-        writer = new rpc.IPCMessageWriter(process);
+        reader = new rpc.IPCMessageReader(process as cp.ChildProcess);
+        writer = new rpc.IPCMessageWriter(process as cp.ChildProcess);
         break;
       case 'socket':
         reader = new rpc.SocketMessageReader(this.socket);
@@ -365,14 +367,16 @@ export default class AutoLanguageClient {
         reader = new rpc.StreamMessageReader(process.stdout);
         writer = new rpc.StreamMessageWriter(process.stdin);
         break;
+      default:
+        return Utils.assertUnreachable(connectionType);
     }
 
     return rpc.createMessageConnection(reader, writer, {
-      log: (m) => {},
-      warn: (m) => {},
-      info: (m) => {},
-      error: (m) => {
-        this.logger.error(m);
+      log: (...args: any[]) => {},
+      warn: (...args: any[]) => {},
+      info: (...args: any[]) => {},
+      error: (...args: any[]) => {
+        this.logger.error(args);
       },
     });
   }
@@ -510,7 +514,7 @@ export default class AutoLanguageClient {
   }
 
   // Linter push v2 API via LS publishDiagnostics
-  public consumeLinterV2(registerIndie: ({name: string}) => linter.V2IndieDelegate): void {
+  public consumeLinterV2(registerIndie: (params: {name: string}) => linter.V2IndieDelegate): void {
     this._linterDelegate = registerIndie({name: this.name});
     if (this._linterDelegate == null) {
       return;

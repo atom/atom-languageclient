@@ -4,7 +4,7 @@ import * as sinon from 'sinon';
 import { expect } from 'chai';
 
 describe('OutlineViewAdapter', () => {
-  const createLocation = (a, b, c, d) => ({
+  const createLocation = (a: any, b: any, c: any, d: any) => ({
     uri: '',
     range: {start: {line: a, character: b}, end: {line: c, character: d}},
   });

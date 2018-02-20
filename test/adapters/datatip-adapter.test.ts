@@ -7,8 +7,8 @@ import DatatipAdapter from '../../lib/adapters/datatip-adapter';
 import { createSpyConnection, createFakeEditor } from '../helpers.js';
 
 describe('DatatipAdapter', () => {
-  let fakeEditor;
-  let connection;
+  let fakeEditor: any;
+  let connection: any;
 
   beforeEach(() => {
     (global as any).sinon = sinon.sandbox.create();

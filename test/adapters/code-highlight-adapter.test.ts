@@ -7,8 +7,8 @@ import CodeHighlightAdapter from '../../lib/adapters/code-highlight-adapter';
 import { createSpyConnection, createFakeEditor } from '../helpers.js';
 
 describe('CodeHighlightAdapter', () => {
-  let fakeEditor;
-  let connection;
+  let fakeEditor: any;
+  let connection: any;
 
   beforeEach(() => {
     connection = new ls.LanguageClientConnection(createSpyConnection());

@@ -7,9 +7,9 @@ import CodeFormatAdapter from '../../lib/adapters/code-format-adapter';
 import { createSpyConnection, createFakeEditor } from '../helpers.js';
 
 describe('CodeFormatAdapter', () => {
-  let fakeEditor;
-  let connection;
-  let range;
+  let fakeEditor: any;
+  let connection: any;
+  let range: any;
 
   beforeEach(() => {
     connection = new ls.LanguageClientConnection(createSpyConnection());
