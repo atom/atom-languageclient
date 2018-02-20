@@ -99,7 +99,7 @@ export default class AutoLanguageClient {
   }
 
   // Return the parameters used to initialize a client - you may want to extend capabilities
-  protected getInitializeParams(projectPath: string, process: cp.ChildProcess): ls.InitializeParams {
+  protected getInitializeParams(projectPath: string, process: LanguageServerProcess): ls.InitializeParams {
     return {
       processId: process.pid,
       rootPath: projectPath,
@@ -324,7 +324,7 @@ export default class AutoLanguageClient {
     return newServer;
   }
 
-  private captureServerErrors(childProcess: cp.ChildProcess, projectPath: string): void {
+  private captureServerErrors(childProcess: LanguageServerProcess, projectPath: string): void {
     childProcess.on('error', (err) => this.handleSpawnFailure(err));
     childProcess.on('exit', (code, signal) => this.logger.debug(`exit: code ${code} signal ${signal}`));
     childProcess.stderr.setEncoding('utf8');
@@ -350,14 +350,14 @@ export default class AutoLanguageClient {
   }
 
   // Creates the RPC connection which can be ipc, socket or stdio
-  private createRpcConnection(process: cp.ChildProcess): rpc.MessageConnection {
+  private createRpcConnection(process: LanguageServerProcess): rpc.MessageConnection {
     let reader: rpc.MessageReader;
     let writer: rpc.MessageWriter;
     const connectionType = this.getConnectionType();
     switch (connectionType) {
       case 'ipc':
-        reader = new rpc.IPCMessageReader(process);
-        writer = new rpc.IPCMessageWriter(process);
+        reader = new rpc.IPCMessageReader(process as cp.ChildProcess);
+        writer = new rpc.IPCMessageWriter(process as cp.ChildProcess);
         break;
       case 'socket':
         reader = new rpc.SocketMessageReader(this.socket);

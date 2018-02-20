@@ -16,13 +16,15 @@ import { CompositeDisposable, ProjectFileEvent, TextEditor } from 'atom';
 // ChildProcess.  This is used so that language packages with alternative
 // language server process hosting strategies can return something compatible
 // with AutoLanguageClient.startServerProcess.
-export interface LanguageServerProcess extends cp.ChildProcess {
+export interface LanguageServerProcess extends EventEmitter {
   stdin: stream.Writable;
   stdout: stream.Readable;
   stderr: stream.Readable;
   pid: number;
 
   kill(signal?: string): void;
+  on(event: 'error', listener: (err: Error) => void): this;
+  on(event: 'exit', listener: (code: number, signal: string) => void): this;
 }
 
 // The necessary elements for a server that has started or is starting.
