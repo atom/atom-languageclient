@@ -47,7 +47,7 @@ export type ConnectionType = 'stdio' | 'socket' | 'ipc';
 export default class AutoLanguageClient {
   private _disposable = new CompositeDisposable();
   private _serverManager: ServerManager;
-  private _linterDelegate: linter.V2IndieDelegate;
+  private _linterDelegate: linter.IndieDelegate;
   private _signatureHelpRegistry: atomIde.SignatureHelpRegistry | null;
   private _lastAutocompleteRequest: AutocompleteRequest;
   private _isDeactivating: boolean;
@@ -514,7 +514,7 @@ export default class AutoLanguageClient {
   }
 
   // Linter push v2 API via LS publishDiagnostics
-  public consumeLinterV2(registerIndie: (params: {name: string}) => linter.V2IndieDelegate): void {
+  public consumeLinterV2(registerIndie: (params: {name: string}) => linter.IndieDelegate): void {
     this._linterDelegate = registerIndie({name: this.name});
     if (this._linterDelegate == null) {
       return;

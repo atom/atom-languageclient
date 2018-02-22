@@ -1,115 +1,90 @@
 declare module "atom-linter" {
-  import { Disposable, Grammar, Point, Range, TextEditor } from 'atom';
-
-  export interface StandardLinter {
-    name: string;
-    scope: 'file' | 'project';
-    lintOnFly: boolean;
-    grammarScopes: string[];
-    lint(textEditor: TextEditor): Message[] | Promise<Message[] | null> | null;
-  }
-
-  export interface Message {
-    type: string;
-    text?: string;
-    html?: string;
-    name?: string;
-    // ^ Only specify this if you want the name to be something other than your linterProvider.name
-    // WARNING: There is NO replacement for this in v2
-    filePath?: string;
-    // ^ MUST be an absolute path (relative paths are not supported)
-    range?: Range;
-    trace?: Trace[];
-    fix?: Fix;
-    severity?: 'error' | 'warning' | 'info';
-    selected?: () => void;
-    // ^ WARNING: There is NO replacement for this in v2
-  }
-
-  export interface Trace {
-    type: 'Trace';
-    text?: string;
-    html?: string;
-    name?: string;
-    // ^ Only specify this if you want the name to be something other than your linterProvider.name
-    // WARNING: There is NO replacement for this in v2
-    filePath?: string;
-    // ^ MUST be an absolute path (relative paths are not supported)
-    range?: Range;
-    class?: string;
-    severity?: 'error' | 'warning' | 'info';
-  }
-
-  export interface Fix {
-    range: Range;
-    newText: string;
-    oldText?: string;
-  }
+  import { Disposable, Point, Range, TextEditor } from "atom";
 
   export interface Config {
     name: string;
   }
 
-  export interface IndieRegistry {
-    register(config: Config): Indie;
+  export interface ReplacementSolution {
+    title?: string;
+    position: Range;
+    priority?: number;
+    currentText?: string;
+    replaceWith: string;
   }
 
-  export interface Indie {
-    deleteMessages(): void;
-    setMessages(messages: Message[]): void;
-    dispose(): void;
+  export interface CallbackSolution {
+    title?: string;
+    position: Range;
+    priority?: number;
+    // tslint:disable-next-line:no-any
+    apply(): any;
   }
 
-  export interface V2IndieDelegate {
-    name(): string;
+  export interface Message {
+    /** The location of the issue (aka where to highlight). */
+    location: {
+      /** The path to the file to which the message applies. */
+      file: string;
+
+      /** The range of the message in the editor. */
+      position: Range;
+    };
+
+    /** A reference to a different location in the editor. */
+    reference?: {
+      /** The path to the file being referenced. */
+      file: string;
+
+      /** The point being referenced in that file. */
+      position?: Point;
+    };
+
+    /** An HTTP link to a resource explaining the issue. Default is a google search. */
+    url?: string;
+
+    /** The name of the octicon to show in the gutter. */
+    icon?: string;
+
+    /** The text for the message. */
+    excerpt: string;
+
+    /** The severity level for the message. */
+    severity: "error" | "warning" | "info";
+
+    /** Possible solutions (which the user can invoke at will). */
+    solutions?: Array<ReplacementSolution | CallbackSolution>;
+
+    /**
+     *  Markdown long description of the error. Accepts a callback so that you can
+     *  do things like HTTP requests.
+     */
+    description?: string | (() => Promise<string> | string);
+
+    /** Optionally override the displayed linter name. Defaults to provider name. */
+    linterName?: string;
+  }
+
+  export interface IndieDelegate {
+    name: string;
     getMessages(): Message[];
     clearMessages(): void;
-    setMessages(filePath: string, messages: V2Message[]): void;
-    setAllMessages(messages: V2Message[]): void;
+    setMessages(filePath: string, messages: Message[]): void;
+    setAllMessages(messages: Message[]): void;
     onDidUpdate(callback: () => void): Disposable;
     onDidDestroy(callback: () => void): Disposable;
     dispose(): void;
   }
 
-  interface V2Message {
-    // NOTE: These are given by providers
-    location: {
-      file: string,
-      // ^ MUST be an absolute path (relative paths are not supported)
-      position: Range,
-    };
-    // ^ Location of the issue (aka where to highlight)
-    reference?: {
-      file: string,
-      // ^ MUST be an absolute path (relative paths are not supported)
-      position?: Point,
-    };
-    // ^ Reference to a different location in the editor, useful for jumping to classes etc.
-    url?: string; // external HTTP link
-    // ^ HTTP link to a resource explaining the issue. Default is a google search
-    icon?: string;
-    // ^ Name of octicon to show in gutter
-    excerpt: string;
-    // ^ Error message
-    severity: 'error' | 'warning' | 'info';
-    // ^ Severity of error
-    solutions?: Array<{
-      title?: string,
-      position: Range,
-      priority?: number,
-      currentText?: string,
-      replaceWith: string,
-    } | {
-      title?: string,
-      position: Range,
-      priority?: number,
-      apply: (() => any),
-    }>;
-    // ^ Possible solutions to the error (user can invoke them at will)
-    description?: string | (() => Promise<string> | string);
-    // ^ Markdown long description of the error, accepts callback so you can do
-    // http requests etc.
-    linterName?: string;
-    // ^ Optionally override the displayed linter name. (Defaults to provider)
+  export type LintResult = Message[] | null;
+
+  export interface LinterProvider {
+    name: string;
+    scope: "file" | "project";
+    lintsOnChange: boolean;
+    grammarScopes: string[];
+    lint(editor: TextEditor): LintResult | Promise<LintResult>;
   }
+
+  export type IndieProvider = (register: (config: Config) => IndieDelegate) => void;
 }
