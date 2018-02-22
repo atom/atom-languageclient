@@ -12,9 +12,9 @@ import Convert from '../convert';
 // Public: Listen to diagnostics messages from the language server and publish them
 // to the user by way of the Linter Push (Indie) v2 API supported by Atom IDE UI.
 export default class LinterPushV2Adapter {
-  private _diagnosticMap: Map<string, linter.V2Message[]> = new Map();
+  private _diagnosticMap: Map<string, linter.Message[]> = new Map();
   private _diagnosticCodes: Map<string, Map<string, DiagnosticCode | null>> = new Map();
-  private _indies: Set<linter.V2IndieDelegate> = new Set();
+  private _indies: Set<linter.IndieDelegate> = new Set();
 
   // Public: Create a new {LinterPushV2Adapter} that will listen for diagnostics
   // via the supplied {LanguageClientConnection}.
@@ -32,7 +32,7 @@ export default class LinterPushV2Adapter {
   // Public: Attach this {LinterPushV2Adapter} to a given {V2IndieDelegate} registry.
   //
   // * `indie` A {V2IndieDelegate} that wants to receive messages.
-  public attach(indie: linter.V2IndieDelegate): void {
+  public attach(indie: linter.IndieDelegate): void {
     this._indies.add(indie);
     this._diagnosticMap.forEach((value, key) => indie.setMessages(key, value));
     indie.onDidDestroy(() => {
@@ -73,7 +73,7 @@ export default class LinterPushV2Adapter {
   // * `diagnostics` A {Diagnostic} object received from the language server.
   //
   // Returns a {V2Message} equivalent to the {Diagnostic} object supplied by the language server.
-  public diagnosticToV2Message(path: string, diagnostic: Diagnostic): linter.V2Message {
+  public diagnosticToV2Message(path: string, diagnostic: Diagnostic): linter.Message {
     return {
       location: {
         file: path,

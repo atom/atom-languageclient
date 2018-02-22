@@ -9,17 +9,10 @@
         "inlineSourceMap": true,
         "strictNullChecks": true,
         "noImplicitAny": true,
-        "baseUrl": "./",
-        "paths": {
-            "atom-ide": [
-                "./typings/atom-ide/index.d.ts"
-            ],
-            "atom-linter": [
-                "./typings/atom-linter/index.d.ts"
-            ]
-        }
+        "baseUrl": "./"
     },
     "include": [
+        "typings/**/*.ts",
         "lib/**/*.ts",
         "test/**/*.ts"
     ]
