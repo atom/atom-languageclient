@@ -25,6 +25,7 @@ import Utils from '../utils';
 interface SuggestionCacheEntry {
   isIncomplete: boolean;
   triggerPoint: Point;
+  triggerChar: string | null;
   suggestionMap: Map<AutocompleteSuggestion, [CompletionItem, boolean]>;
 }
 
@@ -62,30 +63,30 @@ export default class AutocompleteAdapter {
     const triggerChars =
       server.capabilities.completionProvider != null ?
         server.capabilities.completionProvider.triggerCharacters || [] : [];
+    const triggerChar = AutocompleteAdapter.getTriggerCharacter(request, triggerChars);
     const triggerPoint = AutocompleteAdapter.getTriggerPoint(request, triggerChars);
-    const prefixWithTrigger = AutocompleteAdapter.getPrefixWithTrigger(request, triggerPoint);
-
+    const prefixWithTrigger = triggerChar + request.prefix;
     const cache = this._suggestionCache.get(server);
 
-    // We have cached suggestions and should use them
-    if (cache && !cache.isIncomplete && cache.triggerPoint.isEqual(triggerPoint)) {
+    // Do we have complete cached suggestions that are still valid for this request
+    if (cache && !cache.isIncomplete && cache.triggerChar === triggerChar && cache.triggerPoint.isEqual(triggerPoint)) {
       const suggestions = Array.from(cache.suggestionMap.keys());
       AutocompleteAdapter.setReplacementPrefixOnSuggestions(suggestions, request.prefix);
       return prefixWithTrigger.length === 1 ? suggestions : filter(suggestions, request.prefix, {key: 'text'});
     }
 
-    // We either don't have suggestions or they are incomplete so request from the language server
+    // Our cached suggestions can't be used so obtain new ones from the language server
     const completions =
       await Utils.doWithCancellationToken(
         server.connection,
         this._cancellationTokens,
         (cancellationToken) =>
           server.connection.completion(
-            AutocompleteAdapter.createCompletionParams(request, prefixWithTrigger[0]), cancellationToken),
+            AutocompleteAdapter.createCompletionParams(request, triggerChar), cancellationToken),
     );
     const isIncomplete = !Array.isArray(completions) && completions.isIncomplete;
     const suggestionMap = this.completionItemsToSuggestions(completions, request, onDidConvertCompletionItem);
-    this._suggestionCache.set(server, {isIncomplete, triggerPoint, suggestionMap});
+    this._suggestionCache.set(server, {isIncomplete, triggerChar, triggerPoint, suggestionMap});
     return Array.from(suggestionMap.keys());
   }
 
@@ -118,7 +119,6 @@ export default class AutocompleteAdapter {
         }
       }
     }
-
     return suggestion;
   }
 
@@ -133,31 +133,80 @@ export default class AutocompleteAdapter {
     }
   }
 
-  // Public: Get the point where the trigger character occurred.
+  // Public: Get the trigger character that caused the autocomplete (if any).  This is required because
+  // AutoComplete-plus does not have trigger characters.  Although the terminology is 'character' we treat
+  // them as variable length strings as this will almost certainly change in the future to support '->' etc.
   //
-  // * `request` An {Array} of {atom$AutocompleteSuggestion}s to set the replacementPrefix on.
+  // * `request` An {Array} of {atom$AutocompleteSuggestion}s to locate the prefix, editor, bufferPosition etc.
   // * `triggerChars` The {Array} of {string}s that can be trigger characters.
   //
-  // Returns the {atom$Point} where the trigger occurred.
-  public static getTriggerPoint(request: AutocompleteRequest, triggerChars: string[]): Point {
-    if (triggerChars.includes(request.prefix)) {
-      return Point.fromObject(request.bufferPosition, true);
+  // Returns a {string} containing the matching trigger character or null if one was not matched.
+  public static getTriggerCharacter(request: AutocompleteRequest, triggerChars: string[]): string | null {
+    // AutoComplete-Plus considers text after a symbol to be a new trigger. So we should look backward
+    // from the current cursor position to see if one is there and thus simulate it.
+    const buffer = request.editor.getBuffer();
+    const cursor = request.bufferPosition;
+    const prefixStartColumn = cursor.column - request.prefix.length;
+    for (const triggerChar of triggerChars) {
+      if (triggerChar === request.prefix) {
+        return triggerChar;
+      }
+      if (prefixStartColumn >= triggerChar.length) { // Far enough along a line to fit the trigger char
+        const start = new Point(cursor.row, prefixStartColumn - triggerChar.length);
+        const possibleTrigger = buffer.getTextInRange([start, [cursor.row, prefixStartColumn]]);
+        if (possibleTrigger === triggerChar) { // The text before our trigger is a trigger char!
+          return triggerChar;
+        }
+      }
     }
 
-    return new Point(request.bufferPosition.row, request.bufferPosition.column - request.prefix.length);
+    // There was no explicit trigger char
+    return null;
+  }
+
+  // Public: Get the range of the prefix with any additional matching known trigger character.
+  //
+  // * `request` An {Array} of {atom$AutocompleteSuggestion}s to locate the prefix, editor, bufferPosition etc.
+  // * `triggerChars` The {Array} of {string}s that can be trigger characters.
+  //
+  // Returns an {atom$Point} where the trigger occurred.
+  public static getTriggerPoint(request: AutocompleteRequest, triggerChars: string[]): Point {
+    const cursor = request.bufferPosition;
+
+    // Is just the trigger character, no additional prefix
+    if (triggerChars.includes(request.prefix)) {
+      return new Point(cursor.row, cursor.column - 1);
+    }
+
+    // AutoComplete-Plus considers text after a symbol to be a new trigger. So we should look backward
+    // from the current text to see if there was a trigger as a previous prefix as LSP cares.
+    const buffer = request.editor.getBuffer();
+    const prefixStartColumn = cursor.column - request.prefix.length;
+    for (const triggerChar of triggerChars) {
+      if (prefixStartColumn >= triggerChar.length) {
+        const start = new Point(cursor.row, prefixStartColumn - triggerChar.length);
+        const possibleTrigger = buffer.getTextInRange([start, [cursor.row, prefixStartColumn]]);
+        if (possibleTrigger === triggerChar) {
+          return start;
+        }
+      }
+    }
+
+    // There was no explicit trigger character
+    return new Point(cursor.row, cursor.column - request.prefix.length);
   }
 
   // Public: Create TextDocumentPositionParams to be sent to the language server
   // based on the editor and position from the AutoCompleteRequest.
   //
-  // * `request` The {atom$AutocompleteRequest} to obtain the trigger and editor from.
+  // * `request` The {atom$AutocompleteRequest} to obtain the editor from.
   // * `triggerPoint` The {atom$Point} where the trigger started.
   //
   // Returns a {string} containing the prefix including the trigger character.
   public static getPrefixWithTrigger(request: AutocompleteRequest, triggerPoint: Point): string {
     return request.editor
       .getBuffer()
-      .getTextInRange([[triggerPoint.row, triggerPoint.column - 1], request.bufferPosition]);
+      .getTextInRange([[triggerPoint.row, triggerPoint.column], request.bufferPosition]);
   }
 
   // Public: Create {CompletionParams} to be sent to the language server
