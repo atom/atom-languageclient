@@ -64,7 +64,8 @@ export default class AutocompleteAdapter {
       server.capabilities.completionProvider != null ?
         server.capabilities.completionProvider.triggerCharacters || [] : [];
     const triggerChar = AutocompleteAdapter.getTriggerCharacter(request, triggerChars);
-    const triggerPoint = AutocompleteAdapter.getTriggerPoint(request, triggerChars);
+    const triggerColumn = request.bufferPosition.column - (triggerChar != null ? triggerChar.length : 0);
+    const triggerPoint = new Point(request.bufferPosition.row, triggerColumn);
     const prefixWithTrigger = triggerChar + request.prefix;
     const cache = this._suggestionCache.get(server);
 
@@ -162,38 +163,6 @@ export default class AutocompleteAdapter {
 
     // There was no explicit trigger char
     return null;
-  }
-
-  // Public: Get the range of the prefix with any additional matching known trigger character.
-  //
-  // * `request` An {Array} of {atom$AutocompleteSuggestion}s to locate the prefix, editor, bufferPosition etc.
-  // * `triggerChars` The {Array} of {string}s that can be trigger characters.
-  //
-  // Returns an {atom$Point} where the trigger occurred.
-  public static getTriggerPoint(request: AutocompleteRequest, triggerChars: string[]): Point {
-    const cursor = request.bufferPosition;
-
-    // Is just the trigger character, no additional prefix
-    if (triggerChars.includes(request.prefix)) {
-      return new Point(cursor.row, cursor.column - 1);
-    }
-
-    // AutoComplete-Plus considers text after a symbol to be a new trigger. So we should look backward
-    // from the current text to see if there was a trigger as a previous prefix as LSP cares.
-    const buffer = request.editor.getBuffer();
-    const prefixStartColumn = cursor.column - request.prefix.length;
-    for (const triggerChar of triggerChars) {
-      if (prefixStartColumn >= triggerChar.length) {
-        const start = new Point(cursor.row, prefixStartColumn - triggerChar.length);
-        const possibleTrigger = buffer.getTextInRange([start, [cursor.row, prefixStartColumn]]);
-        if (possibleTrigger === triggerChar) {
-          return start;
-        }
-      }
-    }
-
-    // There was no explicit trigger character
-    return new Point(cursor.row, cursor.column - request.prefix.length);
   }
 
   // Public: Create TextDocumentPositionParams to be sent to the language server
