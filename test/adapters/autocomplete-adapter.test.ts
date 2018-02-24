@@ -115,7 +115,7 @@ describe('AutoCompleteAdapter', () => {
 
   describe('createCompletionParams', () => {
     it('creates CompletionParams from an AutocompleteRequest with no trigger', () => {
-      const result = AutoCompleteAdapter.createCompletionParams(request, null);
+      const result = AutoCompleteAdapter.createCompletionParams(request, '');
       expect(result.textDocument.uri).equals('file:///a/b/c/d.js');
       expect(result.position).deep.equals({line: 123, character: 456});
       expect(result.context && result.context.triggerKind === ls.CompletionTriggerKind.Invoked);

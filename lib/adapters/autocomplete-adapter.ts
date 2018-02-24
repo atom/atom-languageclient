@@ -25,7 +25,7 @@ import Utils from '../utils';
 interface SuggestionCacheEntry {
   isIncomplete: boolean;
   triggerPoint: Point;
-  triggerChar: string | null;
+  triggerChar: string;
   suggestionMap: Map<AutocompleteSuggestion, [CompletionItem, boolean]>;
 }
 
@@ -67,6 +67,7 @@ export default class AutocompleteAdapter {
     const triggerColumn = request.bufferPosition.column - (triggerChar != null ? triggerChar.length : 0);
     const triggerPoint = new Point(request.bufferPosition.row, triggerColumn);
     const prefixWithTrigger = triggerChar + request.prefix;
+
     const cache = this._suggestionCache.get(server);
 
     // Do we have complete cached suggestions that are still valid for this request
@@ -141,8 +142,8 @@ export default class AutocompleteAdapter {
   // * `request` An {Array} of {atom$AutocompleteSuggestion}s to locate the prefix, editor, bufferPosition etc.
   // * `triggerChars` The {Array} of {string}s that can be trigger characters.
   //
-  // Returns a {string} containing the matching trigger character or null if one was not matched.
-  public static getTriggerCharacter(request: AutocompleteRequest, triggerChars: string[]): string | null {
+  // Returns a {string} containing the matching trigger character or an empty string if one was not matched.
+  public static getTriggerCharacter(request: AutocompleteRequest, triggerChars: string[]): string {
     // AutoComplete-Plus considers text after a symbol to be a new trigger. So we should look backward
     // from the current cursor position to see if one is there and thus simulate it.
     const buffer = request.editor.getBuffer();
@@ -162,7 +163,7 @@ export default class AutocompleteAdapter {
     }
 
     // There was no explicit trigger char
-    return null;
+    return '';
   }
 
   // Public: Create TextDocumentPositionParams to be sent to the language server
@@ -182,14 +183,14 @@ export default class AutocompleteAdapter {
   // based on the editor and position from the Autocomplete request etc.
   //
   // * `request` The {atom$AutocompleteRequest} containing the request details.
-  // * `triggerCharacter` The nullable {string} containing the trigger character.
+  // * `triggerCharacter` The {string} containing the trigger character (empty if none).
   //
   // Returns an {CompletionParams} with the keys:
   //  * `textDocument` the language server protocol textDocument identification.
   //  * `position` the position within the text document to display completion request for.
   //  * `context` containing the trigger character and kind.
   public static createCompletionParams(
-    request: AutocompleteRequest, triggerCharacter: string | null): CompletionParams {
+    request: AutocompleteRequest, triggerCharacter: string): CompletionParams {
     return {
       textDocument: Convert.editorToTextDocumentIdentifier(request.editor),
       position: Convert.pointToPosition(request.bufferPosition),
@@ -200,12 +201,12 @@ export default class AutocompleteAdapter {
   // Public: Create {CompletionContext} to be sent to the language server
   // based on the trigger character.
   //
-  // * `triggerCharacter` The nullable {string} containing the trigger character.
+  // * `triggerCharacter` The {string} containing the trigger character or '' if none.
   //
   // Returns an {CompletionContext} that specifies the triggerKind and the triggerCharacter
   // if there is one.
-  public static createCompletionContext(triggerCharacter: string | null): CompletionContext {
-    return triggerCharacter == null
+  public static createCompletionContext(triggerCharacter: string): CompletionContext {
+    return triggerCharacter === ''
       ? {triggerKind: CompletionTriggerKind.Invoked}
       : {triggerKind: CompletionTriggerKind.TriggerCharacter, triggerCharacter};
   }
