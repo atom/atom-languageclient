@@ -1,3 +1,9 @@
+## v0.9.0
+
+- Converted project to TypeScript including some TypeScript type definitions for all the things!
+- Filter out document symbols that are missing a name to better handle badly behaved language servers
+- Duplicate visible notifications are now suppressed
+
 ## v0.8.3
 
 - Ensure that triggerChars is correctly sent or not sent depending on whether it was auto-triggered
