@@ -406,7 +406,14 @@ export class LanguageClientConnection extends EventEmitter {
       this._log.debug(`rpc.sendRequest ${method} received (${Math.floor(took)}ms)`, result);
       return result;
     } catch (e) {
-      this._log.error(`rpc.sendRequest ${method} threw`, e);
+      const responseError = e as jsonrpc.ResponseError<any>;
+      if (cancellationToken && responseError.code === jsonrpc.ErrorCodes.RequestCancelled) {
+        this._log.debug(`rpc.sendRequest ${method} was cancelled`);
+      }
+      else {
+        this._log.error(`rpc.sendRequest ${method} threw`, e);
+      }
+
       throw e;
     }
   }
