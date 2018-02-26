@@ -55,7 +55,8 @@ export default class OutlineViewAdapter {
   // Returns an {OutlineTree} containing the given symbols that the Outline View can display.
   public static createOutlineTrees(symbols: SymbolInformation[]): atomIde.OutlineTree[] {
     // Temporarily keep containerName through the conversion process
-    const allItems = symbols.map((symbol) => ({
+    // Also filter out symbols without a name - it's part of the spec but some don't include it
+    const allItems = symbols.filter((symbol) => symbol.name).map((symbol) => ({
       containerName: symbol.containerName,
       outline: OutlineViewAdapter.symbolToOutline(symbol),
     }));
