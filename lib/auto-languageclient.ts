@@ -443,7 +443,7 @@ export default class AutoLanguageClient {
 
     this.autoComplete = this.autoComplete || new AutocompleteAdapter();
     this._lastAutocompleteRequest = request;
-    return this.autoComplete.getSuggestions(server, request, this.onDidConvertAutocomplete);
+    return this.autoComplete.getSuggestions(server, request, this.onDidConvertAutocomplete, atom.config.get('autocomplete-plus.minimumWordLength'));
   }
 
   protected async getSuggestionDetailsOnSelect(
