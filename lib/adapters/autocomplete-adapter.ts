@@ -25,6 +25,7 @@ import Utils from '../utils';
 interface SuggestionCacheEntry {
   isIncomplete: boolean;
   triggerPoint: Point;
+  triggerChar: string;
   suggestionMap: Map<AutocompleteSuggestion, [CompletionItem, boolean]>;
 }
 
@@ -58,35 +59,48 @@ export default class AutocompleteAdapter {
     request: AutocompleteRequest,
     onDidConvertCompletionItem?: (item: CompletionItem, suggestion: AutocompleteSuggestion,
                                   request: AutocompleteRequest) => void,
+    minimumWordLength?: number,
   ): Promise<AutocompleteSuggestion[]> {
     const triggerChars =
       server.capabilities.completionProvider != null ?
         server.capabilities.completionProvider.triggerCharacters || [] : [];
-    const triggerPoint = AutocompleteAdapter.getTriggerPoint(request, triggerChars);
-    const prefixWithTrigger = AutocompleteAdapter.getPrefixWithTrigger(request, triggerPoint);
+    const triggerChar = AutocompleteAdapter.getTriggerCharacter(request, triggerChars);
+    const prefixWithTrigger = triggerChar + request.prefix;
+    const triggerColumn = request.bufferPosition.column - prefixWithTrigger.length;
+    const triggerPoint = new Point(request.bufferPosition.row, triggerColumn);
 
-    const cache = this._suggestionCache.get(server);
-
-    // We have cached suggestions and should use them
-    if (cache && !cache.isIncomplete && cache.triggerPoint.isEqual(triggerPoint)) {
-      const suggestions = Array.from(cache.suggestionMap.keys());
-      AutocompleteAdapter.setReplacementPrefixOnSuggestions(suggestions, request.prefix);
-      return prefixWithTrigger.length === 1 ? suggestions : filter(suggestions, request.prefix, {key: 'text'});
+    // Only auto-trigger on a trigger character or after the minimum number of characters from autocomplete-plus
+    minimumWordLength = minimumWordLength || 0;
+    if (!request.activatedManually && triggerChar === '' &&
+        minimumWordLength > 0 && request.prefix.length < minimumWordLength) {
+      return [];
     }
 
-    // We either don't have suggestions or they are incomplete so request from the language server
-    const completions =
-      await Utils.doWithCancellationToken(
-        server.connection,
-        this._cancellationTokens,
-        (cancellationToken) =>
-          server.connection.completion(
-            AutocompleteAdapter.createCompletionParams(request, prefixWithTrigger[0]), cancellationToken),
-    );
-    const isIncomplete = !Array.isArray(completions) && completions.isIncomplete;
-    const suggestionMap = this.completionItemsToSuggestions(completions, request, onDidConvertCompletionItem);
-    this._suggestionCache.set(server, {isIncomplete, triggerPoint, suggestionMap});
-    return Array.from(suggestionMap.keys());
+    const cache = this._suggestionCache.get(server);
+    let suggestionMap = null;
+
+    // Do we have complete cached suggestions that are still valid for this request
+    if (cache && !cache.isIncomplete && cache.triggerChar === triggerChar && cache.triggerPoint.isEqual(triggerPoint)) {
+      suggestionMap = cache.suggestionMap;
+    } else {
+      // Our cached suggestions can't be used so obtain new ones from the language server
+      const completions =
+        await Utils.doWithCancellationToken(
+          server.connection,
+          this._cancellationTokens,
+          (cancellationToken) =>
+            server.connection.completion(
+              AutocompleteAdapter.createCompletionParams(request, triggerChar), cancellationToken),
+      );
+      const isIncomplete = !Array.isArray(completions) && completions.isIncomplete;
+      suggestionMap = this.completionItemsToSuggestions(completions, request, onDidConvertCompletionItem);
+      this._suggestionCache.set(server, {isIncomplete, triggerChar, triggerPoint, suggestionMap});
+    }
+
+    // Filter the results to recalculate the score and ordering (unless only triggerChar)
+    const suggestions = Array.from(suggestionMap.keys());
+    AutocompleteAdapter.setReplacementPrefixOnSuggestions(suggestions, request.prefix);
+    return request.prefix === triggerChar ? suggestions : filter(suggestions, request.prefix, {key: 'text'});
   }
 
   // Public: Obtain a complete version of a suggestion with additional information
@@ -118,7 +132,6 @@ export default class AutocompleteAdapter {
         }
       }
     }
-
     return suggestion;
   }
 
@@ -133,45 +146,62 @@ export default class AutocompleteAdapter {
     }
   }
 
-  // Public: Get the point where the trigger character occurred.
+  // Public: Get the trigger character that caused the autocomplete (if any).  This is required because
+  // AutoComplete-plus does not have trigger characters.  Although the terminology is 'character' we treat
+  // them as variable length strings as this will almost certainly change in the future to support '->' etc.
   //
-  // * `request` An {Array} of {atom$AutocompleteSuggestion}s to set the replacementPrefix on.
+  // * `request` An {Array} of {atom$AutocompleteSuggestion}s to locate the prefix, editor, bufferPosition etc.
   // * `triggerChars` The {Array} of {string}s that can be trigger characters.
   //
-  // Returns the {atom$Point} where the trigger occurred.
-  public static getTriggerPoint(request: AutocompleteRequest, triggerChars: string[]): Point {
-    if (triggerChars.includes(request.prefix)) {
-      return Point.fromObject(request.bufferPosition, true);
+  // Returns a {string} containing the matching trigger character or an empty string if one was not matched.
+  public static getTriggerCharacter(request: AutocompleteRequest, triggerChars: string[]): string {
+    // AutoComplete-Plus considers text after a symbol to be a new trigger. So we should look backward
+    // from the current cursor position to see if one is there and thus simulate it.
+    const buffer = request.editor.getBuffer();
+    const cursor = request.bufferPosition;
+    const prefixStartColumn = cursor.column - request.prefix.length;
+    for (const triggerChar of triggerChars) {
+      if (triggerChar === request.prefix) {
+        return triggerChar;
+      }
+      if (prefixStartColumn >= triggerChar.length) { // Far enough along a line to fit the trigger char
+        const start = new Point(cursor.row, prefixStartColumn - triggerChar.length);
+        const possibleTrigger = buffer.getTextInRange([start, [cursor.row, prefixStartColumn]]);
+        if (possibleTrigger === triggerChar) { // The text before our trigger is a trigger char!
+          return triggerChar;
+        }
+      }
     }
 
-    return new Point(request.bufferPosition.row, request.bufferPosition.column - request.prefix.length);
+    // There was no explicit trigger char
+    return '';
   }
 
   // Public: Create TextDocumentPositionParams to be sent to the language server
   // based on the editor and position from the AutoCompleteRequest.
   //
-  // * `request` The {atom$AutocompleteRequest} to obtain the trigger and editor from.
+  // * `request` The {atom$AutocompleteRequest} to obtain the editor from.
   // * `triggerPoint` The {atom$Point} where the trigger started.
   //
   // Returns a {string} containing the prefix including the trigger character.
   public static getPrefixWithTrigger(request: AutocompleteRequest, triggerPoint: Point): string {
     return request.editor
       .getBuffer()
-      .getTextInRange([[triggerPoint.row, triggerPoint.column - 1], request.bufferPosition]);
+      .getTextInRange([[triggerPoint.row, triggerPoint.column], request.bufferPosition]);
   }
 
   // Public: Create {CompletionParams} to be sent to the language server
   // based on the editor and position from the Autocomplete request etc.
   //
   // * `request` The {atom$AutocompleteRequest} containing the request details.
-  // * `triggerCharacter` The nullable {string} containing the trigger character.
+  // * `triggerCharacter` The {string} containing the trigger character (empty if none).
   //
   // Returns an {CompletionParams} with the keys:
   //  * `textDocument` the language server protocol textDocument identification.
   //  * `position` the position within the text document to display completion request for.
   //  * `context` containing the trigger character and kind.
   public static createCompletionParams(
-    request: AutocompleteRequest, triggerCharacter: string | null): CompletionParams {
+    request: AutocompleteRequest, triggerCharacter: string): CompletionParams {
     return {
       textDocument: Convert.editorToTextDocumentIdentifier(request.editor),
       position: Convert.pointToPosition(request.bufferPosition),
@@ -182,12 +212,12 @@ export default class AutocompleteAdapter {
   // Public: Create {CompletionContext} to be sent to the language server
   // based on the trigger character.
   //
-  // * `triggerCharacter` The nullable {string} containing the trigger character.
+  // * `triggerCharacter` The {string} containing the trigger character or '' if none.
   //
   // Returns an {CompletionContext} that specifies the triggerKind and the triggerCharacter
   // if there is one.
-  public static createCompletionContext(triggerCharacter: string | null): CompletionContext {
-    return triggerCharacter == null
+  public static createCompletionContext(triggerCharacter: string): CompletionContext {
+    return triggerCharacter === ''
       ? {triggerKind: CompletionTriggerKind.Invoked}
       : {triggerKind: CompletionTriggerKind.TriggerCharacter, triggerCharacter};
   }
