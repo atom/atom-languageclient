@@ -35,7 +35,7 @@ describe('AutoCompleteAdapter', () => {
   const request: AutocompleteRequest = {
     editor: createFakeEditor(),
     bufferPosition: new Point(123, 456),
-    prefix: 'def',
+    prefix: 'lab',
     scopeDescriptor: 'some.scope',
     activatedManually: true,
   };
@@ -61,6 +61,13 @@ describe('AutoCompleteAdapter', () => {
       detail: 'description3',
       documentation: 'a very exciting variable',
     },
+    {
+      label: 'filteredout',
+      kind: ls.CompletionItemKind.Snippet,
+      detail: 'description4',
+      documentation: 'should not appear',
+      sortText: 'zzz'
+    },
   ];
 
   describe('getSuggestions', () => {
@@ -70,6 +77,7 @@ describe('AutoCompleteAdapter', () => {
     it('gets AutoComplete suggestions via LSP given an AutoCompleteRequest', async () => {
       const autoCompleteAdapter = new AutoCompleteAdapter();
       const results = await autoCompleteAdapter.getSuggestions(server, request);
+
       expect(results.length).equals(3);
       expect(results[0].text).equals('label2');
       expect(results[1].description).equals('a very exciting variable');
@@ -135,7 +143,7 @@ describe('AutoCompleteAdapter', () => {
     it('converts LSP CompletionItem array to AutoComplete Suggestions array', () => {
       const autoCompleteAdapter = new AutoCompleteAdapter();
       const results = Array.from(autoCompleteAdapter.completionItemsToSuggestions(completionItems, request));
-      expect(results.length).equals(3);
+      expect(results.length).equals(4);
       expect(results[0][0].text).equals('label2');
       expect(results[1][0].description).equals('a very exciting variable');
       expect(results[2][0].type).equals('keyword');
@@ -145,7 +153,7 @@ describe('AutoCompleteAdapter', () => {
       const completionList = {items: completionItems, isIncomplete: false};
       const autoCompleteAdapter = new AutoCompleteAdapter();
       const results = Array.from(autoCompleteAdapter.completionItemsToSuggestions(completionList, request));
-      expect(results.length).equals(3);
+      expect(results.length).equals(4);
       expect(results[0][0].description).equals('a very exciting field');
       expect(results[1][0].text).equals('label3');
     });
@@ -160,7 +168,7 @@ describe('AutoCompleteAdapter', () => {
             a.displayText = r.scopeDescriptor;
           }));
 
-      expect(results.length).equals(3);
+      expect(results.length).equals(4);
       expect(results[0][0].displayText).equals('some.scope');
       expect(results[1][0].text).equals('label3 ok');
     });
