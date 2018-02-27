@@ -77,7 +77,6 @@ describe('AutoCompleteAdapter', () => {
     it('gets AutoComplete suggestions via LSP given an AutoCompleteRequest', async () => {
       const autoCompleteAdapter = new AutoCompleteAdapter();
       const results = await autoCompleteAdapter.getSuggestions(server, request);
-
       expect(results.length).equals(3);
       expect(results[0].text).equals('label2');
       expect(results[1].description).equals('a very exciting variable');

@@ -97,10 +97,10 @@ export default class AutocompleteAdapter {
       this._suggestionCache.set(server, {isIncomplete, triggerChar, triggerPoint, suggestionMap});
     }
 
-    // Always filter the results to recalculate the score and ordering
+    // Filter the results to recalculate the score and ordering (unless only triggerChar)
     const suggestions = Array.from(suggestionMap.keys());
     AutocompleteAdapter.setReplacementPrefixOnSuggestions(suggestions, request.prefix);
-    return filter(suggestions, request.prefix, {key: 'text'});
+    return request.prefix === triggerChar ? suggestions : filter(suggestions, request.prefix, {key: 'text'});
   }
 
   // Public: Obtain a complete version of a suggestion with additional information
