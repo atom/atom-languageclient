@@ -70,12 +70,13 @@ export default class AutocompleteAdapter {
 
     // Only auto-trigger on a trigger character or after the minimum number of characters from autocomplete-plus
     const minimumWordLength = atom.config.get('autocomplete-plus.minimumWordLength') || 0;
-    if (!request.activatedManually && triggerChar === '' && minimumWordLength > 0 && request.prefix.length < minimumWordLength) {
+    if (!request.activatedManually && triggerChar === '' &&
+        minimumWordLength > 0 && request.prefix.length < minimumWordLength) {
       return [];
     }
 
     const cache = this._suggestionCache.get(server);
-    var suggestionMap = null;
+    let suggestionMap = null;
 
     // Do we have complete cached suggestions that are still valid for this request
     if (cache && !cache.isIncomplete && cache.triggerChar === triggerChar && cache.triggerPoint.isEqual(triggerPoint)) {
