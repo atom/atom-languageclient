@@ -1,5 +1,7 @@
 ## v0.9.0
 
+- AutoComplete now triggers based on settings in autocomplete-plus (min word length)
+- AutoComplete now always filters results based on typed prefix (in case the server does not)
 - Converted project to TypeScript including some TypeScript type definitions for all the things!
 - Filter out document symbols that are missing a name to better handle badly behaved language servers
 - Duplicate visible notifications are now suppressed
