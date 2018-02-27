@@ -66,7 +66,7 @@ describe('AutoCompleteAdapter', () => {
       kind: ls.CompletionItemKind.Snippet,
       detail: 'description4',
       documentation: 'should not appear',
-      sortText: 'zzz'
+      sortText: 'zzz',
     },
   ];
 
