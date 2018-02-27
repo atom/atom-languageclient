@@ -75,27 +75,30 @@ export default class AutocompleteAdapter {
     }
 
     const cache = this._suggestionCache.get(server);
+    var suggestionMap = null;
 
     // Do we have complete cached suggestions that are still valid for this request
     if (cache && !cache.isIncomplete && cache.triggerChar === triggerChar && cache.triggerPoint.isEqual(triggerPoint)) {
-      const suggestions = Array.from(cache.suggestionMap.keys());
-      AutocompleteAdapter.setReplacementPrefixOnSuggestions(suggestions, request.prefix);
-      return prefixWithTrigger.length === 1 ? suggestions : filter(suggestions, request.prefix, {key: 'text'});
+      suggestionMap = cache.suggestionMap;
+    } else {
+      // Our cached suggestions can't be used so obtain new ones from the language server
+      const completions =
+        await Utils.doWithCancellationToken(
+          server.connection,
+          this._cancellationTokens,
+          (cancellationToken) =>
+            server.connection.completion(
+              AutocompleteAdapter.createCompletionParams(request, triggerChar), cancellationToken),
+      );
+      const isIncomplete = !Array.isArray(completions) && completions.isIncomplete;
+      suggestionMap = this.completionItemsToSuggestions(completions, request, onDidConvertCompletionItem);
+      this._suggestionCache.set(server, {isIncomplete, triggerChar, triggerPoint, suggestionMap});
     }
 
-    // Our cached suggestions can't be used so obtain new ones from the language server
-    const completions =
-      await Utils.doWithCancellationToken(
-        server.connection,
-        this._cancellationTokens,
-        (cancellationToken) =>
-          server.connection.completion(
-            AutocompleteAdapter.createCompletionParams(request, triggerChar), cancellationToken),
-    );
-    const isIncomplete = !Array.isArray(completions) && completions.isIncomplete;
-    const suggestionMap = this.completionItemsToSuggestions(completions, request, onDidConvertCompletionItem);
-    this._suggestionCache.set(server, {isIncomplete, triggerChar, triggerPoint, suggestionMap});
-    return Array.from(suggestionMap.keys());
+    // Always filter the results to recalculate the score and ordering
+    const suggestions = Array.from(suggestionMap.keys());
+    AutocompleteAdapter.setReplacementPrefixOnSuggestions(suggestions, request.prefix);
+    return filter(suggestions, request.prefix, {key: 'text'});
   }
 
   // Public: Obtain a complete version of a suggestion with additional information
