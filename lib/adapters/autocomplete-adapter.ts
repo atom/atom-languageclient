@@ -64,9 +64,9 @@ export default class AutocompleteAdapter {
       server.capabilities.completionProvider != null ?
         server.capabilities.completionProvider.triggerCharacters || [] : [];
     const triggerChar = AutocompleteAdapter.getTriggerCharacter(request, triggerChars);
-    const triggerColumn = request.bufferPosition.column - (triggerChar != null ? triggerChar.length : 0);
-    const triggerPoint = new Point(request.bufferPosition.row, triggerColumn);
     const prefixWithTrigger = triggerChar + request.prefix;
+    const triggerColumn = request.bufferPosition.column - prefixWithTrigger.length;
+    const triggerPoint = new Point(request.bufferPosition.row, triggerColumn);
 
     // We auto-trigger on a trigger character or after the minimum number of characters from autocomplete-plus
     const minimumWordLength = atom.config.get('autocomplete-plus.minimumWordLength') || 0;
