@@ -68,6 +68,12 @@ export default class AutocompleteAdapter {
     const triggerPoint = new Point(request.bufferPosition.row, triggerColumn);
     const prefixWithTrigger = triggerChar + request.prefix;
 
+    // We auto-trigger on a trigger character or after the minimum number of characters from autocomplete-plus
+    const minimumWordLength = atom.config.get('autocomplete-plus.minimumWordLength') || 0;
+    if (triggerChar === '' && minimumWordLength > 0 && request.prefix.length < minimumWordLength) {
+      return [];
+    }
+
     const cache = this._suggestionCache.get(server);
 
     // Do we have complete cached suggestions that are still valid for this request
