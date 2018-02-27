@@ -1,7 +1,6 @@
 // tslint:disable:no-reference
 /// <reference path="../typings/atom/index.d.ts"/>
 /// <reference path="../typings/atom-ide/index.d.ts"/>
-/// <reference path="../typings/atom-linter/index.d.ts"/>
 // tslint:enable:no-reference
 
 import AutoLanguageClient from './auto-languageclient';

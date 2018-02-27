@@ -1,4 +1,4 @@
-import * as linter from 'atom-linter';
+import * as linter from 'atom/linter';
 import * as atom from 'atom';
 import {
   Diagnostic,

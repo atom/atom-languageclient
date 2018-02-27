@@ -3,7 +3,7 @@ import * as ls from './languageclient';
 import * as rpc from 'vscode-jsonrpc';
 import * as path from 'path';
 import * as atomIde from 'atom-ide';
-import * as linter from 'atom-linter';
+import * as linter from 'atom/linter';
 import { Socket } from 'net';
 import { ConsoleLogger, NullLogger, Logger } from './logger';
 import { LanguageServerProcess, ServerManager, ActiveServer } from './server-manager.js';
