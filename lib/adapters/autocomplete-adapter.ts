@@ -99,7 +99,8 @@ export default class AutocompleteAdapter {
 
     // Filter the results to recalculate the score and ordering (unless only triggerChar)
     const suggestions = Array.from(suggestionMap.keys());
-    AutocompleteAdapter.setReplacementPrefixOnSuggestions(suggestions, request.prefix);
+    const replacementPrefix = request.prefix != triggerChar ? request.prefix : '';
+    AutocompleteAdapter.setReplacementPrefixOnSuggestions(suggestions, replacementPrefix);
     return request.prefix === triggerChar ? suggestions : filter(suggestions, request.prefix, {key: 'text'});
   }
 
