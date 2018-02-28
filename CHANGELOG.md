@@ -1,3 +1,7 @@
+## v0.9.1
+
+- AutoComplete on a trigger character with no further filtering now does not remove the trigger char
+
 ## v0.9.0
 
 - AutoComplete now triggers based on settings in autocomplete-plus (min word length)
