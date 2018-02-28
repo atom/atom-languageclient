@@ -12,7 +12,6 @@ import {
 } from 'atom';
 import { expect } from 'chai';
 import { createSpyConnection, createFakeEditor } from '../helpers.js';
-import { ChildProcess } from 'child_process';
 
 describe('AutoCompleteAdapter', () => {
   function createActiveServerSpy() {
@@ -277,13 +276,6 @@ describe('AutoCompleteAdapter', () => {
   });
 
   describe('applyTextEditToSuggestion', () => {
-    const basicCompletionItem: ls.CompletionItem = {
-      label: 'label',
-      kind: ls.CompletionItemKind.Keyword,
-      detail: 'detail',
-      documentation: 'An incredible keyword',
-    };
-
     it('does not do anything if there is no textEdit', () => {
       const completionItem: AutocompleteSuggestion = {};
       AutoCompleteAdapter.applyTextEditToSuggestion(undefined, new TextEditor(), completionItem);

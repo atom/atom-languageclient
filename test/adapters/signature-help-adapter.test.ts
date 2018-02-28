@@ -3,7 +3,6 @@ import SignatureHelpAdapter from '../../lib/adapters/signature-help-adapter';
 import { createFakeEditor, createSpyConnection } from '../helpers';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import { ActiveServer } from '../../lib/server-manager';
 
 describe('SignatureHelpAdapter', () => {
   describe('canAdapt', () => {

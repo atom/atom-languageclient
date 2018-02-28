@@ -6,7 +6,6 @@ import SignatureHelpAdapter from './adapters/signature-help-adapter';
 
 import * as path from 'path';
 import * as stream from 'stream';
-import * as cp from 'child_process';
 import * as ls from './languageclient';
 import * as atomIde from 'atom-ide';
 import Convert from './convert';
@@ -297,10 +296,10 @@ export class ServerManager {
     return !projectPath.endsWith(path.sep) ? path.join(projectPath, path.sep) : projectPath;
   }
 
-  public projectPathsChanged(projectPaths: string[]): void {
+  public async projectPathsChanged(projectPaths: string[]): Promise<void> {
     const pathsSet = new Set(projectPaths.map(this.normalizePath));
     const serversToStop = this._activeServers.filter((s) => !pathsSet.has(s.projectPath));
-    Promise.all(serversToStop.map((s) => this.stopServer(s)));
+    await Promise.all(serversToStop.map((s) => this.stopServer(s)));
     this.updateNormalizedProjectPaths();
   }
 

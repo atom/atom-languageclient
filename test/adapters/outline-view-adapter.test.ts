@@ -187,7 +187,6 @@ describe('OutlineViewAdapter', () => {
       expect(result.children).to.deep.equal([]);
       expect(result.tokenizedText).to.not.be.undefined;
       if (result.tokenizedText) {
-        const resultTokenixedText = result.tokenizedText[0];
         expect(result.tokenizedText[0].kind).to.equal('type');
         expect(result.tokenizedText[0].value).to.equal('Program');
         expect(result.startPosition.row).to.equal(1);

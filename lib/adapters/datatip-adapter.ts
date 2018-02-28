@@ -3,9 +3,8 @@ import {
   MarkupContent,
   MarkedString,
   ServerCapabilities,
-  MarkupKind,
 } from '../languageclient';
-import { Point, TextEditor, Range } from 'atom';
+import { Point, TextEditor } from 'atom';
 import * as atomIde from 'atom-ide';
 import Convert from '../convert';
 import Utils from '../utils';

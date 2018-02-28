@@ -161,7 +161,7 @@ export default class Convert {
       case 'renamed': {
         const results: Array<{ uri: string, type: ls.FileChangeType }> = [];
         if (fileEvent.oldPath) {
-          results.push({uri: Convert.pathToUri(fileEvent.oldPath || ''), type: ls.FileChangeType.Deleted});
+          results.push({uri: Convert.pathToUri(fileEvent.oldPath), type: ls.FileChangeType.Deleted});
         }
         if (fileEvent.path) {
           results.push({uri: Convert.pathToUri(fileEvent.path), type: ls.FileChangeType.Created});
