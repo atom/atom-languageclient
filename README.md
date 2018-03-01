@@ -91,7 +91,7 @@ To use ipc simply return *ipc* from getConnectionType(), e.g.
 
 ```javascript
 class ExampleLanguageClient extends AutoLanguageClient {
-  getGrammarScopes () { return [ 'source.js' ] }
+  getGrammarScopes () { return [ 'source.js', 'javascript' ] }
   getLanguageName () { return 'JavaScript' }
   getServerName () { return 'JavaScript Language Server' }
 
