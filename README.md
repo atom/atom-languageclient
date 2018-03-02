@@ -132,7 +132,6 @@ Right now we have the following experimental Atom LSP packages in development. T
 * [ide-csharp](https://github.com/atom/ide-csharp) provides C# support via [Omnisharp (node-omnisharp)](https://github.com/OmniSharp/omnisharp-node-client)
 * [ide-flowtype](https://github.com/flowtype/ide-flowtype) provides Flow support via [Flow Language Server](https://github.com/flowtype/flow-language-server)
 * [ide-java](https://github.com/atom/ide-java) provides Java support via [Java Eclipse JDT](https://github.com/eclipse/eclipse.jdt.ls)
-* [ide-php](https://github.com/atom/ide-php) provides PHP support via [FelixFBeckers PHP Language Server](https://github.com/felixfbecker/php-language-server)
 * [ide-typescript](https://github.com/atom/ide-typescript) provides TypeScript and Javascript support via [SourceGraph Typescript Language Server](https://github.com/sourcegraph/javascript-typescript-langserver)
 
 ### Community packages
