@@ -4,26 +4,7 @@ import * as rpc from 'vscode-jsonrpc';
 import * as path from 'path';
 import * as atomIde from 'atom-ide';
 import * as linter from 'atom/linter';
-import { Socket } from 'net';
-import { LanguageClientConnection } from './languageclient';
-import { ConsoleLogger, NullLogger, Logger } from './logger';
-import { LanguageServerProcess, ServerManager, ActiveServer } from './server-manager.js';
 import Convert from './convert.js';
-
-export { ActiveServer, LanguageClientConnection, LanguageServerProcess };
-
-import {
-  AutocompleteDidInsert,
-  AutocompleteProvider,
-  AutocompleteRequest,
-  AutocompleteSuggestion,
-  CompositeDisposable,
-  Disposable,
-  Point,
-  Range,
-  TextEditor,
-} from 'atom';
-
 import ApplyEditAdapter from './adapters/apply-edit-adapter';
 import AutocompleteAdapter from './adapters/autocomplete-adapter';
 import CodeActionAdapter from './adapters/code-action-adapter';
@@ -38,7 +19,31 @@ import NotificationsAdapter from './adapters/notifications-adapter';
 import OutlineViewAdapter from './adapters/outline-view-adapter';
 import SignatureHelpAdapter from './adapters/signature-help-adapter';
 import Utils from './utils';
+import { Socket } from 'net';
+import { LanguageClientConnection } from './languageclient';
+import {
+  ConsoleLogger,
+  NullLogger,
+  Logger,
+} from './logger';
+import {
+  LanguageServerProcess,
+  ServerManager,
+  ActiveServer,
+} from './server-manager.js';
+import {
+  AutocompleteDidInsert,
+  AutocompleteProvider,
+  AutocompleteRequest,
+  AutocompleteSuggestion,
+  CompositeDisposable,
+  Disposable,
+  Point,
+  Range,
+  TextEditor,
+} from 'atom';
 
+export { ActiveServer, LanguageClientConnection, LanguageServerProcess };
 export type ConnectionType = 'stdio' | 'socket' | 'ipc';
 
 // Public: AutoLanguageClient provides a simple way to have all the supported

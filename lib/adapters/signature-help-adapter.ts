@@ -1,9 +1,17 @@
+import * as atomIde from 'atom-ide';
 import assert = require('assert');
-import { CompositeDisposable, Point, TextEditor } from 'atom';
-import { LanguageClientConnection, ServerCapabilities, SignatureHelp } from '../languageclient';
 import Convert from '../convert';
 import { ActiveServer } from '../server-manager';
-import * as atomIde from 'atom-ide';
+import {
+  CompositeDisposable,
+  Point,
+  TextEditor,
+} from 'atom';
+import {
+  LanguageClientConnection,
+  ServerCapabilities,
+  SignatureHelp,
+} from '../languageclient';
 
 export default class SignatureHelpAdapter {
   private _disposables: CompositeDisposable = new CompositeDisposable();

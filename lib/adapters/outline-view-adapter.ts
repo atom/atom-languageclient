@@ -1,9 +1,17 @@
-import { LanguageClientConnection, SymbolKind, ServerCapabilities, SymbolInformation } from '../languageclient';
+import * as atomIde from 'atom-ide';
 import Convert from '../convert';
 import Utils from '../utils';
-import { Point, TextEditor } from 'atom';
 import { CancellationTokenSource } from 'vscode-jsonrpc';
-import * as atomIde from 'atom-ide';
+import {
+  LanguageClientConnection,
+  SymbolKind,
+  ServerCapabilities,
+  SymbolInformation,
+} from '../languageclient';
+import {
+  Point,
+  TextEditor,
+} from 'atom';
 
 // Public: Adapts the documentSymbolProvider of the language server to the Outline View
 // supplied by Atom IDE UI.

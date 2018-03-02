@@ -1,5 +1,14 @@
-import { Point, TextBuffer, TextEditor, Range, BufferScanResult } from 'atom';
-import { CancellationToken, CancellationTokenSource } from 'vscode-jsonrpc';
+import {
+  Point,
+  TextBuffer,
+  TextEditor,
+  Range,
+  BufferScanResult,
+} from 'atom';
+import {
+  CancellationToken,
+  CancellationTokenSource,
+} from 'vscode-jsonrpc';
 
 export default class Utils {
   /**

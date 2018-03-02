@@ -1,7 +1,12 @@
 import * as ls from '../lib/languageclient';
 import Convert from '../lib/convert';
-import { Point, ProjectFileEvent, Range, TextEditor } from 'atom';
 import { expect } from 'chai';
+import {
+  Point,
+  ProjectFileEvent,
+  Range,
+  TextEditor,
+} from 'atom';
 
 let originalPlatform: NodeJS.Platform;
 const setProcessPlatform = (platform: any) => {

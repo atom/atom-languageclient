@@ -1,8 +1,6 @@
-// @flow
-
 import * as sinon from 'sinon';
-import { TextEditor } from 'atom';
 import * as rpc from 'vscode-jsonrpc';
+import { TextEditor } from 'atom';
 
 export function createSpyConnection(): rpc.MessageConnection {
   return {

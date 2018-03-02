@@ -1,12 +1,15 @@
+import * as atomIde from 'atom-ide';
+import Convert from '../convert';
+import {
+  Point,
+  TextEditor,
+} from 'atom';
 import {
   LanguageClientConnection,
   Location,
   ServerCapabilities,
   ReferenceParams,
 } from '../languageclient';
-import { Point, TextEditor } from 'atom';
-import * as atomIde from 'atom-ide';
-import Convert from '../convert';
 
 // Public: Adapts the language server definition provider to the
 // Atom IDE UI Definitions package for 'Go To Definition' functionality.

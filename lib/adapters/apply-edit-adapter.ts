@@ -1,11 +1,14 @@
+import * as atomIde from 'atom-ide';
+import Convert from '../convert';
 import {
   LanguageClientConnection,
   ApplyWorkspaceEditParams,
   ApplyWorkspaceEditResponse,
 } from '../languageclient';
-import { TextBuffer, TextEditor } from 'atom';
-import * as atomIde from 'atom-ide';
-import Convert from '../convert';
+import {
+  TextBuffer,
+  TextEditor,
+} from 'atom';
 
 // Public: Adapts workspace/applyEdit commands to editors.
 export default class ApplyEditAdapter {
