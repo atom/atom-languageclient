@@ -1,3 +1,8 @@
+## v0.9.2
+
+- Fix issue when completionItem documentation is returned as string
+- Export ActiveServer and LanguageClientConnection types for TypeScript users
+
 ## v0.9.1
 
 - AutoComplete on a trigger character with no further filtering now does not remove the trigger char
