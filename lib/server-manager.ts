@@ -1,5 +1,6 @@
 import DocumentSyncAdapter from './adapters/document-sync-adapter';
 import LinterPushV2Adapter from './adapters/linter-push-v2-adapter';
+import LoggingConsoleAdapter from './adapters/logging-console-adapter';
 import SignatureHelpAdapter from './adapters/signature-help-adapter';
 import Convert from './convert';
 import * as path from 'path';
@@ -37,6 +38,7 @@ export interface ActiveServer {
   connection: ls.LanguageClientConnection;
   capabilities: ls.ServerCapabilities;
   linterPushV2?: LinterPushV2Adapter;
+  loggingConsole?: LoggingConsoleAdapter;
   docSyncAdapter?: DocumentSyncAdapter;
   signatureHelpAdapter?: SignatureHelpAdapter;
 }

@@ -15,6 +15,7 @@ import DefinitionAdapter from './adapters/definition-adapter';
 import DocumentSyncAdapter from './adapters/document-sync-adapter';
 import FindReferencesAdapter from './adapters/find-references-adapter';
 import LinterPushV2Adapter from './adapters/linter-push-v2-adapter';
+import LoggingConsoleAdapter from './adapters/logging-console-adapter';
 import NotificationsAdapter from './adapters/notifications-adapter';
 import OutlineViewAdapter from './adapters/outline-view-adapter';
 import SignatureHelpAdapter from './adapters/signature-help-adapter';
@@ -53,6 +54,7 @@ export type ConnectionType = 'stdio' | 'socket' | 'ipc';
 export default class AutoLanguageClient {
   private _disposable = new CompositeDisposable();
   private _serverManager: ServerManager;
+  private _consoleDelegate: atomIde.ConsoleService;
   private _linterDelegate: linter.IndieDelegate;
   private _signatureHelpRegistry: atomIde.SignatureHelpRegistry | null;
   private _lastAutocompleteRequest: AutocompleteRequest;
@@ -575,6 +577,25 @@ export default class AutoLanguageClient {
 
     this.datatip = this.datatip || new DatatipAdapter();
     return this.datatip.getDatatip(server.connection, editor, point);
+  }
+
+  // Console via LS logging---------------------------------------------
+  public consumeConsole(createConsole: atomIde.ConsoleService): Disposable {
+    this._consoleDelegate = createConsole;
+
+    for (const server of this._serverManager.getActiveServers()) {
+      if (server.loggingConsole != null) {
+        server.loggingConsole.attach(this._consoleDelegate);
+      }
+    }
+
+    return new Disposable(() => {
+      for (const server of this._serverManager.getActiveServers()) {
+        if (server.loggingConsole != null) {
+          server.loggingConsole.detach(this._consoleDelegate);
+        }
+      }
+    });
   }
 
   // Code Format via LS formatDocument & formatDocumentRange------------
