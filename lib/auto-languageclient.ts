@@ -5,11 +5,12 @@ import * as path from 'path';
 import * as atomIde from 'atom-ide';
 import * as linter from 'atom/linter';
 import { Socket } from 'net';
+import { LanguageClientConnection } from './languageclient';
 import { ConsoleLogger, NullLogger, Logger } from './logger';
 import { LanguageServerProcess, ServerManager, ActiveServer } from './server-manager.js';
 import Convert from './convert.js';
 
-export { LanguageServerProcess };
+export { ActiveServer, LanguageClientConnection, LanguageServerProcess };
 
 import {
   AutocompleteDidInsert,
@@ -184,7 +185,7 @@ export default class AutoLanguageClient {
   }
 
   // Early wire-up of listeners before initialize method is sent
-  protected preInitialization(connection: ls.LanguageClientConnection): void {}
+  protected preInitialization(connection: LanguageClientConnection): void {}
 
   // Late wire-up of listeners after initialize method has been sent
   protected postInitialization(server: ActiveServer): void {}
@@ -208,7 +209,7 @@ export default class AutoLanguageClient {
   // ---------------------------------------------------------------------------
 
   // Gets a LanguageClientConnection for a given TextEditor
-  protected async getConnectionForEditor(editor: TextEditor): Promise<ls.LanguageClientConnection | null> {
+  protected async getConnectionForEditor(editor: TextEditor): Promise<LanguageClientConnection | null> {
     const server = await this._serverManager.getServer(editor);
     return server ? server.connection : null;
   }
@@ -274,7 +275,7 @@ export default class AutoLanguageClient {
       startingSignal && startingSignal.dispose();
     }
     this.captureServerErrors(process, projectPath);
-    const connection = new ls.LanguageClientConnection(this.createRpcConnection(process), this.logger);
+    const connection = new LanguageClientConnection(this.createRpcConnection(process), this.logger);
     this.preInitialization(connection);
     const initializeParams = this.getInitializeParams(projectPath, process);
     const initialization = connection.initialize(initializeParams);
