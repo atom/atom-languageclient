@@ -285,13 +285,19 @@ export default class AutocompleteAdapter {
     suggestion.type = AutocompleteAdapter.completionKindToSuggestionType(item.kind);
     suggestion.rightLabel = item.detail;
 
-    if (typeof item.documentation === 'object') {
-      suggestion.descriptionMarkdown = item.documentation.value;
-      suggestion.description = item.documentation.value;
-    }
-    else {
+    // Older format, can't know what it is so assign to both and hope for best
+    if (typeof(item.documentation) === 'string') {
       suggestion.descriptionMarkdown = item.documentation;
       suggestion.description = item.documentation;
+    }
+
+    if (item.documentation != null && typeof(item.documentation) === 'object') {
+      // Newer format specifies the kind of documentation, assign appropriately
+      if (item.documentation.kind === 'markdown') {
+        suggestion.descriptionMarkdown = item.documentation.value;
+      } else {
+        suggestion.description = item.documentation.value;
+      }
     }
   }
 

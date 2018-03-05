@@ -237,7 +237,7 @@ describe('AutoCompleteAdapter', () => {
     });
   });
 
-  describe('basicCompletionItemToSuggestion', () => {
+  describe('applyCompletionItemToSuggestion', () => {
     it('converts LSP CompletionItem with insertText and filterText to AutoComplete Suggestion', () => {
       const completionItem: ls.CompletionItem = {
         insertText: 'insert',
@@ -255,6 +255,43 @@ describe('AutoCompleteAdapter', () => {
       expect(result.rightLabel).equals('detail');
       expect(result.description).equals('a very exciting keyword');
       expect(result.descriptionMarkdown).equals('a very exciting keyword');
+    });
+
+    it('converts LSP CompletionItem with missing documentation to AutoComplete Suggestion', () => {
+      const completionItem: ls.CompletionItem = {
+        insertText: 'insert',
+        label: 'label',
+        filterText: 'filter',
+        kind: ls.CompletionItemKind.Keyword,
+        detail: 'detail',
+      };
+      const result: any = { };
+      AutoCompleteAdapter.applyCompletionItemToSuggestion(completionItem, result);
+      expect(result.text).equals('insert');
+      expect(result.displayText).equals('label');
+      expect(result.type).equals('keyword');
+      expect(result.rightLabel).equals('detail');
+      expect(result.description).equals(null);
+      expect(result.descriptionMarkdown).equals(null);
+    });
+
+    it('converts LSP CompletionItem with markdown documentation to AutoComplete Suggestion', () => {
+      const completionItem: ls.CompletionItem = {
+        insertText: 'insert',
+        label: 'label',
+        filterText: 'filter',
+        kind: ls.CompletionItemKind.Keyword,
+        detail: 'detail',
+        documentation: { value: 'Some *markdown*', kind: 'markdown' },
+      };
+      const result: any = { };
+      AutoCompleteAdapter.applyCompletionItemToSuggestion(completionItem, result);
+      expect(result.text).equals('insert');
+      expect(result.displayText).equals('label');
+      expect(result.type).equals('keyword');
+      expect(result.rightLabel).equals('detail');
+      expect(result.description).equals('Some *markdown*');
+      expect(result.descriptionMarkdown).equals('Some *markdown*');
     });
 
     it('converts LSP CompletionItem without insertText or filterText to AutoComplete Suggestion', () => {
