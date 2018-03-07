@@ -86,6 +86,18 @@ export default class AutoLanguageClient {
     throw Error('Must implement getServerName when extending AutoLanguageClient');
   }
 
+  protected getInclusionPriority(): number {
+    return 1;
+  }
+
+  protected getSuggestionPriority(): number {
+    return 2;
+  }
+
+  protected getExcludeLowerPriority(): boolean {
+    return false;
+  }
+
   // Start your server process
   protected startServerProcess(projectPath: string): LanguageServerProcess | Promise<LanguageServerProcess> {
     throw Error('Must override startServerProcess to start language server process when extending AutoLanguageClient');
@@ -425,9 +437,9 @@ export default class AutoLanguageClient {
       selector: this.getGrammarScopes()
         .map((g) => '.' + g)
         .join(', '),
-      inclusionPriority: 1,
-      suggestionPriority: 2,
-      excludeLowerPriority: false,
+      inclusionPriority: this.getInclusionPriority(),
+      suggestionPriority: this.getSuggestionPriority(),
+      excludeLowerPriority: this.getExcludeLowerPriority(),
       getSuggestions: this.getSuggestions.bind(this),
       onDidInsertSuggestion: this.onDidInsertSuggestion.bind(this),
       getSuggestionDetailsOnSelect: this.getSuggestionDetailsOnSelect.bind(this),
