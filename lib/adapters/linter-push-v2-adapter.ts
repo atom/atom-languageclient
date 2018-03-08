@@ -41,8 +41,6 @@ export default class LinterPushV2Adapter {
   }
 
   // Public: Remove all {V2IndieDelegate} registries attached to this adapter and clear them.
-  //
-  // * `indie` A {V2IndieDelegate} that wants to receive messages.
   public detachAll(): void {
     this._indies.forEach((i) => i.clearMessages());
     this._indies.clear();
