@@ -409,6 +409,12 @@ export default class AutoLanguageClient {
     }
     server.disposable.add(server.linterPushV2);
 
+    server.loggingConsole = new LoggingConsoleAdapter(server.connection);
+    if (this._consoleDelegate != null) {
+      server.loggingConsole.attach(this._consoleDelegate({ id: this.name, name: 'abc' }));
+    }
+    server.disposable.add(server.loggingConsole);
+
     if (SignatureHelpAdapter.canAdapt(server.capabilities)) {
       server.signatureHelpAdapter = new SignatureHelpAdapter(server, this.getGrammarScopes());
       if (this._signatureHelpRegistry != null) {
@@ -584,18 +590,14 @@ export default class AutoLanguageClient {
     this._consoleDelegate = createConsole;
 
     for (const server of this._serverManager.getActiveServers()) {
-      if (server.loggingConsole != null) {
-        server.loggingConsole.attach(this._consoleDelegate);
+      if (server.loggingConsole == null) {
+        server.loggingConsole = new LoggingConsoleAdapter(server.connection);
       }
+      server.loggingConsole.attach(this._consoleDelegate({ id: this.name, name: 'abc' }));
     }
 
-    return new Disposable(() => {
-      for (const server of this._serverManager.getActiveServers()) {
-        if (server.loggingConsole != null) {
-          server.loggingConsole.detach(this._consoleDelegate);
-        }
-      }
-    });
+    // No way of detaching from client connections today
+    return new Disposable(() => { });
   }
 
   // Code Format via LS formatDocument & formatDocumentRange------------

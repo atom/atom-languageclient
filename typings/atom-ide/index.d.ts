@@ -278,26 +278,24 @@ declare module 'atom-ide' {
   export type ConsoleService = (options: SourceInfo) => ConsoleApi;
 
   export interface ConsoleApi {
-    setStatus(status: OutputProviderStatus): void,
-    append(message: Message): void,
-    dispose(): void,
-    log(object: string): void,
-    error(object: string): void,
-    warn(object: string): void,
-    info(object: string): void,
+    setStatus(status: OutputProviderStatus): void;
+    append(message: Message): void;
+    dispose(): void;
+    log(object: string): void;
+    error(object: string): void;
+    warn(object: string): void;
+    info(object: string): void;
   }
 
   export type OutputProviderStatus = 'starting' | 'running' | 'stopped';
 
-  export type Message = {
-    text: string,
-    level: Level,
-    // data?: EvaluationResult,  // Excluded for now, brings in React etc.
-    tags?: Array<string> | null,
-    kind?: MessageKind | null,
-    scopeName?: string | null,
-  };
-
+  export interface Message {
+    text: string;
+    level: Level;
+    tags?: string[] | null;
+    kind?: MessageKind | null;
+    scopeName?: string | null;
+  }
 
   export type TaskLevelType = 'info' | 'log' | 'warning' | 'error' | 'debug' | 'success';
   export type Level = TaskLevelType | Color;
