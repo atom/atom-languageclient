@@ -1,11 +1,9 @@
-import * as atomIde from 'atom-ide';
-import { ActiveServer } from '../server-manager';
+import { ConsoleApi } from 'atom-ide';
 import {
   LanguageClientConnection,
   LogMessageParams,
   MessageType,
 } from '../languageclient';
-import { ConsoleService, ConsoleApi } from "atom-ide";
 
 // Adapts Atom's user notifications to those of the language server protocol.
 export default class LoggingConsoleAdapter {
