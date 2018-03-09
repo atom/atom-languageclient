@@ -11,7 +11,7 @@ import { ConsoleService, ConsoleApi } from "atom-ide";
 export default class LoggingConsoleAdapter {
   private _consoles: Set<ConsoleApi> = new Set();
 
-  // Create a new {LoggingConsoleAdapter} that will listen for diagnostics
+  // Create a new {LoggingConsoleAdapter} that will listen for log messages
   // via the supplied {LanguageClientConnection}.
   //
   // * `connection` A {LanguageClientConnection} to the language server that will provide log messages.
@@ -24,14 +24,14 @@ export default class LoggingConsoleAdapter {
     this.detachAll();
   }
 
-  // Public: Attach this {LoggingConsoleAdapter} to a given {ConsoleService}.
+  // Public: Attach this {LoggingConsoleAdapter} to a given {ConsoleApi}.
   //
   // * `console` A {ConsoleApi} that wants to receive messages.
   public attach(console: ConsoleApi): void {
     this._consoles.add(console);
   }
 
-  // Public: Remove all {V2IndieDelegate} registries attached to this adapter.
+  // Public: Remove all {ConsoleApi}'s attached to this adapter.
   public detachAll(): void {
     this._consoles.clear();
   }
