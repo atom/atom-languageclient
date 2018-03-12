@@ -9,7 +9,6 @@ import {
   VersionedTextDocumentIdentifier,
   ServerCapabilities,
 } from '../languageclient';
-import * as lsp from 'vscode-languageserver-protocol';
 import * as atomIde from 'atom-ide';
 import {
   CompositeDisposable,
