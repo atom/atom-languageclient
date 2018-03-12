@@ -135,7 +135,7 @@ export default class AutoLanguageClient {
           synchronization: {
             dynamicRegistration: false,
             willSave: true,
-            willSaveWaitUntil: false,
+            willSaveWaitUntil: true,
             didSave: true,
           },
           completion: {

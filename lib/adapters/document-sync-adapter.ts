@@ -9,6 +9,8 @@ import {
   VersionedTextDocumentIdentifier,
   ServerCapabilities,
 } from '../languageclient';
+import * as lsp from 'vscode-languageserver-protocol';
+import * as atomIde from 'atom-ide';
 import {
   CompositeDisposable,
   Disposable,
@@ -166,6 +168,7 @@ export class TextEditorSyncAdapter {
 
     this._disposable.add(
       editor.getBuffer().onWillSave(this.willSave.bind(this)),
+      editor.getBuffer().onWillSave(this.willSaveWaitUntil.bind(this)),
       editor.onDidSave(this.didSave.bind(this)),
       editor.onDidDestroy(this.didClose.bind(this)),
       editor.onDidChangePath(this.didRename.bind(this)),
@@ -314,6 +317,20 @@ export class TextEditorSyncAdapter {
       textDocument: {uri},
       reason: TextDocumentSaveReason.Manual,
     });
+  }
+
+  // Called just before the {TextEditor} saves, sends the 'willSaveWaitUntilTextDocument' request to
+  // the connected language server and waits for the response before saving the buffer.
+  public async willSaveWaitUntil(): Promise<atomIde.TextEdit[]> {
+    if (!this._isPrimaryAdapter()) { return Promise.resolve([]); }
+
+    const uri = this.getEditorUri();
+    return this._connection.willSaveWaitUntilTextDocument({
+      textDocument: {uri},
+      reason: TextDocumentSaveReason.Manual,
+    }).then((edits: lsp.TextEdit[] | null) =>
+      Convert.convertLsTextEdits(edits || [])
+    );
   }
 
   // Called when the {TextEditor} saves and sends the 'didSaveTextDocument' notification to

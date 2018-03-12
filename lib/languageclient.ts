@@ -178,6 +178,16 @@ export class LanguageClientConnection extends EventEmitter {
     this._sendNotification('textDocument/willSave', params);
   }
 
+  // Public: Send a `textDocument/willSaveWaitUntil` notification.
+  //
+  // * `params` The {WillSaveTextDocumentParams} containing the to-be-saved text document
+  // details and the reason for the save.
+  // Returns a {Promise} containing an {Array} of {TextEdit}s to be applied to the text
+  // document before it is saved.
+  public willSaveWaitUntilTextDocument(params: lsp.WillSaveTextDocumentParams): Promise<lsp.TextEdit[] | null> {
+    return this._sendRequest('textDocument/willSaveWaitUntil', params);
+  }
+
   // Public: Send a `textDocument/didSave` notification.
   //
   // * `params` The {DidSaveTextDocumentParams} containing the saved text document details.
