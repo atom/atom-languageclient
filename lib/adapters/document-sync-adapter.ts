@@ -328,9 +328,7 @@ export class TextEditorSyncAdapter {
     return this._connection.willSaveWaitUntilTextDocument({
       textDocument: {uri},
       reason: TextDocumentSaveReason.Manual,
-    }).then((edits: lsp.TextEdit[] | null) =>
-      Convert.convertLsTextEdits(edits || [])
-    );
+    }).then(Convert.convertLsTextEdits);
   }
 
   // Called when the {TextEditor} saves and sends the 'didSaveTextDocument' notification to
