@@ -1,3 +1,8 @@
+## v0.9.3
+
+- Display buttons on showRequestMessage LSP calls - fixes many prompts from LSP packages
+- logMessages from language servers are now available in the Atom IDE UI Console window
+
 ## v0.9.2
 
 - Fix issue when completionItem documentation is returned as string
