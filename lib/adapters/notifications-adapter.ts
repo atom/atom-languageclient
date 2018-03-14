@@ -101,7 +101,7 @@ export default class NotificationsAdapter {
 }
 
 function messageTypeToString(
-  messageType: number
+  messageType: number,
 ): string {
   switch (messageType) {
     case MessageType.Error: return 'error';
