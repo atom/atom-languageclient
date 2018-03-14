@@ -1,7 +1,14 @@
 import assert = require('assert');
-import { Point, TextEditor, Range } from 'atom';
-import { LanguageClientConnection, ServerCapabilities } from '../languageclient';
 import Convert from '../convert';
+import {
+  Point,
+  TextEditor,
+  Range,
+} from 'atom';
+import {
+  LanguageClientConnection,
+  ServerCapabilities,
+} from '../languageclient';
 
 export default class CodeHighlightAdapter {
   // Returns a {Boolean} indicating this adapter can adapt the server based on the

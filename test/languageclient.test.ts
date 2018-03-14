@@ -1,8 +1,8 @@
 import * as ls from '../lib/languageclient';
-import { NullLogger } from '../lib/logger';
 import * as sinon from 'sinon';
 import { expect } from 'chai';
 import { createSpyConnection } from './helpers.js';
+import { NullLogger } from '../lib/logger';
 
 describe('LanguageClientConnection', () => {
   beforeEach(() => {

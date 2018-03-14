@@ -1,9 +1,12 @@
 import * as jsonrpc from 'vscode-jsonrpc';
 import * as lsp from 'vscode-languageserver-protocol';
-export * from 'vscode-languageserver-protocol';
-
 import { EventEmitter } from 'events';
-import { NullLogger, Logger } from './logger';
+import {
+  NullLogger,
+  Logger,
+} from './logger';
+
+export * from 'vscode-languageserver-protocol';
 
 // TypeScript wrapper around JSONRPC to implement Microsoft Language Server Protocol v3
 // https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
