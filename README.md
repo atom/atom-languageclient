@@ -28,7 +28,7 @@ The language server protocol consists of a number of capabilities. Some of these
 |---------------------------------|-------------------------------|
 | window/showMessage              | Notifications package         |
 | window/showMessageRequest       | Notifications package         |
-| window/logMessage               | Ignored                       |
+| window/logMessage               | Atom-IDE console              |
 | telemetry/event                 | Ignored                       |
 | workspace/didChangeWatchedFiles | Atom file watch API           |
 | textDocument/publishDiagnostics | Linter v2 push/indie          |
