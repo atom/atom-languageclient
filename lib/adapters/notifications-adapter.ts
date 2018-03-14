@@ -16,11 +16,22 @@ import {
 export default class NotificationsAdapter {
   // Public: Attach to a {LanguageClientConnection} to recieve events indicating
   // when user notifications should be displayed.
-  public static attach(connection: LanguageClientConnection, name: string, projectPath: string) {
+  public static attach(
+    connection: LanguageClientConnection,
+    name: string,
+    projectPath: string,
+  ) {
     connection.onShowMessage((m) => NotificationsAdapter.onShowMessage(m, name, projectPath));
     connection.onShowMessageRequest((m) => NotificationsAdapter.onShowMessageRequest(m, name, projectPath));
   }
 
+  // Public: Show a notification message with buttons using the Atom notifications API.
+  //
+  // * `params` The {ShowMessageRequestParams} received from the language server
+  //            indicating the details of the notification to be displayed.
+  // * `name`   The name of the language server so the user can identify the
+  //            context of the message.
+  // * `projectPath`   The path of the current project.
   public static onShowMessageRequest(
     params: ShowMessageRequestParams,
     name: string,
@@ -29,7 +40,7 @@ export default class NotificationsAdapter {
     return new Promise((resolve, reject) => {
       const options: NotificationOptions = {
         dismissable: true,
-        detail: name,
+        detail: `${name} ${projectPath}`,
       };
       if (params.actions) {
         options.buttons = params.actions.map((a) => ({
@@ -43,10 +54,10 @@ export default class NotificationsAdapter {
         }));
       }
 
-      const notification = addNotificationForMessage(params.type, params.message, {
-        dismissable: true,
-        detail: `${name} ${projectPath}`,
-      });
+      const notification = addNotificationForMessage(
+        params.type,
+        params.message,
+        options);
 
       if (notification != null) {
         notification.onDidDismiss(() => {
@@ -62,7 +73,12 @@ export default class NotificationsAdapter {
   //            indicating the details of the notification to be displayed.
   // * `name`   The name of the language server so the user can identify the
   //            context of the message.
-  public static onShowMessage(params: ShowMessageParams, name: string, projectPath: string): void {
+  // * `projectPath`   The path of the current project.
+  public static onShowMessage(
+    params: ShowMessageParams,
+    name: string,
+    projectPath: string,
+  ): void {
     addNotificationForMessage(params.type, params.message, {
       dismissable: true,
       detail: `${name} ${projectPath}`,
@@ -75,14 +91,18 @@ export default class NotificationsAdapter {
   // * `actionItem` The {MessageActionItem} to be converted.
   //
   // Returns a {NotificationButton} equivalent to the {MessageActionItem} given.
-  public static actionItemToNotificationButton(actionItem: MessageActionItem): NotificationButton {
+  public static actionItemToNotificationButton(
+    actionItem: MessageActionItem,
+  ): NotificationButton {
     return {
       text: actionItem.title,
     };
   }
 }
 
-function messageTypeToString(messageType: number): string {
+function messageTypeToString(
+  messageType: number,
+): string {
   switch (messageType) {
     case MessageType.Error: return 'error';
     case MessageType.Warning: return 'warning';
