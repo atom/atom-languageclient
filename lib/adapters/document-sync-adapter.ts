@@ -10,7 +10,6 @@ import {
   ServerCapabilities,
 } from '../languageclient';
 import ApplyEditAdapter from './apply-edit-adapter';
-import * as atomIde from 'atom-ide';
 import {
   CompositeDisposable,
   Disposable,
