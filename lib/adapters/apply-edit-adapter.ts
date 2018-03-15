@@ -17,6 +17,31 @@ export default class ApplyEditAdapter {
     connection.onApplyEdit((m) => ApplyEditAdapter.onApplyEdit(m));
   }
 
+  /**
+   * Tries to apply edits and reverts if anything goes wrong.
+   * Returns the checkpoint, so the caller can revert changes if needed.
+   */
+  public static applyEdits(
+    buffer: TextBuffer,
+    edits: atomIde.TextEdit[],
+  ): number {
+    const checkpoint = buffer.createCheckpoint();
+    try {
+      // Sort edits in reverse order to prevent edit conflicts.
+      edits.sort((edit1, edit2) => -edit1.oldRange.compare(edit2.oldRange));
+      edits.reduce((previous, current) => {
+        ApplyEditAdapter.validateEdit(buffer, current, previous);
+        buffer.setTextInRange(current.oldRange, current.newText);
+        return current;
+      }, null);
+      buffer.groupChangesSinceCheckpoint(checkpoint);
+      return checkpoint;
+    } catch (err) {
+      buffer.revertToCheckpoint(checkpoint);
+      throw err;
+    }
+  }
+
   public static async onApplyEdit(params: ApplyWorkspaceEditParams): Promise<ApplyWorkspaceEditResponse> {
 
     let changes = params.edit.changes || {};

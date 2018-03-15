@@ -9,6 +9,7 @@ import {
   VersionedTextDocumentIdentifier,
   ServerCapabilities,
 } from '../languageclient';
+import ApplyEditAdapter from './apply-edit-adapter';
 import * as atomIde from 'atom-ide';
 import {
   CompositeDisposable,
@@ -320,14 +321,17 @@ export class TextEditorSyncAdapter {
 
   // Called just before the {TextEditor} saves, sends the 'willSaveWaitUntilTextDocument' request to
   // the connected language server and waits for the response before saving the buffer.
-  public async willSaveWaitUntil(): Promise<atomIde.TextEdit[]> {
-    if (!this._isPrimaryAdapter()) { return Promise.resolve([]); }
+  public async willSaveWaitUntil(): Promise<void> {
+    if (!this._isPrimaryAdapter()) { return Promise.resolve(); }
 
+    const buffer = this._editor.getBuffer();
     const uri = this.getEditorUri();
-    return this._connection.willSaveWaitUntilTextDocument({
+    const edits = await this._connection.willSaveWaitUntilTextDocument({
       textDocument: {uri},
       reason: TextDocumentSaveReason.Manual,
-    }).then(Convert.convertLsTextEdits);
+    });
+    // TODO: set a timeout on this and cancel if it takes too long
+    ApplyEditAdapter.applyEdits(buffer, Convert.convertLsTextEdits(edits));
   }
 
   // Called when the {TextEditor} saves and sends the 'didSaveTextDocument' notification to
