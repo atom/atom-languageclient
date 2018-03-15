@@ -53,49 +53,42 @@ export default class ApplyEditAdapter {
     }
 
     const uris = Object.keys(changes);
-    const paths = uris.map(Convert.uriToPath);
-    const editors = await Promise.all(
-      paths.map((path) => {
-        return atom.workspace.open(path, {
+
+    // Keep checkpoints from all successfull buffer edits
+    const checkpoints: Array<{ buffer: TextBuffer, checkpoint: number }> = [];
+
+    const promises = uris.map(async (uri) => {
+      const path = Convert.uriToPath(uri);
+      const editor = await atom.workspace.open(
+        path, {
           searchAllPanes: true,
           // Open new editors in the background.
           activatePane: false,
           activateItem: false,
-        });
-      }),
-    );
+        },
+      ) as TextEditor;
+      const buffer = editor.getBuffer();
+      // Get an existing editor for the file, or open a new one if it doesn't exist.
+      const edits = Convert.convertLsTextEdits(changes[uri]);
+      const checkpoint = ApplyEditAdapter.applyEdits(buffer, edits);
+      checkpoints.push({buffer, checkpoint});
+    });
 
-    const checkpoints: Array<{ buffer: TextBuffer, checkpoint: number}> = [];
-    try {
-      for (let i = 0; i < editors.length; i++) {
-        const editor = editors[i] as TextEditor;
-        const uri = uris[i];
-        // Get an existing editor for the file, or open a new one if it doesn't exist.
-        const edits = Convert.convertLsTextEdits(changes[uri]);
-        // Sort edits in reverse order to prevent edit conflicts.
-        edits.sort((edit1, edit2) => -edit1.oldRange.compare(edit2.oldRange));
-        const buffer = editor.getBuffer();
-        const checkpoint = buffer.createCheckpoint();
-        checkpoints.push({buffer, checkpoint});
-        let prevEdit: atomIde.TextEdit | null = null;
-        for (const edit of edits) {
-          ApplyEditAdapter.validateEdit(buffer, edit, prevEdit);
-          buffer.setTextInRange(edit.oldRange, edit.newText);
-          prevEdit = edit;
-        }
-        buffer.groupChangesSinceCheckpoint(checkpoint);
-      }
-      return {applied: true};
-    } catch (e) {
-      atom.notifications.addError('workspace/applyEdits failed', {
-        description: 'Failed to apply edits.',
-        detail: e.message,
+    // Apply all edits or fail and revert everything
+    const applied = await Promise.all(promises)
+      .then(() => true)
+      .catch((err) => {
+        atom.notifications.addError('workspace/applyEdits failed', {
+          description: 'Failed to apply edits.',
+          detail: err.message,
+        });
+        checkpoints.forEach(({buffer, checkpoint}) => {
+          buffer.revertToCheckpoint(checkpoint);
+        });
+        return false;
       });
-      checkpoints.forEach(({buffer, checkpoint}) => {
-        buffer.revertToCheckpoint(checkpoint);
-      });
-      return {applied: false};
-    }
+
+    return {applied};
   }
 
   // Private: Do some basic sanity checking on the edit ranges.
