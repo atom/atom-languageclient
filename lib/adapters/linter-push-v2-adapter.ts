@@ -1,5 +1,6 @@
 import * as linter from 'atom/linter';
 import * as atom from 'atom';
+import Convert from '../convert';
 import {
   Diagnostic,
   DiagnosticCode,
@@ -7,7 +8,6 @@ import {
   LanguageClientConnection,
   PublishDiagnosticsParams,
 } from '../languageclient';
-import Convert from '../convert';
 
 // Public: Listen to diagnostics messages from the language server and publish them
 // to the user by way of the Linter Push (Indie) v2 API supported by Atom IDE UI.
@@ -41,8 +41,6 @@ export default class LinterPushV2Adapter {
   }
 
   // Public: Remove all {V2IndieDelegate} registries attached to this adapter and clear them.
-  //
-  // * `indie` A {V2IndieDelegate} that wants to receive messages.
   public detachAll(): void {
     this._indies.forEach((i) => i.clearMessages());
     this._indies.clear();

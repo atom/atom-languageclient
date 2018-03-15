@@ -4,14 +4,34 @@ import * as rpc from 'vscode-jsonrpc';
 import * as path from 'path';
 import * as atomIde from 'atom-ide';
 import * as linter from 'atom/linter';
+import Convert from './convert.js';
+import ApplyEditAdapter from './adapters/apply-edit-adapter';
+import AutocompleteAdapter from './adapters/autocomplete-adapter';
+import CodeActionAdapter from './adapters/code-action-adapter';
+import CodeFormatAdapter from './adapters/code-format-adapter';
+import CodeHighlightAdapter from './adapters/code-highlight-adapter';
+import DatatipAdapter from './adapters/datatip-adapter';
+import DefinitionAdapter from './adapters/definition-adapter';
+import DocumentSyncAdapter from './adapters/document-sync-adapter';
+import FindReferencesAdapter from './adapters/find-references-adapter';
+import LinterPushV2Adapter from './adapters/linter-push-v2-adapter';
+import LoggingConsoleAdapter from './adapters/logging-console-adapter';
+import NotificationsAdapter from './adapters/notifications-adapter';
+import OutlineViewAdapter from './adapters/outline-view-adapter';
+import SignatureHelpAdapter from './adapters/signature-help-adapter';
+import Utils from './utils';
 import { Socket } from 'net';
 import { LanguageClientConnection } from './languageclient';
-import { ConsoleLogger, NullLogger, Logger } from './logger';
-import { LanguageServerProcess, ServerManager, ActiveServer } from './server-manager.js';
-import Convert from './convert.js';
-
-export { ActiveServer, LanguageClientConnection, LanguageServerProcess };
-
+import {
+  ConsoleLogger,
+  NullLogger,
+  Logger,
+} from './logger';
+import {
+  LanguageServerProcess,
+  ServerManager,
+  ActiveServer,
+} from './server-manager.js';
 import {
   AutocompleteDidInsert,
   AutocompleteProvider,
@@ -24,21 +44,7 @@ import {
   TextEditor,
 } from 'atom';
 
-import ApplyEditAdapter from './adapters/apply-edit-adapter';
-import AutocompleteAdapter from './adapters/autocomplete-adapter';
-import CodeActionAdapter from './adapters/code-action-adapter';
-import CodeFormatAdapter from './adapters/code-format-adapter';
-import CodeHighlightAdapter from './adapters/code-highlight-adapter';
-import DatatipAdapter from './adapters/datatip-adapter';
-import DefinitionAdapter from './adapters/definition-adapter';
-import DocumentSyncAdapter from './adapters/document-sync-adapter';
-import FindReferencesAdapter from './adapters/find-references-adapter';
-import LinterPushV2Adapter from './adapters/linter-push-v2-adapter';
-import NotificationsAdapter from './adapters/notifications-adapter';
-import OutlineViewAdapter from './adapters/outline-view-adapter';
-import SignatureHelpAdapter from './adapters/signature-help-adapter';
-import Utils from './utils';
-
+export { ActiveServer, LanguageClientConnection, LanguageServerProcess };
 export type ConnectionType = 'stdio' | 'socket' | 'ipc';
 
 // Public: AutoLanguageClient provides a simple way to have all the supported
@@ -48,6 +54,7 @@ export type ConnectionType = 'stdio' | 'socket' | 'ipc';
 export default class AutoLanguageClient {
   private _disposable = new CompositeDisposable();
   private _serverManager: ServerManager;
+  private _consoleDelegate: atomIde.ConsoleService;
   private _linterDelegate: linter.IndieDelegate;
   private _signatureHelpRegistry: atomIde.SignatureHelpRegistry | null;
   private _lastAutocompleteRequest: AutocompleteRequest;
@@ -402,6 +409,12 @@ export default class AutoLanguageClient {
     }
     server.disposable.add(server.linterPushV2);
 
+    server.loggingConsole = new LoggingConsoleAdapter(server.connection);
+    if (this._consoleDelegate != null) {
+      server.loggingConsole.attach(this._consoleDelegate({ id: this.name, name: 'abc' }));
+    }
+    server.disposable.add(server.loggingConsole);
+
     if (SignatureHelpAdapter.canAdapt(server.capabilities)) {
       server.signatureHelpAdapter = new SignatureHelpAdapter(server, this.getGrammarScopes());
       if (this._signatureHelpRegistry != null) {
@@ -570,6 +583,21 @@ export default class AutoLanguageClient {
 
     this.datatip = this.datatip || new DatatipAdapter();
     return this.datatip.getDatatip(server.connection, editor, point);
+  }
+
+  // Console via LS logging---------------------------------------------
+  public consumeConsole(createConsole: atomIde.ConsoleService): Disposable {
+    this._consoleDelegate = createConsole;
+
+    for (const server of this._serverManager.getActiveServers()) {
+      if (server.loggingConsole == null) {
+        server.loggingConsole = new LoggingConsoleAdapter(server.connection);
+      }
+      server.loggingConsole.attach(this._consoleDelegate({ id: this.name, name: 'abc' }));
+    }
+
+    // No way of detaching from client connections today
+    return new Disposable(() => { });
   }
 
   // Code Format via LS formatDocument & formatDocumentRange------------

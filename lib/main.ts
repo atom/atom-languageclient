@@ -9,4 +9,9 @@ import DownloadFile from './download-file';
 import LinterPushV2Adapter from './adapters/linter-push-v2-adapter';
 
 export * from './auto-languageclient';
-export { AutoLanguageClient, Convert, DownloadFile, LinterPushV2Adapter };
+export {
+  AutoLanguageClient,
+  Convert,
+  DownloadFile,
+  LinterPushV2Adapter,
+};

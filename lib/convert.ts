@@ -1,8 +1,17 @@
 
 import * as ls from './languageclient';
-import { Point, ProjectFileEvent, Range, TextEditor } from 'atom';
-import { Diagnostic, DiagnosticType, TextEdit } from 'atom-ide';
 import * as URL from 'url';
+import {
+  Point,
+  ProjectFileEvent,
+  Range,
+  TextEditor,
+} from 'atom';
+import {
+  Diagnostic,
+  DiagnosticType,
+  TextEdit,
+} from 'atom-ide';
 
 // Public: Class that contains a number of helper methods for general conversions
 // between the language server protocol and Atom/Atom packages.

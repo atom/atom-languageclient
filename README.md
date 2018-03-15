@@ -28,7 +28,7 @@ The language server protocol consists of a number of capabilities. Some of these
 |---------------------------------|-------------------------------|
 | window/showMessage              | Notifications package         |
 | window/showMessageRequest       | Notifications package         |
-| window/logMessage               | Ignored                       |
+| window/logMessage               | Atom-IDE console              |
 | telemetry/event                 | Ignored                       |
 | workspace/didChangeWatchedFiles | Atom file watch API           |
 | textDocument/publishDiagnostics | Linter v2 push/indie          |
@@ -114,7 +114,6 @@ Sockets are a little more complex because you need to allocate a free socket. Th
 
 Atom-LanguageClient can log all sent and received messages nicely formatted to the Developer Tools Console within Atom. To do so simply enable it with `atom.config.set('core.debugLSP', true)`, e.g.
 
-
 ### Tips
 
 Some more elaborate scenarios can be found in the [ide-java](https://github.com/atom/ide-java) package which includes:
@@ -143,6 +142,18 @@ Our [full list of Atom IDE packages](https://github.com/atom/atom-languageclient
 Additional LSP servers that might be of interest to be packaged with this for Atom can be found at [LangServer.org](http://langserver.org)
 
 ## Contributing
+
+### Running from source
+
+If you want to run from source you will need to perform the following steps (you will need node and npm intalled):
+
+1. Check out the source
+2. From the source folder type `npm link` to build and link
+3. From the folder where your package lives type `npm link atom-languageclient`
+
+If you want to switch back to the production version of atom-languageclient type `npm unlink atom-languageclient` from the folder where your package lives.
+
+### Guidance 
 
 Always feel free to help out!  Whether it's [filing bugs and feature requests](https://github.com/atom/atom-languageclient/issues/new) or working on some of the [open issues](https://github.com/atom/atom-languageclient/issues), Atom's [contributing guide](https://github.com/atom/atom/blob/master/CONTRIBUTING.md) will help get you started while the [guide for contributing to packages](https://github.com/atom/atom/blob/master/docs/contributing-to-packages.md) has some extra information.
 

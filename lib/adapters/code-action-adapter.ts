@@ -1,10 +1,15 @@
-import LinterPushV2Adapter from './linter-push-v2-adapter';
-
-import assert = require('assert');
-import { LanguageClientConnection, ServerCapabilities } from '../languageclient';
-import { TextEditor, Range } from 'atom';
-import Convert from '../convert';
 import * as atomIde from 'atom-ide';
+import LinterPushV2Adapter from './linter-push-v2-adapter';
+import assert = require('assert');
+import Convert from '../convert';
+import {
+  LanguageClientConnection,
+  ServerCapabilities,
+} from '../languageclient';
+import {
+  TextEditor,
+  Range,
+} from 'atom';
 
 export default class CodeActionAdapter {
   // Returns a {Boolean} indicating this adapter can adapt the server based on the

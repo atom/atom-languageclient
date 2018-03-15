@@ -1,3 +1,5 @@
+import * as atomIde from 'atom-ide';
+import Convert from '../convert';
 import {
   LanguageClientConnection,
   DocumentFormattingParams,
@@ -5,9 +7,10 @@ import {
   FormattingOptions,
   ServerCapabilities,
 } from '../languageclient';
-import { TextEditor, Range } from 'atom';
-import * as atomIde from 'atom-ide';
-import Convert from '../convert';
+import {
+  TextEditor,
+  Range,
+} from 'atom';
 
 // Public: Adapts the language server protocol "textDocument/completion" to the
 // Atom IDE UI Code-format package.

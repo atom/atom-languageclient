@@ -1,3 +1,8 @@
+import Convert from '../convert';
+import Utils from '../utils';
+import { CancellationTokenSource } from 'vscode-jsonrpc';
+import { ActiveServer } from '../server-manager';
+import { filter } from 'fuzzaldrin-plus';
 import {
   CompletionItemKind,
   CompletionTriggerKind,
@@ -16,11 +21,6 @@ import {
   Point,
   TextEditor,
 } from 'atom';
-import { CancellationTokenSource } from 'vscode-jsonrpc';
-import { ActiveServer } from '../server-manager';
-import Convert from '../convert';
-import { filter } from 'fuzzaldrin-plus';
-import Utils from '../utils';
 
 interface SuggestionCacheEntry {
   isIncomplete: boolean;
