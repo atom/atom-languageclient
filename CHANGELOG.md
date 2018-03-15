@@ -1,4 +1,4 @@
-## v0.9.3
+## v0.9.4
 
 - Correctly handle multi-sequence symbols from autocomplete plus that could prevent triggering
 
