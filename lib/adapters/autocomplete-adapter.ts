@@ -101,7 +101,9 @@ export default class AutocompleteAdapter {
     const suggestions = Array.from(suggestionMap.keys());
     const replacementPrefix = request.prefix !== triggerChar ? request.prefix : '';
     AutocompleteAdapter.setReplacementPrefixOnSuggestions(suggestions, replacementPrefix);
-    return request.prefix === triggerChar ? suggestions : filter(suggestions, request.prefix, {key: 'text'});
+    return request.prefix === "" || request.prefix === triggerChar
+      ? suggestions
+      : filter(suggestions, request.prefix, {key: 'text'});
   }
 
   // Public: Obtain a complete version of a suggestion with additional information

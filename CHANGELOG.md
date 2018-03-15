@@ -1,5 +1,9 @@
 ## v0.9.3
 
+- Correctly handle multi-sequence symbols from autocomplete plus that could prevent triggering
+
+## v0.9.3
+
 - Display buttons on showRequestMessage LSP calls - fixes many prompts from LSP packages
 - logMessages from language servers are now available in the Atom IDE UI Console window
 
