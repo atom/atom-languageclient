@@ -201,7 +201,7 @@ export default class Convert {
   // * `textEdits` The language server protocol {TextEdit} objects to convert.
   //
   // Returns an {Array} of Atom {TextEdit} objects.
-  public static convertLsTextEdits(textEdits: ls.TextEdit[]): TextEdit[] {
+  public static convertLsTextEdits(textEdits: ls.TextEdit[] | null): TextEdit[] {
     return (textEdits || []).map(Convert.convertLsTextEdit);
   }
 
