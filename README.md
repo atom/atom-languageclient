@@ -153,6 +153,10 @@ If you want to run from source you will need to perform the following steps (you
 
 If you want to switch back to the production version of atom-languageclient type `npm unlink atom-languageclient` from the folder where your package lives.
 
+### Before sending a PR
+
+We have various unit tests and some linter rules - you can run both of these locally using `npm test` to ensure your CI will get a clean build.
+
 ### Guidance 
 
 Always feel free to help out!  Whether it's [filing bugs and feature requests](https://github.com/atom/atom-languageclient/issues/new) or working on some of the [open issues](https://github.com/atom/atom-languageclient/issues), Atom's [contributing guide](https://github.com/atom/atom/blob/master/CONTRIBUTING.md) will help get you started while the [guide for contributing to packages](https://github.com/atom/atom/blob/master/docs/contributing-to-packages.md) has some extra information.
