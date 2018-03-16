@@ -85,7 +85,7 @@ export class LanguageClientConnection extends EventEmitter {
   //
   // * `method`   A string containing the name of the request message.
   // * `params`   The method's parameters
-  public sendCustomRequest(method: string, params?: Array<any> | object): Promise<any | null> {
+  public sendCustomRequest(method: string, params?: any[] | object): Promise<any | null> {
     return this._sendRequest(method, params);
   }
 
@@ -93,7 +93,7 @@ export class LanguageClientConnection extends EventEmitter {
   //
   // * `method`   A string containing the name of the notification message.
   // * `params`  The method's parameters
-  public sendCustomNotification(method: string, params?: Array<any> | object): void {
+  public sendCustomNotification(method: string, params?: any[] | object): void {
     this._sendNotification(method, params);
   }
 
