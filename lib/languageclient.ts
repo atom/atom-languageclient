@@ -81,6 +81,22 @@ export class LanguageClientConnection extends EventEmitter {
     this._onNotification({method}, callback);
   }
 
+  // Public: Send a custom request
+  //
+  // * `method`   A string containing the name of the request message.
+  // * `params`   The method's parameters
+  public sendCustomRequest(method: string, params?: any[] | object): Promise<any | null> {
+    return this._sendRequest(method, params);
+  }
+
+  // Public: Send a custom notification
+  //
+  // * `method`   A string containing the name of the notification message.
+  // * `params`  The method's parameters
+  public sendCustomNotification(method: string, params?: any[] | object): void {
+    this._sendNotification(method, params);
+  }
+
   // Public: Register a callback for the `window/showMessage` message.
   //
   // * `callback` The function to be called when the `window/showMessage` message is
