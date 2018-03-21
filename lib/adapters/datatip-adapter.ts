@@ -2,6 +2,7 @@ import * as atomIde from 'atom-ide';
 import Convert from '../convert';
 import Utils from '../utils';
 import {
+  Hover,
   LanguageClientConnection,
   MarkupContent,
   MarkedString,
@@ -43,12 +44,7 @@ export default class DatatipAdapter {
     const documentPositionParams = Convert.editorToTextDocumentPositionParams(editor, point);
 
     const hover = await connection.hover(documentPositionParams);
-    if (
-      hover == null ||
-      hover.contents == null ||
-      (typeof hover.contents === 'string' && hover.contents.length === 0) ||
-      (Array.isArray(hover.contents) && hover.contents.length === 0)
-    ) {
+    if (hover == null || DatatipAdapter.isEmptyHover(hover)) {
       return null;
     }
 
@@ -60,6 +56,13 @@ export default class DatatipAdapter {
     );
 
     return { range, markedStrings };
+  }
+
+  private static isEmptyHover(hover: Hover): boolean {
+    return hover.contents == null ||
+      (typeof hover.contents === 'string' && hover.contents.length === 0) ||
+      (Array.isArray(hover.contents) &&
+        (hover.contents.length === 0 || hover.contents[0] === ""));
   }
 
   private static convertMarkedString(
