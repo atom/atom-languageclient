@@ -10,7 +10,6 @@ import * as fs from 'fs';
 //                      unable to provide a Content-Length header and whitelist CORS access via a 
 //                      `Access-Control-Expose-Headers "content-length"` header.
 //                      
-//
 // Returns a {Promise} that will accept when complete.
 export default (async function downloadFile(
   sourceUrl: string,
