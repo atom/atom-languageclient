@@ -6,9 +6,10 @@ import * as fs from 'fs';
 // * `targetFile`       File path to save to.
 // * `progressCallback` Callback function that will be given a {ByteProgressCallback} object containing
 //                      both bytesDone and percent.
-// * `length`           Optional file length in bytes for cases where the server will not supply the
-//                      Content-Length header but the value is known in advance. Without either the
-//                      percentage on the callback can not be determined.
+// * `length`           File length in bytes if you want percentage progress indication and the server is
+//                      unable to provide a Content-Length header and whitelist CORS access via a 
+//                      `Access-Control-Expose-Headers "content-length"` header.
+//                      
 //
 // Returns a {Promise} that will accept when complete.
 export default (async function downloadFile(
