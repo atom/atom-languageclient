@@ -7,9 +7,9 @@ import * as fs from 'fs';
 // * `progressCallback` Callback function that will be given a {ByteProgressCallback} object containing
 //                      both bytesDone and percent.
 // * `length`           File length in bytes if you want percentage progress indication and the server is
-//                      unable to provide a Content-Length header and whitelist CORS access via a 
+//                      unable to provide a Content-Length header and whitelist CORS access via a
 //                      `Access-Control-Expose-Headers "content-length"` header.
-//                      
+//
 // Returns a {Promise} that will accept when complete.
 export default (async function downloadFile(
   sourceUrl: string,
