@@ -165,9 +165,14 @@ export class TextEditorSyncAdapter {
       this._disposable.add(changeTracking);
     }
 
+    // These handlers are attached only if server supports them
+    if (documentSync.willSave) {
+      this._disposable.add(editor.getBuffer().onWillSave(this.willSave.bind(this)));
+    }
+    if (documentSync.willSaveWaitUntil) {
+      this._disposable.add(editor.getBuffer().onWillSave(this.willSaveWaitUntil.bind(this)));
+    }
     this._disposable.add(
-      editor.getBuffer().onWillSave(this.willSave.bind(this)),
-      editor.getBuffer().onWillSave(this.willSaveWaitUntil.bind(this)),
       editor.onDidSave(this.didSave.bind(this)),
       editor.onDidDestroy(this.didClose.bind(this)),
       editor.onDidChangePath(this.didRename.bind(this)),
