@@ -24,7 +24,7 @@ import {
 export default class DocumentSyncAdapter {
   private _editorSelector: (editor: TextEditor) => boolean;
   private _disposable = new CompositeDisposable();
-  public _documentSyncKind: number;
+  public _documentSync: TextDocumentSyncOptions;
   private _editors: WeakMap<TextEditor, TextEditorSyncAdapter> = new WeakMap();
   private _connection: LanguageClientConnection;
   private _versions: Map<string, number> = new Map();
@@ -60,21 +60,21 @@ export default class DocumentSyncAdapter {
   // Public: Create a new {DocumentSyncAdapter} for the given language server.
   //
   // * `connection` A {LanguageClientConnection} to the language server to be kept in sync.
-  // * `documentSyncKind` The type of document syncing supported - Full or Incremental.
+  // * `documentSync` The document syncing options.
   // * `editorSelector` A predicate function that takes a {TextEditor} and returns a {boolean}
   //                    indicating whether this adapter should care about the contents of the editor.
   constructor(
     connection: LanguageClientConnection,
-    documentSyncKind: TextDocumentSyncOptions | number | undefined,
     editorSelector: (editor: TextEditor) => boolean,
+    documentSync?: TextDocumentSyncOptions | TextDocumentSyncKind,
   ) {
     this._connection = connection;
-    if (typeof documentSyncKind === 'number') {
-      this._documentSyncKind = documentSyncKind;
-    } else if (documentSyncKind != null && documentSyncKind.change != null) {
-      this._documentSyncKind = documentSyncKind.change;
+    if (typeof documentSync === 'object') {
+      this._documentSync = documentSync;
     } else {
-      this._documentSyncKind = TextDocumentSyncKind.Full;
+      this._documentSync = {
+        change: documentSync || TextDocumentSyncKind.Full,
+      };
     }
     this._editorSelector = editorSelector;
     this._disposable.add(atom.textEditors.observe(this.observeTextEditor.bind(this)));
@@ -115,7 +115,7 @@ export default class DocumentSyncAdapter {
   }
 
   private _handleNewEditor(editor: TextEditor): void {
-    const sync = new TextEditorSyncAdapter(editor, this._connection, this._documentSyncKind, this._versions);
+    const sync = new TextEditorSyncAdapter(editor, this._connection, this._documentSync, this._versions);
     this._editors.set(editor, sync);
     this._disposable.add(sync);
     this._disposable.add(
@@ -148,11 +148,11 @@ export class TextEditorSyncAdapter {
   //
   // * `editor` A {TextEditor} to keep in sync.
   // * `connection` A {LanguageClientConnection} to a language server to keep in sync.
-  // * `documentSyncKind` Whether to use Full (1) or Incremental (2) when sending changes.
+  // * `documentSync` The document syncing options.
   constructor(
     editor: TextEditor,
     connection: LanguageClientConnection,
-    documentSyncKind: number,
+    documentSync: TextDocumentSyncOptions,
     versions: Map<string, number>,
   ) {
     this._editor = editor;
@@ -160,7 +160,7 @@ export class TextEditorSyncAdapter {
     this._versions = versions;
     this._fakeDidChangeWatchedFiles = atom.project.onDidChangeFiles == null;
 
-    const changeTracking = this.setupChangeTracking(documentSyncKind);
+    const changeTracking = this.setupChangeTracking(documentSync);
     if (changeTracking != null) {
       this._disposable.add(changeTracking);
     }
@@ -179,8 +179,8 @@ export class TextEditorSyncAdapter {
 
   // The change tracking disposable listener that will ensure that changes are sent to the
   // language server as appropriate.
-  public setupChangeTracking(documentSyncKind: number): Disposable | null {
-    switch (documentSyncKind) {
+  public setupChangeTracking(documentSync: TextDocumentSyncOptions): Disposable | null {
+    switch (documentSync.change) {
       case TextDocumentSyncKind.Full:
         return this._editor.onDidChange(this.sendFullChanges.bind(this));
       case TextDocumentSyncKind.Incremental:
