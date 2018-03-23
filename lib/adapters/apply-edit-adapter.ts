@@ -57,7 +57,7 @@ export default class ApplyEditAdapter {
 
     const uris = Object.keys(changes);
 
-    // Keep checkpoints from all successfull buffer edits
+    // Keep checkpoints from all successful buffer edits
     const checkpoints: Array<{ buffer: TextBuffer, checkpoint: number }> = [];
 
     const promises = uris.map(async (uri) => {
