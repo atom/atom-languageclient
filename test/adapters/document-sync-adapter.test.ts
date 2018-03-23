@@ -48,27 +48,32 @@ describe('DocumentSyncAdapter', () => {
   });
 
   describe('constructor', () => {
-    function create(textDocumentSync: TextDocumentSyncKind | TextDocumentSyncOptions) {
-      return new DocumentSyncAdapter(null as any, textDocumentSync, () => false);
+    function create(textDocumentSync?: TextDocumentSyncKind | TextDocumentSyncOptions) {
+      return new DocumentSyncAdapter(null as any, () => false, textDocumentSync);
     }
 
-    it('sets _documentSyncKind correctly Incremental for v2 capabilities', () => {
-      const result = create(TextDocumentSyncKind.Incremental)._documentSyncKind;
+    it('sets _documentSync.change correctly Incremental for v2 capabilities', () => {
+      const result = create(TextDocumentSyncKind.Incremental)._documentSync.change;
       expect(result).equals(TextDocumentSyncKind.Incremental);
     });
 
-    it('sets _documentSyncKind correctly Full for v2 capabilities', () => {
-      const result = create(TextDocumentSyncKind.Full)._documentSyncKind;
+    it('sets _documentSync.change correctly Full for v2 capabilities', () => {
+      const result = create(TextDocumentSyncKind.Full)._documentSync.change;
       expect(result).equals(TextDocumentSyncKind.Full);
     });
 
-    it('sets _documentSyncKind correctly Incremental for v3 capabilities', () => {
-      const result = create({change: TextDocumentSyncKind.Incremental})._documentSyncKind;
+    it('sets _documentSync.change correctly Incremental for v3 capabilities', () => {
+      const result = create({change: TextDocumentSyncKind.Incremental})._documentSync.change;
       expect(result).equals(TextDocumentSyncKind.Incremental);
     });
 
-    it('sets _documentSyncKind correctly Full for v3 capabilities', () => {
-      const result = create({change: TextDocumentSyncKind.Full})._documentSyncKind;
+    it('sets _documentSync.change correctly Full for v3 capabilities', () => {
+      const result = create({change: TextDocumentSyncKind.Full})._documentSync.change;
+      expect(result).equals(TextDocumentSyncKind.Full);
+    });
+
+    it('sets _documentSync.change correctly Full for unset capabilities', () => {
+      const result = create()._documentSync.change;
       expect(result).equals(TextDocumentSyncKind.Full);
     });
   });

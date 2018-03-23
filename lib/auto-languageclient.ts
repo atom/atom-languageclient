@@ -398,8 +398,9 @@ export default class AutoLanguageClient {
       server.docSyncAdapter =
         new DocumentSyncAdapter(
           server.connection,
+          (editor) => this.shouldSyncForEditor(editor, server.projectPath),
           server.capabilities.textDocumentSync,
-          (editor) => this.shouldSyncForEditor(editor, server.projectPath));
+        );
       server.disposable.add(server.docSyncAdapter);
     }
 
