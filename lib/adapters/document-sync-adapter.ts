@@ -8,6 +8,7 @@ import {
   TextDocumentContentChangeEvent,
   VersionedTextDocumentIdentifier,
   ServerCapabilities,
+  DidSaveTextDocumentParams,
 } from '../languageclient';
 import ApplyEditAdapter from './apply-edit-adapter';
 import {
@@ -354,7 +355,13 @@ export class TextEditorSyncAdapter {
     if (!this._isPrimaryAdapter()) { return; }
 
     const uri = this.getEditorUri();
-    this._connection.didSaveTextDocument({textDocument: {uri, version: this._getVersion((uri))}});
+    const didSaveNotification = {
+      textDocument: {uri, version: this._getVersion((uri))},
+    } as DidSaveTextDocumentParams;
+    if (this._documentSync.save && this._documentSync.save.includeText) {
+      didSaveNotification.text = this._editor.getText();
+    }
+    this._connection.didSaveTextDocument(didSaveNotification);
     if (this._fakeDidChangeWatchedFiles) {
       this._connection.didChangeWatchedFiles({
         changes: [{uri, type: FileChangeType.Changed}],
