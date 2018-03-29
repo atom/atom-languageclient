@@ -8,6 +8,7 @@ import {
   TextDocumentContentChangeEvent,
   VersionedTextDocumentIdentifier,
   ServerCapabilities,
+  DidSaveTextDocumentParams,
 } from '../languageclient';
 import ApplyEditAdapter from './apply-edit-adapter';
 import {
@@ -143,6 +144,7 @@ export class TextEditorSyncAdapter {
   private _connection: LanguageClientConnection;
   private _fakeDidChangeWatchedFiles: boolean;
   private _versions: Map<string, number>;
+  private _documentSync: TextDocumentSyncOptions;
 
   // Public: Create a {TextEditorSyncAdapter} in sync with a given language server.
   //
@@ -159,6 +161,7 @@ export class TextEditorSyncAdapter {
     this._connection = connection;
     this._versions = versions;
     this._fakeDidChangeWatchedFiles = atom.project.onDidChangeFiles == null;
+    this._documentSync = documentSync;
 
     const changeTracking = this.setupChangeTracking(documentSync);
     if (changeTracking != null) {
@@ -172,14 +175,20 @@ export class TextEditorSyncAdapter {
     if (documentSync.willSaveWaitUntil) {
       this._disposable.add(editor.getBuffer().onWillSave(this.willSaveWaitUntil.bind(this)));
     }
+    // Send close notifications unless it's explicitly disabled
+    if (documentSync.openClose !== false) {
+      this._disposable.add(editor.onDidDestroy(this.didClose.bind(this)));
+    }
     this._disposable.add(
       editor.onDidSave(this.didSave.bind(this)),
-      editor.onDidDestroy(this.didClose.bind(this)),
       editor.onDidChangePath(this.didRename.bind(this)),
     );
 
     this._currentUri = this.getEditorUri();
-    this.didOpen();
+
+    if (documentSync.openClose !== false) {
+      this.didOpen();
+    }
   }
 
   // The change tracking disposable listener that will ensure that changes are sent to the
@@ -346,7 +355,13 @@ export class TextEditorSyncAdapter {
     if (!this._isPrimaryAdapter()) { return; }
 
     const uri = this.getEditorUri();
-    this._connection.didSaveTextDocument({textDocument: {uri, version: this._getVersion((uri))}});
+    const didSaveNotification = {
+      textDocument: {uri, version: this._getVersion((uri))},
+    } as DidSaveTextDocumentParams;
+    if (this._documentSync.save && this._documentSync.save.includeText) {
+      didSaveNotification.text = this._editor.getText();
+    }
+    this._connection.didSaveTextDocument(didSaveNotification);
     if (this._fakeDidChangeWatchedFiles) {
       this._connection.didChangeWatchedFiles({
         changes: [{uri, type: FileChangeType.Changed}],
@@ -363,9 +378,9 @@ export class TextEditorSyncAdapter {
       return; // Didn't previously have a name
     }
 
-    this._connection.didCloseTextDocument({
-      textDocument: {uri: oldUri},
-    });
+    if (this._documentSync.openClose !== false) {
+      this._connection.didCloseTextDocument({textDocument: {uri: oldUri}});
+    }
 
     if (this._fakeDidChangeWatchedFiles) {
       this._connection.didChangeWatchedFiles({
@@ -375,7 +390,9 @@ export class TextEditorSyncAdapter {
 
     // Send an equivalent open event for this editor, which will now use the new
     // file path.
-    this.didOpen();
+    if (this._documentSync.openClose !== false) {
+      this.didOpen();
+    }
   }
 
   // Public: Obtain the current {TextEditor} path and convert it to a Uri.
