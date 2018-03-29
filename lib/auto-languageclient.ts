@@ -437,7 +437,7 @@ export default class AutoLanguageClient {
   public provideAutocomplete(): AutocompleteProvider {
     return {
       selector: this.getGrammarScopes()
-        .map((g) => '.' + g)
+        .map((g) => g.includes('.') ? '.' + g : g)
         .join(', '),
       inclusionPriority: 1,
       suggestionPriority: 2,
