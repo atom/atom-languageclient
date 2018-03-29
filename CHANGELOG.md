@@ -1,3 +1,8 @@
+## v0.9.5
+
+- Respect server document sync capabilities #202
+- Tree-sitter grammars now work correctly with autocomplete-plus https://github.com/atom/autocomplete-plus/issues/962
+
 ## v0.9.4
 
 - Correctly handle multi-sequence symbols from autocomplete plus that could prevent triggering
