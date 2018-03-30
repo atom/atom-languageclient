@@ -1,6 +1,7 @@
 ## v0.9.5
 
 - Respect server document sync capabilities #202
+- Implementation of willSaveWaitUntil #193
 - Tree-sitter grammars now work correctly with autocomplete-plus https://github.com/atom/autocomplete-plus/issues/962
 
 ## v0.9.4
