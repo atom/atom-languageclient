@@ -18,6 +18,7 @@ import {
   TextEditEvent,
   TextEditor,
 } from 'atom';
+import Utils from '../utils';
 
 // Public: Synchronizes the documents between Atom and the language server by notifying
 // each end of changes, opening, closing and other events as well as sending and applying
@@ -339,12 +340,21 @@ export class TextEditorSyncAdapter {
 
     const buffer = this._editor.getBuffer();
     const uri = this.getEditorUri();
-    const edits = await this._connection.willSaveWaitUntilTextDocument({
-      textDocument: {uri},
-      reason: TextDocumentSaveReason.Manual,
+    return Utils.promiseWithTimeout(
+      3000, // 3 seconds timeout
+      this._connection.willSaveWaitUntilTextDocument({
+        textDocument: {uri},
+        reason: TextDocumentSaveReason.Manual,
+      }),
+    ).then((edits) => {
+      ApplyEditAdapter.applyEdits(buffer, Convert.convertLsTextEdits(edits));
+    }).catch((err) => {
+      atom.notifications.addError('On-save action failed', {
+        description: 'Failed to apply edits.',
+        detail: err.message,
+      });
+      return;
     });
-    // TODO: set a timeout on this and cancel if it takes too long
-    ApplyEditAdapter.applyEdits(buffer, Convert.convertLsTextEdits(edits));
   }
 
   // Called when the {TextEditor} saves and sends the 'didSaveTextDocument' notification to
