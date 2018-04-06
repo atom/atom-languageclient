@@ -400,6 +400,7 @@ export default class AutoLanguageClient {
           server.connection,
           (editor) => this.shouldSyncForEditor(editor, server.projectPath),
           server.capabilities.textDocumentSync,
+          this.busySignalService,
         );
       server.disposable.add(server.docSyncAdapter);
     }

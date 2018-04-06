@@ -19,6 +19,8 @@ import {
   TextEditor,
 } from 'atom';
 import Utils from '../utils';
+import { BusySignalService } from 'atom-ide';
+import * as path from 'path';
 
 // Public: Synchronizes the documents between Atom and the language server by notifying
 // each end of changes, opening, closing and other events as well as sending and applying
@@ -30,6 +32,7 @@ export default class DocumentSyncAdapter {
   private _editors: WeakMap<TextEditor, TextEditorSyncAdapter> = new WeakMap();
   private _connection: LanguageClientConnection;
   private _versions: Map<string, number> = new Map();
+  private _busySignalService?: BusySignalService;
 
   // Public: Determine whether this adapter can be used to adapt a language server
   // based on the serverCapabilities matrix textDocumentSync capability either being Full or
@@ -69,6 +72,7 @@ export default class DocumentSyncAdapter {
     connection: LanguageClientConnection,
     editorSelector: (editor: TextEditor) => boolean,
     documentSync?: TextDocumentSyncOptions | TextDocumentSyncKind,
+    busySignalService?: BusySignalService,
   ) {
     this._connection = connection;
     if (typeof documentSync === 'object') {
@@ -79,6 +83,7 @@ export default class DocumentSyncAdapter {
       };
     }
     this._editorSelector = editorSelector;
+    this._busySignalService = busySignalService;
     this._disposable.add(atom.textEditors.observe(this.observeTextEditor.bind(this)));
   }
 
@@ -117,7 +122,13 @@ export default class DocumentSyncAdapter {
   }
 
   private _handleNewEditor(editor: TextEditor): void {
-    const sync = new TextEditorSyncAdapter(editor, this._connection, this._documentSync, this._versions);
+    const sync = new TextEditorSyncAdapter(
+      editor,
+      this._connection,
+      this._documentSync,
+      this._versions,
+      this._busySignalService,
+    );
     this._editors.set(editor, sync);
     this._disposable.add(sync);
     this._disposable.add(
@@ -146,6 +157,7 @@ export class TextEditorSyncAdapter {
   private _fakeDidChangeWatchedFiles: boolean;
   private _versions: Map<string, number>;
   private _documentSync: TextDocumentSyncOptions;
+  private _busySignalService?: BusySignalService;
 
   // Public: Create a {TextEditorSyncAdapter} in sync with a given language server.
   //
@@ -157,12 +169,14 @@ export class TextEditorSyncAdapter {
     connection: LanguageClientConnection,
     documentSync: TextDocumentSyncOptions,
     versions: Map<string, number>,
+    busySignalService?: BusySignalService,
   ) {
     this._editor = editor;
     this._connection = connection;
     this._versions = versions;
     this._fakeDidChangeWatchedFiles = atom.project.onDidChangeFiles == null;
     this._documentSync = documentSync;
+    this._busySignalService = busySignalService;
 
     const changeTracking = this.setupChangeTracking(documentSync);
     if (changeTracking != null) {
@@ -340,8 +354,10 @@ export class TextEditorSyncAdapter {
 
     const buffer = this._editor.getBuffer();
     const uri = this.getEditorUri();
-    return Utils.promiseWithTimeout(
-      3000, // 3 seconds timeout
+    const title = this._editor.getLongTitle();
+
+    const applyEditsOrTimeout = Utils.promiseWithTimeout(
+      2500, // 2.5 seconds timeout
       this._connection.willSaveWaitUntilTextDocument({
         textDocument: {uri},
         reason: TextDocumentSaveReason.Manual,
@@ -350,11 +366,19 @@ export class TextEditorSyncAdapter {
       ApplyEditAdapter.applyEdits(buffer, Convert.convertLsTextEdits(edits));
     }).catch((err) => {
       atom.notifications.addError('On-save action failed', {
-        description: 'Failed to apply edits.',
+        description: `Failed to apply edits to ${title}`,
         detail: err.message,
       });
       return;
     });
+
+    const withBusySignal =
+      this._busySignalService &&
+      this._busySignalService.reportBusyWhile(
+        `Applying on-save edits for ${title}`,
+        () => applyEditsOrTimeout,
+      );
+    return withBusySignal || applyEditsOrTimeout;
   }
 
   // Called when the {TextEditor} saves and sends the 'didSaveTextDocument' notification to
