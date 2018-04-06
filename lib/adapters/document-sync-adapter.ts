@@ -363,7 +363,9 @@ export class TextEditorSyncAdapter {
         reason: TextDocumentSaveReason.Manual,
       }),
     ).then((edits) => {
+      const cursor = this._editor.getCursorBufferPosition();
       ApplyEditAdapter.applyEdits(buffer, Convert.convertLsTextEdits(edits));
+      this._editor.setCursorBufferPosition(cursor);
     }).catch((err) => {
       atom.notifications.addError('On-save action failed', {
         description: `Failed to apply edits to ${title}`,
