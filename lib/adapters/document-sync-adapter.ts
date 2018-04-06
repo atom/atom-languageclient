@@ -20,7 +20,6 @@ import {
 } from 'atom';
 import Utils from '../utils';
 import { BusySignalService } from 'atom-ide';
-import * as path from 'path';
 
 // Public: Synchronizes the documents between Atom and the language server by notifying
 // each end of changes, opening, closing and other events as well as sending and applying
