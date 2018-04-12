@@ -91,4 +91,21 @@ export default class Utils {
   public static assertUnreachable(_: never): never {
     return _;
   }
+
+  public static promiseWithTimeout<T>(ms: number, promise: Promise<T>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      // create a timeout to reject promise if not resolved
+      const timer = setTimeout(() => {
+        reject(new Error(`Timeout after ${ms}ms`));
+      }, ms);
+
+      promise.then((res) => {
+        clearTimeout(timer);
+        resolve(res);
+      }).catch((err) => {
+        clearTimeout(timer);
+        reject(err);
+      });
+    });
+  }
 }
