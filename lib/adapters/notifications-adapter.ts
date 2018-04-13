@@ -37,7 +37,7 @@ export default class NotificationsAdapter {
     name: string,
     projectPath: string,
   ): Promise<MessageActionItem | null> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const options: NotificationOptions = {
         dismissable: true,
         detail: `${name} ${projectPath}`,

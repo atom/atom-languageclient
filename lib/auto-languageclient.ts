@@ -53,27 +53,27 @@ export type ConnectionType = 'stdio' | 'socket' | 'ipc';
 // getServerName.
 export default class AutoLanguageClient {
   private _disposable = new CompositeDisposable();
-  private _serverManager: ServerManager;
-  private _consoleDelegate: atomIde.ConsoleService;
-  private _linterDelegate: linter.IndieDelegate;
-  private _signatureHelpRegistry: atomIde.SignatureHelpRegistry | null;
-  private _lastAutocompleteRequest: AutocompleteRequest;
-  private _isDeactivating: boolean;
+  private _serverManager!: ServerManager;
+  private _consoleDelegate?: atomIde.ConsoleService;
+  private _linterDelegate?: linter.IndieDelegate;
+  private _signatureHelpRegistry?: atomIde.SignatureHelpRegistry;
+  private _lastAutocompleteRequest?: AutocompleteRequest;
+  private _isDeactivating: boolean = false;
 
   // Available if consumeBusySignal is setup
-  protected busySignalService: atomIde.BusySignalService;
+  protected busySignalService!: atomIde.BusySignalService;
 
   protected processStdErr: string = '';
-  protected logger: Logger;
-  protected name: string;
-  protected socket: Socket;
+  protected logger!: Logger;
+  protected name!: string;
+  protected socket!: Socket;
 
   // Shared adapters that can take the RPC connection as required
-  protected autoComplete: AutocompleteAdapter;
-  protected datatip: DatatipAdapter;
-  protected definitions: DefinitionAdapter;
-  protected findReferences: FindReferencesAdapter;
-  protected outlineView: OutlineViewAdapter;
+  protected autoComplete?: AutocompleteAdapter;
+  protected datatip?: DatatipAdapter;
+  protected definitions?: DefinitionAdapter;
+  protected findReferences?: FindReferencesAdapter;
+  protected outlineView?: OutlineViewAdapter;
 
   // You must implement these so we know how to deal with your language and server
   // -------------------------------------------------------------------------
@@ -94,7 +94,7 @@ export default class AutoLanguageClient {
   }
 
   // Start your server process
-  protected startServerProcess(projectPath: string): LanguageServerProcess | Promise<LanguageServerProcess> {
+  protected startServerProcess(_projectPath: string): LanguageServerProcess | Promise<LanguageServerProcess> {
     throw Error('Must override startServerProcess to start language server process when extending AutoLanguageClient');
   }
 
@@ -192,10 +192,10 @@ export default class AutoLanguageClient {
   }
 
   // Early wire-up of listeners before initialize method is sent
-  protected preInitialization(connection: LanguageClientConnection): void {}
+  protected preInitialization(_connection: LanguageClientConnection): void {}
 
   // Late wire-up of listeners after initialize method has been sent
-  protected postInitialization(server: ActiveServer): void {}
+  protected postInitialization(_server: ActiveServer): void {}
 
   // Determine whether to use ipc, stdio or socket to connect to the server
   protected getConnectionType(): ConnectionType {
@@ -380,9 +380,9 @@ export default class AutoLanguageClient {
     }
 
     return rpc.createMessageConnection(reader, writer, {
-      log: (...args: any[]) => {},
-      warn: (...args: any[]) => {},
-      info: (...args: any[]) => {},
+      log: (..._args: any[]) => {},
+      warn: (..._args: any[]) => {},
+      info: (..._args: any[]) => {},
       error: (...args: any[]) => {
         this.logger.error(args);
       },
@@ -476,13 +476,13 @@ export default class AutoLanguageClient {
   }
 
   protected onDidConvertAutocomplete(
-    completionItem: ls.CompletionItem,
-    suggestion: AutocompleteSuggestion,
-    request: AutocompleteRequest,
+    _completionItem: ls.CompletionItem,
+    _suggestion: AutocompleteSuggestion,
+    _request: AutocompleteRequest,
   ): void {
   }
 
-  protected onDidInsertSuggestion(arg: AutocompleteDidInsert): void {}
+  protected onDidInsertSuggestion(_arg: AutocompleteDidInsert): void {}
 
   // Definitions via LS documentHighlight and gotoDefinition------------
   public provideDefinitions(): atomIde.DefinitionProvider {
@@ -673,7 +673,7 @@ export default class AutoLanguageClient {
       }
     }
     return new Disposable(() => {
-      this._signatureHelpRegistry = null;
+      this._signatureHelpRegistry = undefined;
     });
   }
 
@@ -687,7 +687,7 @@ export default class AutoLanguageClient {
    * @param filePath path of a file that has changed in the project path
    * @return false => message will not be sent to the language server
    */
-  protected filterChangeWatchedFiles(filePath: string): boolean {
+  protected filterChangeWatchedFiles(_filePath: string): boolean {
     return true;
   }
 
@@ -695,7 +695,7 @@ export default class AutoLanguageClient {
    * Called on language server stderr output.
    * @param stderr a chunk of stderr from a language server instance
    */
-  private handleServerStderr(stderr: string, projectPath: string) {
+  private handleServerStderr(stderr: string, _projectPath: string) {
     stderr.split('\n').filter((l) => l).forEach((line) => this.logger.warn(`stderr ${line}`));
   }
 }

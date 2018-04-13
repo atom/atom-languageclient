@@ -52,9 +52,9 @@ export class ConsoleLogger {
 }
 
 export class NullLogger {
-  public warn(...args: any[]): void {}
-  public error(...args: any[]): void {}
-  public info(...args: any[]): void {}
-  public log(...args: any[]): void {}
-  public debug(...args: any[]): void {}
+  public warn(..._args: any[]): void {}
+  public error(..._args: any[]): void {}
+  public info(..._args: any[]): void {}
+  public log(..._args: any[]): void {}
+  public debug(..._args: any[]): void {}
 }

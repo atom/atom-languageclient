@@ -7,8 +7,12 @@
         "declaration": true,
         "inlineSources": true,
         "inlineSourceMap": true,
-        "strictNullChecks": true,
+        "strict": true,
         "noImplicitAny": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
         "baseUrl": "./"
     },
     "include": [

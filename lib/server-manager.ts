@@ -103,7 +103,7 @@ export class ServerManager {
 
   private observeTextEditors(editor: TextEditor): void {
     // Track grammar changes for opened editors
-    const listener = editor.observeGrammar((grammar) => this._handleGrammarChange(editor));
+    const listener = editor.observeGrammar((_grammar) => this._handleGrammarChange(editor));
     this._disposable.add(editor.onDidDestroy(() => listener.dispose()));
     // Try to see if editor can have LS connected to it
     this._handleTextEditor(editor);
