@@ -50,7 +50,7 @@ declare module 'atom' {
   interface AutocompleteRequest {
     editor: TextEditor;
     bufferPosition: Point;
-    scopeDescriptor: string;
+    scopeDescriptor: ScopeDescriptor;
     prefix: string;
     activatedManually?: boolean;
   }

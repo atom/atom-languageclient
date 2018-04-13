@@ -35,7 +35,7 @@ describe('AutoCompleteAdapter', () => {
     editor: createFakeEditor(),
     bufferPosition: new Point(123, 456),
     prefix: 'lab',
-    scopeDescriptor: 'some.scope',
+    scopeDescriptor: { getScopesArray() { return ['some.scope']; } },
     activatedManually: true,
   };
 
@@ -163,7 +163,7 @@ describe('AutoCompleteAdapter', () => {
         Array.from(
           autoCompleteAdapter.completionItemsToSuggestions(completionList, request, (c, a, r) => {
             a.text = c.label + ' ok';
-            a.displayText = r.scopeDescriptor;
+            a.displayText = r.scopeDescriptor.getScopesArray()[0];
           }));
 
       expect(results.length).equals(4);
@@ -218,7 +218,7 @@ describe('AutoCompleteAdapter', () => {
         editor: createFakeEditor(),
         bufferPosition: new Point(123, 456),
         prefix: 'def',
-        scopeDescriptor: 'some.scope',
+        scopeDescriptor: { getScopesArray() { return ['some.scope']; } },
       };
       sinon.stub(autocompleteRequest.editor, 'getTextInBufferRange').returns('replacementPrefix');
       const result: any = { };
