@@ -16,8 +16,7 @@ export default class Utils {
    * Uses the non-word characters from the position's grammar scope.
    */
   public static getWordAtPosition(editor: TextEditor, position: Point): Range {
-    const scopeDescriptor = editor.scopeDescriptorForBufferPosition(position);
-    const nonWordCharacters = Utils.escapeRegExp(editor.getNonWordCharacters(scopeDescriptor));
+    const nonWordCharacters = Utils.escapeRegExp(editor.getNonWordCharacters(position));
     const range = Utils._getRegexpRangeAtPosition(
       editor.getBuffer(),
       position,
