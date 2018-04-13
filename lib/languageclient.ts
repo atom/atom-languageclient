@@ -8,6 +8,27 @@ import {
 
 export * from 'vscode-languageserver-protocol';
 
+export interface KnownNotifications {
+  'textDocument/publishDiagnostics': lsp.PublishDiagnosticsParams;
+  'telemetry/event': any;
+  'window/logMessage': lsp.LogMessageParams;
+  'window/showMessageRequest': lsp.ShowMessageRequestParams;
+  'window/showMessage': lsp.ShowMessageParams;
+  [custom: string]: object;
+}
+
+export interface KnownRequests {
+  'window/showMessageRequest':
+    [lsp.ShowMessageRequestParams, lsp.MessageActionItem | null];
+  'workspace/applyEdit':
+    [lsp.ApplyWorkspaceEditParams, lsp.ApplyWorkspaceEditResponse];
+}
+
+export type RequestCallback<T extends keyof KnownRequests> =
+  KnownRequests[T] extends [infer U, infer V] ?
+  (param: U) => Promise<V> :
+  never;
+
 // TypeScript wrapper around JSONRPC to implement Microsoft Language Server Protocol v3
 // https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
 export class LanguageClientConnection extends EventEmitter {
@@ -286,7 +307,7 @@ export class LanguageClientConnection extends EventEmitter {
   // navigate this document.
   public documentSymbol(
     params: lsp.DocumentSymbolParams,
-    cancellationToken?: jsonrpc.CancellationToken,
+    _cancellationToken?: jsonrpc.CancellationToken,
   ): Promise<lsp.SymbolInformation[]> {
     return this._sendRequest('textDocument/documentSymbol', params);
   }
@@ -394,14 +415,16 @@ export class LanguageClientConnection extends EventEmitter {
     return this._sendRequest('workspace/executeCommand', params);
   }
 
-  private _onRequest(type: {method: string}, callback: (obj: object) => Promise<any>): void {
+  private _onRequest<T extends keyof KnownRequests>(type: {method: T}, callback: RequestCallback<T>): void {
     this._rpc.onRequest(type.method, (value) => {
       this._log.debug(`rpc.onRequest ${type.method}`, value);
       return callback(value);
     });
   }
 
-  private _onNotification(type: {method: string}, callback: (obj: object) => void): void {
+  private _onNotification<T extends keyof KnownNotifications>(
+    type: {method: T}, callback: (obj: KnownNotifications[T]) => void,
+  ): void {
     this._rpc.onNotification(type.method, (value) => {
       this._log.debug(`rpc.onNotification ${type.method}`, value);
       callback(value);

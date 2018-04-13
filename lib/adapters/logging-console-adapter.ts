@@ -34,10 +34,6 @@ export default class LoggingConsoleAdapter {
     this._consoles.clear();
   }
 
-  private generateId(): string {
-    return new Date().toISOString();
-  }
-
   // Log a message using the Atom IDE UI Console API.
   //
   // * `params` The {LogMessageParams} received from the language server

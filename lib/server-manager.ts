@@ -62,7 +62,7 @@ export class ServerManager {
   private _startForEditor: (editor: TextEditor) => boolean;
   private _startServer: (projectPath: string) => Promise<ActiveServer>;
   private _changeWatchedFileFilter: (filePath: string) => boolean;
-  private _getBusySignalService: () => atomIde.BusySignalService | null;
+  private _getBusySignalService: () => atomIde.BusySignalService | undefined;
   private _languageServerName: string;
   private _isStarted = false;
 
@@ -71,7 +71,7 @@ export class ServerManager {
     logger: Logger,
     startForEditor: (editor: TextEditor) => boolean,
     changeWatchedFileFilter: (filePath: string) => boolean,
-    busySignalServiceGetter: () => atomIde.BusySignalService | null,
+    busySignalServiceGetter: () => atomIde.BusySignalService | undefined,
     languageServerName: string,
   ) {
     this._languageServerName = languageServerName;
@@ -103,7 +103,7 @@ export class ServerManager {
 
   private observeTextEditors(editor: TextEditor): void {
     // Track grammar changes for opened editors
-    const listener = editor.observeGrammar((grammar) => this._handleGrammarChange(editor));
+    const listener = editor.observeGrammar((_grammar) => this._handleGrammarChange(editor));
     this._disposable.add(editor.onDidDestroy(() => listener.dispose()));
     // Try to see if editor can have LS connected to it
     this._handleTextEditor(editor);

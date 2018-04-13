@@ -96,7 +96,7 @@ export default class DocumentSyncAdapter {
   //
   // * `editor` A {TextEditor} to consider for observation.
   public observeTextEditor(editor: TextEditor): void {
-    const listener = editor.observeGrammar((grammar) => this._handleGrammarChange(editor));
+    const listener = editor.observeGrammar((_grammar) => this._handleGrammarChange(editor));
     this._disposable.add(
       editor.onDidDestroy(() => {
         this._disposable.remove(listener);

@@ -29,7 +29,7 @@ export default class ApplyEditAdapter {
     try {
       // Sort edits in reverse order to prevent edit conflicts.
       edits.sort((edit1, edit2) => -edit1.oldRange.compare(edit2.oldRange));
-      edits.reduce((previous, current) => {
+      edits.reduce((previous: atomIde.TextEdit | null, current) => {
         ApplyEditAdapter.validateEdit(buffer, current, previous);
         buffer.setTextInRange(current.oldRange, current.newText);
         return current;
