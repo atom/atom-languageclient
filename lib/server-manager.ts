@@ -1,12 +1,7 @@
-import DocumentSyncAdapter from './adapters/document-sync-adapter';
-import LinterPushV2Adapter from './adapters/linter-push-v2-adapter';
-import LoggingConsoleAdapter from './adapters/logging-console-adapter';
-import SignatureHelpAdapter from './adapters/signature-help-adapter';
 import Convert from './convert';
 import * as path from 'path';
 import * as stream from 'stream';
 import * as ls from './languageclient';
-import * as atomIde from 'atom-ide';
 import { EventEmitter } from 'events';
 import { Logger } from './logger';
 import {
@@ -37,16 +32,15 @@ export interface ActiveServer {
   process: LanguageServerProcess;
   connection: ls.LanguageClientConnection;
   capabilities: ls.ServerCapabilities;
-  linterPushV2?: LinterPushV2Adapter;
-  loggingConsole?: LoggingConsoleAdapter;
-  docSyncAdapter?: DocumentSyncAdapter;
-  signatureHelpAdapter?: SignatureHelpAdapter;
 }
 
 interface RestartCounter {
   restarts: number;
   timerId: NodeJS.Timer;
 }
+
+export type ReportBusyWhile =
+  <T>(message: string, promiseGenerator: () => Promise<T>) => Promise<T>;
 
 // Manages the language server lifecycles and their associated objects necessary
 // for adapting them to Atom IDE.
@@ -57,30 +51,19 @@ export class ServerManager {
   private _stoppingServers: ActiveServer[] = [];
   private _disposable: CompositeDisposable = new CompositeDisposable();
   private _editorToServer: Map<TextEditor, ActiveServer> = new Map();
-  private _logger: Logger;
   private _normalizedProjectPaths: string[] = [];
-  private _startForEditor: (editor: TextEditor) => boolean;
-  private _startServer: (projectPath: string) => Promise<ActiveServer>;
-  private _changeWatchedFileFilter: (filePath: string) => boolean;
-  private _getBusySignalService: () => atomIde.BusySignalService | null;
-  private _languageServerName: string;
   private _isStarted = false;
 
   constructor(
-    startServer: (projectPath: string) => Promise<ActiveServer>,
-    logger: Logger,
-    startForEditor: (editor: TextEditor) => boolean,
-    changeWatchedFileFilter: (filePath: string) => boolean,
-    busySignalServiceGetter: () => atomIde.BusySignalService | null,
-    languageServerName: string,
+    private _startServer: (projectPath: string) => Promise<ActiveServer>,
+    private _logger: Logger,
+    private _startForEditor: (editor: TextEditor) => boolean,
+    private _changeWatchedFileFilter: (filePath: string) => boolean,
+    private _reportBusyWhile: ReportBusyWhile,
+    private _languageServerName: string,
+    private _unsupportedEditorGrammar: (server: ActiveServer, editor: TextEditor) => void,
   ) {
-    this._languageServerName = languageServerName;
-    this._startServer = startServer;
-    this._logger = logger;
-    this._startForEditor = startForEditor;
     this.updateNormalizedProjectPaths();
-    this._changeWatchedFileFilter = changeWatchedFileFilter;
-    this._getBusySignalService = busySignalServiceGetter;
   }
 
   public startListening(): void {
@@ -136,13 +119,7 @@ export class ServerManager {
       // If LS is running for the unsupported editor then disconnect the editor from LS and shut down LS if necessary
       if (server) {
         // LS is up for unsupported server
-        if (server.docSyncAdapter) {
-          const syncAdapter = server.docSyncAdapter.getEditorSyncAdapter(editor);
-          if (syncAdapter) {
-            // Immitate editor close to disconnect LS from the editor
-            syncAdapter.didClose();
-          }
-        }
+        this._unsupportedEditorGrammar(server, editor);
         // Remove editor from the cache
         this._editorToServer.delete(editor);
         // Shut down LS if it's used by any other editor
@@ -237,32 +214,29 @@ export class ServerManager {
   }
 
   public async stopServer(server: ActiveServer): Promise<void> {
-    const busySignalService = this._getBusySignalService();
-    const signal = busySignalService && busySignalService.reportBusy(
+    this._reportBusyWhile(
       `Stopping ${this._languageServerName} for ${path.basename(server.projectPath)}`,
-    );
-    try {
-      this._logger.debug(`Server stopping "${server.projectPath}"`);
-      // Immediately remove the server to prevent further usage.
-      // If we re-open the file after this point, we'll get a new server.
-      this._activeServers.splice(this._activeServers.indexOf(server), 1);
-      this._stoppingServers.push(server);
-      server.disposable.dispose();
-      if (server.connection.isConnected) {
-        await server.connection.shutdown();
-      }
-
-      for (const [editor, mappedServer] of this._editorToServer) {
-        if (mappedServer === server) {
-          this._editorToServer.delete(editor);
+      async () => {
+        this._logger.debug(`Server stopping "${server.projectPath}"`);
+        // Immediately remove the server to prevent further usage.
+        // If we re-open the file after this point, we'll get a new server.
+        this._activeServers.splice(this._activeServers.indexOf(server), 1);
+        this._stoppingServers.push(server);
+        server.disposable.dispose();
+        if (server.connection.isConnected) {
+          await server.connection.shutdown();
         }
-      }
 
-      this.exitServer(server);
-      this._stoppingServers.splice(this._stoppingServers.indexOf(server), 1);
-    } finally {
-      signal && signal.dispose();
-    }
+        for (const [editor, mappedServer] of this._editorToServer) {
+          if (mappedServer === server) {
+            this._editorToServer.delete(editor);
+          }
+        }
+
+        this.exitServer(server);
+        this._stoppingServers.splice(this._stoppingServers.indexOf(server), 1);
+      },
+    );
   }
 
   public exitServer(server: ActiveServer): void {
