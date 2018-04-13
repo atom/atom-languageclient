@@ -19,7 +19,6 @@ import {
   TextEditor,
 } from 'atom';
 import Utils from '../utils';
-import { BusySignalService } from 'atom-ide';
 
 // Public: Synchronizes the documents between Atom and the language server by notifying
 // each end of changes, opening, closing and other events as well as sending and applying
@@ -31,7 +30,6 @@ export default class DocumentSyncAdapter {
   private _editors: WeakMap<TextEditor, TextEditorSyncAdapter> = new WeakMap();
   private _connection: LanguageClientConnection;
   private _versions: Map<string, number> = new Map();
-  private _busySignalService?: BusySignalService;
 
   // Public: Determine whether this adapter can be used to adapt a language server
   // based on the serverCapabilities matrix textDocumentSync capability either being Full or
@@ -71,7 +69,7 @@ export default class DocumentSyncAdapter {
     connection: LanguageClientConnection,
     editorSelector: (editor: TextEditor) => boolean,
     documentSync?: TextDocumentSyncOptions | TextDocumentSyncKind,
-    busySignalService?: BusySignalService,
+    private _reportBusyWhile?: <T>(message: string, promiseGenerator: () => Promise<T>) => Promise<T>,
   ) {
     this._connection = connection;
     if (typeof documentSync === 'object') {
@@ -82,7 +80,6 @@ export default class DocumentSyncAdapter {
       };
     }
     this._editorSelector = editorSelector;
-    this._busySignalService = busySignalService;
     this._disposable.add(atom.textEditors.observe(this.observeTextEditor.bind(this)));
   }
 
@@ -126,7 +123,7 @@ export default class DocumentSyncAdapter {
       this._connection,
       this._documentSync,
       this._versions,
-      this._busySignalService,
+      this._reportBusyWhile,
     );
     this._editors.set(editor, sync);
     this._disposable.add(sync);
@@ -156,7 +153,6 @@ export class TextEditorSyncAdapter {
   private _fakeDidChangeWatchedFiles: boolean;
   private _versions: Map<string, number>;
   private _documentSync: TextDocumentSyncOptions;
-  private _busySignalService?: BusySignalService;
 
   // Public: Create a {TextEditorSyncAdapter} in sync with a given language server.
   //
@@ -168,14 +164,13 @@ export class TextEditorSyncAdapter {
     connection: LanguageClientConnection,
     documentSync: TextDocumentSyncOptions,
     versions: Map<string, number>,
-    busySignalService?: BusySignalService,
+    private _reportBusyWhile?: <T>(message: string, promiseGenerator: () => Promise<T>) => Promise<T>,
   ) {
     this._editor = editor;
     this._connection = connection;
     this._versions = versions;
     this._fakeDidChangeWatchedFiles = atom.project.onDidChangeFiles == null;
     this._documentSync = documentSync;
-    this._busySignalService = busySignalService;
 
     const changeTracking = this.setupChangeTracking(documentSync);
     if (changeTracking != null) {
@@ -374,8 +369,8 @@ export class TextEditorSyncAdapter {
     });
 
     const withBusySignal =
-      this._busySignalService &&
-      this._busySignalService.reportBusyWhile(
+      this._reportBusyWhile &&
+      this._reportBusyWhile(
         `Applying on-save edits for ${title}`,
         () => applyEditsOrTimeout,
       );

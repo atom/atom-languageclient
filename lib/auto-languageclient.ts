@@ -101,7 +101,7 @@ export default class AutoLanguageClient extends BaseLanguageClient {
           server.connection,
           (editor) => this.shouldSyncForEditor(editor, server.projectPath),
           server.capabilities.textDocumentSync,
-          this.busySignalService,
+          this.reportBusyWhile.bind(this),
         );
       server.disposable.add(docSyncAdapter);
     }
