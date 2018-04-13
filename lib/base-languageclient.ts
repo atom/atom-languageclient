@@ -59,9 +59,6 @@ export default abstract class BaseLanguageClient {
   // Report busy status
   protected abstract reportBusyWhile<T>(message: string, promiseGenerator: () => Promise<T>): Promise<T>;
 
-  // Handle editor switching to unsupported grammar
-  protected abstract unsupportedEditorGrammar(server: ActiveServer, editor: TextEditor): void;
-
   // You might want to override these for different behavior
   // ---------------------------------------------------------------------------
 
@@ -204,7 +201,6 @@ export default abstract class BaseLanguageClient {
       (filepath) => this.filterChangeWatchedFiles(filepath),
       this.reportBusyWhile.bind(this),
       this.getServerName(),
-      this.unsupportedEditorGrammar.bind(this),
     );
     this._serverManager.startListening();
     process.on('exit', () => this.exitCleanup.bind(this));

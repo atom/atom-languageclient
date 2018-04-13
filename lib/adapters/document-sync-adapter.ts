@@ -111,6 +111,7 @@ export default class DocumentSyncAdapter {
     if (sync != null && !this._editorSelector(editor)) {
       this._editors.delete(editor);
       this._disposable.remove(sync);
+      sync.didClose();
       sync.dispose();
     } else if (sync == null && this._editorSelector(editor)) {
       this._handleNewEditor(editor);

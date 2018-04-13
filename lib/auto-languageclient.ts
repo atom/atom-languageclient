@@ -38,7 +38,6 @@ export type ConnectionType = 'stdio' | 'socket' | 'ipc';
 export interface ServerAdapters {
   linterPushV2: LinterPushV2Adapter;
   loggingConsole: LoggingConsoleAdapter;
-  docSyncAdapter?: DocumentSyncAdapter;
   signatureHelpAdapter?: SignatureHelpAdapter;
 }
 
@@ -94,16 +93,13 @@ export default class AutoLanguageClient extends BaseLanguageClient {
     ApplyEditAdapter.attach(server.connection);
     NotificationsAdapter.attach(server.connection, this.name, server.projectPath);
 
-    let docSyncAdapter;
     if (DocumentSyncAdapter.canAdapt(server.capabilities)) {
-      docSyncAdapter =
-        new DocumentSyncAdapter(
-          server.connection,
-          (editor) => this.shouldSyncForEditor(editor, server.projectPath),
-          server.capabilities.textDocumentSync,
-          this.reportBusyWhile.bind(this),
-        );
-      server.disposable.add(docSyncAdapter);
+      server.disposable.add(new DocumentSyncAdapter(
+        server.connection,
+        (editor) => this.shouldSyncForEditor(editor, server.projectPath),
+        server.capabilities.textDocumentSync,
+        this.reportBusyWhile.bind(this),
+      ));
     }
 
     const linterPushV2 = new LinterPushV2Adapter(server.connection);
@@ -128,7 +124,7 @@ export default class AutoLanguageClient extends BaseLanguageClient {
     }
 
     this._serverAdapters.set(server, {
-      docSyncAdapter, linterPushV2, loggingConsole, signatureHelpAdapter,
+      linterPushV2, loggingConsole, signatureHelpAdapter,
     });
   }
 
@@ -138,17 +134,6 @@ export default class AutoLanguageClient extends BaseLanguageClient {
     } else {
       this.logger.info(message);
       return promiseGenerator();
-    }
-  }
-
-  protected unsupportedEditorGrammar(server: ActiveServer, editor: TextEditor): void {
-    const adapter = this.getServerAdapter(server, 'docSyncAdapter');
-    if (adapter) {
-      const syncAdapter = adapter.getEditorSyncAdapter(editor);
-      if (syncAdapter) {
-        // Immitate editor close to disconnect LS from the editor
-        syncAdapter.didClose();
-      }
     }
   }
 

@@ -61,7 +61,6 @@ export class ServerManager {
     private _changeWatchedFileFilter: (filePath: string) => boolean,
     private _reportBusyWhile: ReportBusyWhile,
     private _languageServerName: string,
-    private _unsupportedEditorGrammar: (server: ActiveServer, editor: TextEditor) => void,
   ) {
     this.updateNormalizedProjectPaths();
   }
@@ -118,8 +117,6 @@ export class ServerManager {
       const server = this._editorToServer.get(editor);
       // If LS is running for the unsupported editor then disconnect the editor from LS and shut down LS if necessary
       if (server) {
-        // LS is up for unsupported server
-        this._unsupportedEditorGrammar(server, editor);
         // Remove editor from the cache
         this._editorToServer.delete(editor);
         // Shut down LS if it's used by any other editor
