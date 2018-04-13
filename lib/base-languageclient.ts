@@ -375,7 +375,7 @@ export default abstract class BaseLanguageClient {
    * Called on language server stderr output.
    * @param stderr a chunk of stderr from a language server instance
    */
-  private handleServerStderr(stderr: string, _projectPath: string) {
+  protected handleServerStderr(stderr: string, _projectPath: string) {
     stderr.split('\n').filter((l) => l).forEach((line) => this.logger.warn(`stderr ${line}`));
   }
 }
