@@ -80,7 +80,7 @@ export default class AutocompleteAdapter {
     let suggestionMap = null;
 
     // Do we have complete cached suggestions that are still valid for this request
-    if (cache && !cache.isIncomplete && cache.triggerChar === triggerChar && cache.triggerPoint.isEqual(triggerPoint)) {
+    if (cache && !cache.isIncomplete && triggerChar !== '' && cache.triggerChar === triggerChar && cache.triggerPoint.isEqual(triggerPoint)) {
       suggestionMap = cache.suggestionMap;
     } else {
       // Our cached suggestions can't be used so obtain new ones from the language server
