@@ -120,6 +120,7 @@ function addNotificationForMessage(
     const noteOptions = note.getOptions && note.getOptions() || {};
     return !noteDismissed &&
       note.getType() === messageTypeToString(messageType) &&
+      note.getMessage() === message &&
       noteOptions.detail === options.detail;
   }
   if (atom.notifications.getNotifications().some(isDuplicate)) {
