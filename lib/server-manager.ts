@@ -1,4 +1,3 @@
-import DocumentSyncAdapter from './adapters/document-sync-adapter';
 import LinterPushV2Adapter from './adapters/linter-push-v2-adapter';
 import LoggingConsoleAdapter from './adapters/logging-console-adapter';
 import SignatureHelpAdapter from './adapters/signature-help-adapter';
@@ -39,7 +38,6 @@ export interface ActiveServer {
   capabilities: ls.ServerCapabilities;
   linterPushV2?: LinterPushV2Adapter;
   loggingConsole?: LoggingConsoleAdapter;
-  docSyncAdapter?: DocumentSyncAdapter;
   signatureHelpAdapter?: SignatureHelpAdapter;
 }
 
@@ -135,14 +133,6 @@ export class ServerManager {
       const server = this._editorToServer.get(editor);
       // If LS is running for the unsupported editor then disconnect the editor from LS and shut down LS if necessary
       if (server) {
-        // LS is up for unsupported server
-        if (server.docSyncAdapter) {
-          const syncAdapter = server.docSyncAdapter.getEditorSyncAdapter(editor);
-          if (syncAdapter) {
-            // Immitate editor close to disconnect LS from the editor
-            syncAdapter.didClose();
-          }
-        }
         // Remove editor from the cache
         this._editorToServer.delete(editor);
         // Shut down LS if it's used by any other editor

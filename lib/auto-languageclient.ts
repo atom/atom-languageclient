@@ -396,14 +396,14 @@ export default class AutoLanguageClient {
     NotificationsAdapter.attach(server.connection, this.name, server.projectPath);
 
     if (DocumentSyncAdapter.canAdapt(server.capabilities)) {
-      server.docSyncAdapter =
+      const docSyncAdapter =
         new DocumentSyncAdapter(
           server.connection,
           (editor) => this.shouldSyncForEditor(editor, server.projectPath),
           server.capabilities.textDocumentSync,
           this.busySignalService,
         );
-      server.disposable.add(server.docSyncAdapter);
+      server.disposable.add(docSyncAdapter);
     }
 
     server.linterPushV2 = new LinterPushV2Adapter(server.connection);
