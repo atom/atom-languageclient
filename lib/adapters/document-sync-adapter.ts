@@ -25,13 +25,10 @@ import { BusySignalService } from 'atom-ide';
 // each end of changes, opening, closing and other events as well as sending and applying
 // changes either in whole or in part depending on what the language server supports.
 export default class DocumentSyncAdapter {
-  private _editorSelector: (editor: TextEditor) => boolean;
   private _disposable = new CompositeDisposable();
   public _documentSync: TextDocumentSyncOptions;
   private _editors: WeakMap<TextEditor, TextEditorSyncAdapter> = new WeakMap();
-  private _connection: LanguageClientConnection;
   private _versions: Map<string, number> = new Map();
-  private _busySignalService?: BusySignalService;
 
   // Public: Determine whether this adapter can be used to adapt a language server
   // based on the serverCapabilities matrix textDocumentSync capability either being Full or
@@ -68,12 +65,11 @@ export default class DocumentSyncAdapter {
   // * `editorSelector` A predicate function that takes a {TextEditor} and returns a {boolean}
   //                    indicating whether this adapter should care about the contents of the editor.
   constructor(
-    connection: LanguageClientConnection,
-    editorSelector: (editor: TextEditor) => boolean,
+    private _connection: LanguageClientConnection,
+    private _editorSelector: (editor: TextEditor) => boolean,
     documentSync?: TextDocumentSyncOptions | TextDocumentSyncKind,
-    busySignalService?: BusySignalService,
+    private _busySignalService?: BusySignalService,
   ) {
-    this._connection = connection;
     if (typeof documentSync === 'object') {
       this._documentSync = documentSync;
     } else {
@@ -81,8 +77,6 @@ export default class DocumentSyncAdapter {
         change: documentSync || TextDocumentSyncKind.Full,
       };
     }
-    this._editorSelector = editorSelector;
-    this._busySignalService = busySignalService;
     this._disposable.add(atom.textEditors.observe(this.observeTextEditor.bind(this)));
   }
 
