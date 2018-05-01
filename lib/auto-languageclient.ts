@@ -19,7 +19,7 @@ import LoggingConsoleAdapter from './adapters/logging-console-adapter';
 import NotificationsAdapter from './adapters/notifications-adapter';
 import OutlineViewAdapter from './adapters/outline-view-adapter';
 import SignatureHelpAdapter from './adapters/signature-help-adapter';
-import Utils, { ReportBusyWhile } from './utils';
+import * as Utils from './utils';
 import { Socket } from 'net';
 import { LanguageClientConnection } from './languageclient';
 import {
@@ -716,7 +716,7 @@ export default class AutoLanguageClient {
     return adapters && adapters[adapter];
   }
 
-  protected reportBusyWhile: ReportBusyWhile = async (title, f) => {
+  protected reportBusyWhile: Utils.ReportBusyWhile = async (title, f) => {
     if (this.busySignalService) {
       return this.busySignalService.reportBusyWhile(title, f);
     } else {
@@ -724,7 +724,7 @@ export default class AutoLanguageClient {
     }
   }
 
-  protected reportBusyWhileDefault: ReportBusyWhile = async (title, f) => {
+  protected reportBusyWhileDefault: Utils.ReportBusyWhile = async (title, f) => {
     this.logger.info(`[Started] ${title}`);
     let res;
     try {

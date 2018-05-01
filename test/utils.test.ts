@@ -1,4 +1,4 @@
-import Utils from '../lib/utils';
+import * as Utils from '../lib/utils';
 import { createFakeEditor } from './helpers';
 import { expect } from 'chai';
 import { Point } from 'atom';

@@ -1,5 +1,5 @@
 import Convert from '../convert';
-import Utils from '../utils';
+import * as Utils from '../utils';
 import { CancellationTokenSource } from 'vscode-jsonrpc';
 import { ActiveServer } from '../server-manager';
 import { filter } from 'fuzzaldrin-plus';

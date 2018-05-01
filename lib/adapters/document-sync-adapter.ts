@@ -18,7 +18,7 @@ import {
   TextEditEvent,
   TextEditor,
 } from 'atom';
-import Utils, { ReportBusyWhile } from '../utils';
+import * as Utils from '../utils';
 
 // Public: Synchronizes the documents between Atom and the language server by notifying
 // each end of changes, opening, closing and other events as well as sending and applying
@@ -67,7 +67,7 @@ export default class DocumentSyncAdapter {
     private _connection: LanguageClientConnection,
     private _editorSelector: (editor: TextEditor) => boolean,
     documentSync: TextDocumentSyncOptions | TextDocumentSyncKind | undefined,
-    private _reportBusyWhile: ReportBusyWhile,
+    private _reportBusyWhile: Utils.ReportBusyWhile,
   ) {
     if (typeof documentSync === 'object') {
       this._documentSync = documentSync;
@@ -157,7 +157,7 @@ export class TextEditorSyncAdapter {
     private _connection: LanguageClientConnection,
     private _documentSync: TextDocumentSyncOptions,
     private _versions: Map<string, number>,
-    private _reportBusyWhile: ReportBusyWhile,
+    private _reportBusyWhile: Utils.ReportBusyWhile,
   ) {
     this._fakeDidChangeWatchedFiles = atom.project.onDidChangeFiles == null;
 
