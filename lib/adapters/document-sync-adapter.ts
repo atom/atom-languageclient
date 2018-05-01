@@ -145,13 +145,8 @@ export default class DocumentSyncAdapter {
 // Public: Keep a single {TextEditor} in sync with a given language server.
 export class TextEditorSyncAdapter {
   private _disposable = new CompositeDisposable();
-  private _editor: TextEditor;
   private _currentUri: string;
-  private _connection: LanguageClientConnection;
   private _fakeDidChangeWatchedFiles: boolean;
-  private _versions: Map<string, number>;
-  private _documentSync: TextDocumentSyncOptions;
-  private _busySignalService?: BusySignalService;
 
   // Public: Create a {TextEditorSyncAdapter} in sync with a given language server.
   //
@@ -159,43 +154,38 @@ export class TextEditorSyncAdapter {
   // * `connection` A {LanguageClientConnection} to a language server to keep in sync.
   // * `documentSync` The document syncing options.
   constructor(
-    editor: TextEditor,
-    connection: LanguageClientConnection,
-    documentSync: TextDocumentSyncOptions,
-    versions: Map<string, number>,
-    busySignalService?: BusySignalService,
+    private _editor: TextEditor,
+    private _connection: LanguageClientConnection,
+    private _documentSync: TextDocumentSyncOptions,
+    private _versions: Map<string, number>,
+    private _busySignalService?: BusySignalService,
   ) {
-    this._editor = editor;
-    this._connection = connection;
-    this._versions = versions;
     this._fakeDidChangeWatchedFiles = atom.project.onDidChangeFiles == null;
-    this._documentSync = documentSync;
-    this._busySignalService = busySignalService;
 
-    const changeTracking = this.setupChangeTracking(documentSync);
+    const changeTracking = this.setupChangeTracking(_documentSync);
     if (changeTracking != null) {
       this._disposable.add(changeTracking);
     }
 
     // These handlers are attached only if server supports them
-    if (documentSync.willSave) {
-      this._disposable.add(editor.getBuffer().onWillSave(this.willSave.bind(this)));
+    if (_documentSync.willSave) {
+      this._disposable.add(_editor.getBuffer().onWillSave(this.willSave.bind(this)));
     }
-    if (documentSync.willSaveWaitUntil) {
-      this._disposable.add(editor.getBuffer().onWillSave(this.willSaveWaitUntil.bind(this)));
+    if (_documentSync.willSaveWaitUntil) {
+      this._disposable.add(_editor.getBuffer().onWillSave(this.willSaveWaitUntil.bind(this)));
     }
     // Send close notifications unless it's explicitly disabled
-    if (documentSync.openClose !== false) {
-      this._disposable.add(editor.onDidDestroy(this.didClose.bind(this)));
+    if (_documentSync.openClose !== false) {
+      this._disposable.add(_editor.onDidDestroy(this.didClose.bind(this)));
     }
     this._disposable.add(
-      editor.onDidSave(this.didSave.bind(this)),
-      editor.onDidChangePath(this.didRename.bind(this)),
+      _editor.onDidSave(this.didSave.bind(this)),
+      _editor.onDidChangePath(this.didRename.bind(this)),
     );
 
     this._currentUri = this.getEditorUri();
 
-    if (documentSync.openClose !== false) {
+    if (_documentSync.openClose !== false) {
       this.didOpen();
     }
   }
