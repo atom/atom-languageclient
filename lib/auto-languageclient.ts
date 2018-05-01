@@ -47,6 +47,12 @@ import {
 export { ActiveServer, LanguageClientConnection, LanguageServerProcess };
 export type ConnectionType = 'stdio' | 'socket' | 'ipc';
 
+export interface ServerAdapters {
+  linterPushV2: LinterPushV2Adapter;
+  loggingConsole: LoggingConsoleAdapter;
+  signatureHelpAdapter?: SignatureHelpAdapter;
+}
+
 // Public: AutoLanguageClient provides a simple way to have all the supported
 // Atom-IDE services wired up entirely for you by just subclassing it and
 // implementing startServerProcess/getGrammarScopes/getLanguageName and
@@ -59,6 +65,7 @@ export default class AutoLanguageClient {
   private _signatureHelpRegistry?: atomIde.SignatureHelpRegistry;
   private _lastAutocompleteRequest?: AutocompleteRequest;
   private _isDeactivating: boolean = false;
+  private _serverAdapters = new WeakMap<ActiveServer, ServerAdapters>();
 
   // Available if consumeBusySignal is setup
   protected busySignalService?: atomIde.BusySignalService;
@@ -406,25 +413,30 @@ export default class AutoLanguageClient {
       server.disposable.add(docSyncAdapter);
     }
 
-    server.linterPushV2 = new LinterPushV2Adapter(server.connection);
+    const linterPushV2 = new LinterPushV2Adapter(server.connection);
     if (this._linterDelegate != null) {
-      server.linterPushV2.attach(this._linterDelegate);
+      linterPushV2.attach(this._linterDelegate);
     }
-    server.disposable.add(server.linterPushV2);
+    server.disposable.add(linterPushV2);
 
-    server.loggingConsole = new LoggingConsoleAdapter(server.connection);
+    const loggingConsole = new LoggingConsoleAdapter(server.connection);
     if (this._consoleDelegate != null) {
-      server.loggingConsole.attach(this._consoleDelegate({ id: this.name, name: 'abc' }));
+      loggingConsole.attach(this._consoleDelegate({ id: this.name, name: 'abc' }));
     }
-    server.disposable.add(server.loggingConsole);
+    server.disposable.add(loggingConsole);
 
+    let signatureHelpAdapter: SignatureHelpAdapter | undefined;
     if (SignatureHelpAdapter.canAdapt(server.capabilities)) {
-      server.signatureHelpAdapter = new SignatureHelpAdapter(server, this.getGrammarScopes());
+      signatureHelpAdapter = new SignatureHelpAdapter(server, this.getGrammarScopes());
       if (this._signatureHelpRegistry != null) {
-        server.signatureHelpAdapter.attach(this._signatureHelpRegistry);
+        signatureHelpAdapter.attach(this._signatureHelpRegistry);
       }
-      server.disposable.add(server.signatureHelpAdapter);
+      server.disposable.add(signatureHelpAdapter);
     }
+
+    this._serverAdapters.set(server, {
+      linterPushV2, loggingConsole, signatureHelpAdapter,
+    });
   }
 
   public shouldSyncForEditor(editor: TextEditor, projectPath: string): boolean {
@@ -539,8 +551,9 @@ export default class AutoLanguageClient {
     }
 
     for (const server of this._serverManager.getActiveServers()) {
-      if (server.linterPushV2 != null) {
-        server.linterPushV2.attach(this._linterDelegate);
+      const linterPushV2 = this.getServerAdapter(server, 'linterPushV2');
+      if (linterPushV2 != null) {
+        linterPushV2.attach(this._linterDelegate);
       }
     }
   }
@@ -593,10 +606,10 @@ export default class AutoLanguageClient {
     this._consoleDelegate = createConsole;
 
     for (const server of this._serverManager.getActiveServers()) {
-      if (server.loggingConsole == null) {
-        server.loggingConsole = new LoggingConsoleAdapter(server.connection);
+      const loggingConsole = this.getServerAdapter(server, 'loggingConsole');
+      if (loggingConsole) {
+        loggingConsole.attach(this._consoleDelegate({ id: this.name, name: 'abc' }));
       }
-      server.loggingConsole.attach(this._consoleDelegate({ id: this.name, name: 'abc' }));
     }
 
     // No way of detaching from client connections today
@@ -659,7 +672,7 @@ export default class AutoLanguageClient {
     return CodeActionAdapter.getCodeActions(
       server.connection,
       server.capabilities,
-      server.linterPushV2,
+      this.getServerAdapter(server, 'linterPushV2'),
       editor,
       range,
       diagnostics,
@@ -669,8 +682,9 @@ export default class AutoLanguageClient {
   public consumeSignatureHelp(registry: atomIde.SignatureHelpRegistry): Disposable {
     this._signatureHelpRegistry = registry;
     for (const server of this._serverManager.getActiveServers()) {
-      if (server.signatureHelpAdapter != null) {
-        server.signatureHelpAdapter.attach(registry);
+      const signatureHelpAdapter = this.getServerAdapter(server, 'signatureHelpAdapter');
+      if (signatureHelpAdapter != null) {
+        signatureHelpAdapter.attach(registry);
       }
     }
     return new Disposable(() => {
@@ -698,5 +712,12 @@ export default class AutoLanguageClient {
    */
   protected handleServerStderr(stderr: string, _projectPath: string) {
     stderr.split('\n').filter((l) => l).forEach((line) => this.logger.warn(`stderr ${line}`));
+  }
+
+  private getServerAdapter<T extends keyof ServerAdapters>(
+    server: ActiveServer, adapter: T,
+  ): ServerAdapters[T] | undefined {
+    const adapters = this._serverAdapters.get(server);
+    return adapters && adapters[adapter];
   }
 }

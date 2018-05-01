@@ -1,6 +1,3 @@
-import LinterPushV2Adapter from './adapters/linter-push-v2-adapter';
-import LoggingConsoleAdapter from './adapters/logging-console-adapter';
-import SignatureHelpAdapter from './adapters/signature-help-adapter';
 import Convert from './convert';
 import * as path from 'path';
 import * as stream from 'stream';
@@ -36,9 +33,6 @@ export interface ActiveServer {
   process: LanguageServerProcess;
   connection: ls.LanguageClientConnection;
   capabilities: ls.ServerCapabilities;
-  linterPushV2?: LinterPushV2Adapter;
-  loggingConsole?: LoggingConsoleAdapter;
-  signatureHelpAdapter?: SignatureHelpAdapter;
 }
 
 interface RestartCounter {
