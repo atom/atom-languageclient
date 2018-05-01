@@ -49,30 +49,18 @@ export class ServerManager {
   private _stoppingServers: ActiveServer[] = [];
   private _disposable: CompositeDisposable = new CompositeDisposable();
   private _editorToServer: Map<TextEditor, ActiveServer> = new Map();
-  private _logger: Logger;
   private _normalizedProjectPaths: string[] = [];
-  private _startForEditor: (editor: TextEditor) => boolean;
-  private _startServer: (projectPath: string) => Promise<ActiveServer>;
-  private _changeWatchedFileFilter: (filePath: string) => boolean;
-  private _getBusySignalService: () => atomIde.BusySignalService | undefined;
-  private _languageServerName: string;
   private _isStarted = false;
 
   constructor(
-    startServer: (projectPath: string) => Promise<ActiveServer>,
-    logger: Logger,
-    startForEditor: (editor: TextEditor) => boolean,
-    changeWatchedFileFilter: (filePath: string) => boolean,
-    busySignalServiceGetter: () => atomIde.BusySignalService | undefined,
-    languageServerName: string,
+    private _startServer: (projectPath: string) => Promise<ActiveServer>,
+    private _logger: Logger,
+    private _startForEditor: (editor: TextEditor) => boolean,
+    private _changeWatchedFileFilter: (filePath: string) => boolean,
+    private _getBusySignalService: () => atomIde.BusySignalService | undefined,
+    private _languageServerName: string,
   ) {
-    this._languageServerName = languageServerName;
-    this._startServer = startServer;
-    this._logger = logger;
-    this._startForEditor = startForEditor;
     this.updateNormalizedProjectPaths();
-    this._changeWatchedFileFilter = changeWatchedFileFilter;
-    this._getBusySignalService = busySignalServiceGetter;
   }
 
   public startListening(): void {
