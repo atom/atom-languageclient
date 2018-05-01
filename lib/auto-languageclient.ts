@@ -52,7 +52,7 @@ export type ConnectionType = 'stdio' | 'socket' | 'ipc';
 // implementing startServerProcess/getGrammarScopes/getLanguageName and
 // getServerName.
 export default class AutoLanguageClient {
-  private _disposable = new CompositeDisposable();
+  private _disposable!: CompositeDisposable;
   private _serverManager!: ServerManager;
   private _consoleDelegate?: atomIde.ConsoleService;
   private _linterDelegate?: linter.IndieDelegate;
@@ -231,6 +231,7 @@ export default class AutoLanguageClient {
 
   // Activate does very little for perf reasons - hooks in via ServerManager for later 'activation'
   public activate(): void {
+    this._disposable = new CompositeDisposable();
     this.name = `${this.getLanguageName()} (${this.getServerName()})`;
     this.logger = this.getLogger();
     this._serverManager = new ServerManager(
