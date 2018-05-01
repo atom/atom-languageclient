@@ -6,7 +6,7 @@ import { EventEmitter } from 'events';
 import { Logger } from './logger';
 import {
   CompositeDisposable,
-  ProjectFileEvent,
+  FilesystemChangeEvent,
   TextEditor,
 } from 'atom';
 import { ReportBusyWhile } from './utils';
@@ -277,7 +277,7 @@ export class ServerManager {
     this.updateNormalizedProjectPaths();
   }
 
-  public projectFilesChanged(fileEvents: ProjectFileEvent[]): void {
+  public projectFilesChanged(fileEvents: FilesystemChangeEvent): void {
     if (this._activeServers.length === 0) {
       return;
     }
@@ -289,7 +289,7 @@ export class ServerManager {
           changes.push(Convert.atomFileEventToLSFileEvents(fileEvent)[0]);
         }
         if (
-          fileEvent.oldPath &&
+          fileEvent.action === 'renamed' &&
           fileEvent.oldPath.startsWith(activeServer.projectPath) &&
           this._changeWatchedFileFilter(fileEvent.oldPath)
         ) {

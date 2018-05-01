@@ -14,9 +14,9 @@ import ApplyEditAdapter from './apply-edit-adapter';
 import {
   CompositeDisposable,
   Disposable,
-  DidStopChangingEvent,
-  TextEditEvent,
   TextEditor,
+  BufferStoppedChangingEvent,
+  TextChange,
 } from 'atom';
 import * as Utils from '../utils';
 
@@ -241,7 +241,7 @@ export class TextEditorSyncAdapter {
   //           text editor.
   // Note: The order of changes in the event is guaranteed top to bottom.  Language server
   // expects this in reverse.
-  public sendIncrementalChanges(event: DidStopChangingEvent): void {
+  public sendIncrementalChanges(event: BufferStoppedChangingEvent): void {
     if (event.changes.length > 0) {
       if (!this._isPrimaryAdapter()) { return; } // Multiple editors, we are not first
 
@@ -259,7 +259,7 @@ export class TextEditorSyncAdapter {
   // * `change` The Atom {TextEditEvent} to convert.
   //
   // Returns a {TextDocumentContentChangeEvent} that represents the converted {TextEditEvent}.
-  public static textEditToContentChange(change: TextEditEvent): TextDocumentContentChangeEvent {
+  public static textEditToContentChange(change: TextChange): TextDocumentContentChangeEvent {
     return {
       range: Convert.atomRangeToLSRange(change.oldRange),
       rangeLength: change.oldText.length,
