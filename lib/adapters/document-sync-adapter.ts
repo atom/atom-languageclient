@@ -18,8 +18,7 @@ import {
   TextEditEvent,
   TextEditor,
 } from 'atom';
-import Utils from '../utils';
-import { BusySignalService } from 'atom-ide';
+import Utils, { ReportBusyWhile } from '../utils';
 
 // Public: Synchronizes the documents between Atom and the language server by notifying
 // each end of changes, opening, closing and other events as well as sending and applying
@@ -67,8 +66,8 @@ export default class DocumentSyncAdapter {
   constructor(
     private _connection: LanguageClientConnection,
     private _editorSelector: (editor: TextEditor) => boolean,
-    documentSync?: TextDocumentSyncOptions | TextDocumentSyncKind,
-    private _busySignalService?: BusySignalService,
+    documentSync: TextDocumentSyncOptions | TextDocumentSyncKind | undefined,
+    private _reportBusyWhile: ReportBusyWhile,
   ) {
     if (typeof documentSync === 'object') {
       this._documentSync = documentSync;
@@ -121,7 +120,7 @@ export default class DocumentSyncAdapter {
       this._connection,
       this._documentSync,
       this._versions,
-      this._busySignalService,
+      this._reportBusyWhile,
     );
     this._editors.set(editor, sync);
     this._disposable.add(sync);
@@ -158,7 +157,7 @@ export class TextEditorSyncAdapter {
     private _connection: LanguageClientConnection,
     private _documentSync: TextDocumentSyncOptions,
     private _versions: Map<string, number>,
-    private _busySignalService?: BusySignalService,
+    private _reportBusyWhile: ReportBusyWhile,
   ) {
     this._fakeDidChangeWatchedFiles = atom.project.onDidChangeFiles == null;
 
@@ -359,8 +358,7 @@ export class TextEditorSyncAdapter {
     });
 
     const withBusySignal =
-      this._busySignalService &&
-      this._busySignalService.reportBusyWhile(
+      this._reportBusyWhile(
         `Applying on-save edits for ${title}`,
         () => applyEditsOrTimeout,
       );

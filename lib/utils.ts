@@ -10,6 +10,11 @@ import {
   CancellationTokenSource,
 } from 'vscode-jsonrpc';
 
+export type ReportBusyWhile = <T>(
+  title: string,
+  f: () => Promise<T>,
+) => Promise<T>;
+
 export default class Utils {
   /**
    * Obtain the range of the word at the given editor position.

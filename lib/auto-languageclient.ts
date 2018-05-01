@@ -19,7 +19,7 @@ import LoggingConsoleAdapter from './adapters/logging-console-adapter';
 import NotificationsAdapter from './adapters/notifications-adapter';
 import OutlineViewAdapter from './adapters/outline-view-adapter';
 import SignatureHelpAdapter from './adapters/signature-help-adapter';
-import Utils from './utils';
+import Utils, { ReportBusyWhile } from './utils';
 import { Socket } from 'net';
 import { LanguageClientConnection } from './languageclient';
 import {
@@ -246,7 +246,7 @@ export default class AutoLanguageClient {
       this.logger,
       (e) => this.shouldStartForEditor(e),
       (filepath) => this.filterChangeWatchedFiles(filepath),
-      () => this.busySignalService,
+      this.reportBusyWhile,
       this.getServerName(),
     );
     this._serverManager.startListening();
@@ -280,21 +280,16 @@ export default class AutoLanguageClient {
 
   // Starts the server by starting the process, then initializing the language server and starting adapters
   private async startServer(projectPath: string): Promise<ActiveServer> {
-    const startingSignal = this.busySignalService && this.busySignalService.reportBusy(
+    const process = await this.reportBusyWhile(
       `Starting ${this.getServerName()} for ${path.basename(projectPath)}`,
+      async () => this.startServerProcess(projectPath),
     );
-    let process;
-    try {
-      process = await this.startServerProcess(projectPath);
-    } finally {
-      startingSignal && startingSignal.dispose();
-    }
     this.captureServerErrors(process, projectPath);
     const connection = new LanguageClientConnection(this.createRpcConnection(process), this.logger);
     this.preInitialization(connection);
     const initializeParams = this.getInitializeParams(projectPath, process);
     const initialization = connection.initialize(initializeParams);
-    this.busySignalService && this.busySignalService.reportBusyWhile(
+    this.reportBusyWhile(
       `${this.getServerName()} initializing for ${path.basename(projectPath)}`,
       () => initialization,
     );
@@ -408,7 +403,7 @@ export default class AutoLanguageClient {
           server.connection,
           (editor) => this.shouldSyncForEditor(editor, server.projectPath),
           server.capabilities.textDocumentSync,
-          this.busySignalService,
+          this.reportBusyWhile,
         );
       server.disposable.add(docSyncAdapter);
     }
@@ -719,5 +714,24 @@ export default class AutoLanguageClient {
   ): ServerAdapters[T] | undefined {
     const adapters = this._serverAdapters.get(server);
     return adapters && adapters[adapter];
+  }
+
+  protected reportBusyWhile: ReportBusyWhile = async (title, f) => {
+    if (this.busySignalService) {
+      return this.busySignalService.reportBusyWhile(title, f);
+    } else {
+      return this.reportBusyWhileDefault(title, f);
+    }
+  }
+
+  protected reportBusyWhileDefault: ReportBusyWhile = async (title, f) => {
+    this.logger.info(`[Started] ${title}`);
+    let res;
+    try {
+      res = await f();
+    } finally {
+      this.logger.info(`[Finished] ${title}`);
+    }
+    return res;
   }
 }

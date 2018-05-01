@@ -2,7 +2,6 @@ import Convert from './convert';
 import * as path from 'path';
 import * as stream from 'stream';
 import * as ls from './languageclient';
-import * as atomIde from 'atom-ide';
 import { EventEmitter } from 'events';
 import { Logger } from './logger';
 import {
@@ -10,6 +9,7 @@ import {
   ProjectFileEvent,
   TextEditor,
 } from 'atom';
+import { ReportBusyWhile } from './utils';
 
 // Public: Defines the minimum surface area for an object that resembles a
 // ChildProcess.  This is used so that language packages with alternative
@@ -57,7 +57,7 @@ export class ServerManager {
     private _logger: Logger,
     private _startForEditor: (editor: TextEditor) => boolean,
     private _changeWatchedFileFilter: (filePath: string) => boolean,
-    private _getBusySignalService: () => atomIde.BusySignalService | undefined,
+    private _reportBusyWhile: ReportBusyWhile,
     private _languageServerName: string,
   ) {
     this.updateNormalizedProjectPaths();
@@ -209,32 +209,29 @@ export class ServerManager {
   }
 
   public async stopServer(server: ActiveServer): Promise<void> {
-    const busySignalService = this._getBusySignalService();
-    const signal = busySignalService && busySignalService.reportBusy(
+    await this._reportBusyWhile(
       `Stopping ${this._languageServerName} for ${path.basename(server.projectPath)}`,
-    );
-    try {
-      this._logger.debug(`Server stopping "${server.projectPath}"`);
-      // Immediately remove the server to prevent further usage.
-      // If we re-open the file after this point, we'll get a new server.
-      this._activeServers.splice(this._activeServers.indexOf(server), 1);
-      this._stoppingServers.push(server);
-      server.disposable.dispose();
-      if (server.connection.isConnected) {
-        await server.connection.shutdown();
-      }
-
-      for (const [editor, mappedServer] of this._editorToServer) {
-        if (mappedServer === server) {
-          this._editorToServer.delete(editor);
+      async () => {
+        this._logger.debug(`Server stopping "${server.projectPath}"`);
+        // Immediately remove the server to prevent further usage.
+        // If we re-open the file after this point, we'll get a new server.
+        this._activeServers.splice(this._activeServers.indexOf(server), 1);
+        this._stoppingServers.push(server);
+        server.disposable.dispose();
+        if (server.connection.isConnected) {
+          await server.connection.shutdown();
         }
-      }
 
-      this.exitServer(server);
-      this._stoppingServers.splice(this._stoppingServers.indexOf(server), 1);
-    } finally {
-      signal && signal.dispose();
-    }
+        for (const [editor, mappedServer] of this._editorToServer) {
+          if (mappedServer === server) {
+            this._editorToServer.delete(editor);
+          }
+        }
+
+        this.exitServer(server);
+        this._stoppingServers.splice(this._stoppingServers.indexOf(server), 1);
+      },
+    );
   }
 
   public exitServer(server: ActiveServer): void {
