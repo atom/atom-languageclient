@@ -43,6 +43,7 @@ import {
   Range,
   TextEditor,
 } from 'atom';
+import {CommandAdapter} from './adapters/command-adapter';
 
 export { ActiveServer, LanguageClientConnection, LanguageServerProcess };
 export type ConnectionType = 'stdio' | 'socket' | 'ipc';
@@ -128,7 +129,7 @@ export default class AutoLanguageClient {
             dynamicRegistration: false,
           },
           executeCommand: {
-            dynamicRegistration: false,
+            dynamicRegistration: true,
           },
         },
         textDocument: {
@@ -424,6 +425,10 @@ export default class AutoLanguageClient {
       }
       server.disposable.add(server.signatureHelpAdapter);
     }
+
+    server.commands = new CommandAdapter(server.connection);
+    server.commands.initialize(server.capabilities);
+    server.disposable.add(server.commands);
   }
 
   public shouldSyncForEditor(editor: TextEditor, projectPath: string): boolean {

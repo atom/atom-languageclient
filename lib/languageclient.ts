@@ -5,6 +5,7 @@ import {
   NullLogger,
   Logger,
 } from './logger';
+import {Registration, RegistrationParams, Unregistration, UnregistrationParams} from "vscode-languageserver-protocol";
 
 export * from 'vscode-languageserver-protocol';
 
@@ -209,6 +210,36 @@ export class LanguageClientConnection extends EventEmitter {
   //              received a {PublishDiagnosticsParams} containing new {Diagnostic} messages for a given uri.
   public onPublishDiagnostics(callback: (params: lsp.PublishDiagnosticsParams) => void): void {
     this._onNotification({method: 'textDocument/publishDiagnostics'}, callback);
+  }
+
+  private _onRegisterCapability(method: string, callback: (registration: Registration) => void): void {
+    this._onRequest({method: 'client/registerCapability'}, (params: RegistrationParams) => {
+        params.registrations.forEach(registration => {
+            if (registration.method === method) {
+                callback(registration);
+            }
+        });
+        return Promise.resolve();
+    });
+  }
+
+  private _onUnregisterCapability(method: string, callback: (unregistration: Unregistration) => void): void {
+    this._onRequest({method: 'client/unregisterCapability'}, (params: UnregistrationParams) => {
+      params.unregisterations.forEach(unregistration => {
+        if (unregistration.method === method) {
+          callback(unregistration);
+        }
+      });
+      return Promise.resolve();
+    });
+  }
+
+  public onRegisterCommand(callback: (registration: Registration) => void): void {
+    this._onRegisterCapability('workspace/executeCommand', callback);
+  }
+
+  public onUnregisterCommand(callback: (unregisteration: Unregistration) => void): void {
+    this._onUnregisterCapability('workspace/executeCommand', callback);
   }
 
   // Public: Send a `textDocument/completion` request.
