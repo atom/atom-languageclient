@@ -14,6 +14,7 @@ import {
   ProjectFileEvent,
   TextEditor,
 } from 'atom';
+import {CommandAdapter} from './adapters/command-adapter';
 
 // Public: Defines the minimum surface area for an object that resembles a
 // ChildProcess.  This is used so that language packages with alternative
@@ -37,6 +38,7 @@ export interface ActiveServer {
   process: LanguageServerProcess;
   connection: ls.LanguageClientConnection;
   capabilities: ls.ServerCapabilities;
+  commands?: CommandAdapter;
   linterPushV2?: LinterPushV2Adapter;
   loggingConsole?: LoggingConsoleAdapter;
   docSyncAdapter?: DocumentSyncAdapter;
