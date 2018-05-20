@@ -101,7 +101,7 @@ export default class AutoLanguageClient {
   }
 
   // Start your server process
-  protected startServerProcess(_projectPath: string): LanguageServerProcess | Promise<LanguageServerProcess> {
+  protected startServerProcess(projectPath: string): LanguageServerProcess | Promise<LanguageServerProcess> {
     throw Error('Must override startServerProcess to start language server process when extending AutoLanguageClient');
   }
 
@@ -199,10 +199,10 @@ export default class AutoLanguageClient {
   }
 
   // Early wire-up of listeners before initialize method is sent
-  protected preInitialization(_connection: LanguageClientConnection): void {}
+  protected preInitialization(connection: LanguageClientConnection): void {}
 
   // Late wire-up of listeners after initialize method has been sent
-  protected postInitialization(_server: ActiveServer): void {}
+  protected postInitialization(server: ActiveServer): void {}
 
   // Determine whether to use ipc, stdio or socket to connect to the server
   protected getConnectionType(): ConnectionType {
@@ -383,9 +383,9 @@ export default class AutoLanguageClient {
     }
 
     return rpc.createMessageConnection(reader, writer, {
-      log: (..._args: any[]) => {},
-      warn: (..._args: any[]) => {},
-      info: (..._args: any[]) => {},
+      log: (...args: any[]) => {},
+      warn: (...args: any[]) => {},
+      info: (...args: any[]) => {},
       error: (...args: any[]) => {
         this.logger.error(args);
       },
@@ -484,13 +484,13 @@ export default class AutoLanguageClient {
   }
 
   protected onDidConvertAutocomplete(
-    _completionItem: ls.CompletionItem,
-    _suggestion: AutocompleteSuggestion,
-    _request: AutocompleteRequest,
+    completionItem: ls.CompletionItem,
+    suggestion: AutocompleteSuggestion,
+    request: AutocompleteRequest,
   ): void {
   }
 
-  protected onDidInsertSuggestion(_arg: AutocompleteDidInsert): void {}
+  protected onDidInsertSuggestion(arg: AutocompleteDidInsert): void {}
 
   // Definitions via LS documentHighlight and gotoDefinition------------
   public provideDefinitions(): atomIde.DefinitionProvider {
@@ -697,7 +697,7 @@ export default class AutoLanguageClient {
    * @param filePath path of a file that has changed in the project path
    * @return false => message will not be sent to the language server
    */
-  protected filterChangeWatchedFiles(_filePath: string): boolean {
+  protected filterChangeWatchedFiles(filePath: string): boolean {
     return true;
   }
 
@@ -705,7 +705,7 @@ export default class AutoLanguageClient {
    * Called on language server stderr output.
    * @param stderr a chunk of stderr from a language server instance
    */
-  protected handleServerStderr(stderr: string, _projectPath: string) {
+  protected handleServerStderr(stderr: string, projectPath: string) {
     stderr.split('\n').filter((l) => l).forEach((line) => this.logger.warn(`stderr ${line}`));
   }
 
