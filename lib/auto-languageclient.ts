@@ -19,7 +19,7 @@ import LoggingConsoleAdapter from './adapters/logging-console-adapter';
 import NotificationsAdapter from './adapters/notifications-adapter';
 import OutlineViewAdapter from './adapters/outline-view-adapter';
 import SignatureHelpAdapter from './adapters/signature-help-adapter';
-import Utils from './utils';
+import * as Utils from './utils';
 import { Socket } from 'net';
 import { LanguageClientConnection } from './languageclient';
 import {
@@ -47,33 +47,40 @@ import {
 export { ActiveServer, LanguageClientConnection, LanguageServerProcess };
 export type ConnectionType = 'stdio' | 'socket' | 'ipc';
 
+export interface ServerAdapters {
+  linterPushV2: LinterPushV2Adapter;
+  loggingConsole: LoggingConsoleAdapter;
+  signatureHelpAdapter?: SignatureHelpAdapter;
+}
+
 // Public: AutoLanguageClient provides a simple way to have all the supported
 // Atom-IDE services wired up entirely for you by just subclassing it and
 // implementing startServerProcess/getGrammarScopes/getLanguageName and
 // getServerName.
 export default class AutoLanguageClient {
-  private _disposable = new CompositeDisposable();
-  private _serverManager: ServerManager;
-  private _consoleDelegate: atomIde.ConsoleService;
-  private _linterDelegate: linter.IndieDelegate;
-  private _signatureHelpRegistry: atomIde.SignatureHelpRegistry | null;
-  private _lastAutocompleteRequest: AutocompleteRequest;
-  private _isDeactivating: boolean;
+  private _disposable!: CompositeDisposable;
+  private _serverManager!: ServerManager;
+  private _consoleDelegate?: atomIde.ConsoleService;
+  private _linterDelegate?: linter.IndieDelegate;
+  private _signatureHelpRegistry?: atomIde.SignatureHelpRegistry;
+  private _lastAutocompleteRequest?: AutocompleteRequest;
+  private _isDeactivating: boolean = false;
+  private _serverAdapters = new WeakMap<ActiveServer, ServerAdapters>();
 
   // Available if consumeBusySignal is setup
-  protected busySignalService: atomIde.BusySignalService;
+  protected busySignalService?: atomIde.BusySignalService;
 
   protected processStdErr: string = '';
-  protected logger: Logger;
-  protected name: string;
-  protected socket: Socket;
+  protected logger!: Logger;
+  protected name!: string;
+  protected socket!: Socket;
 
   // Shared adapters that can take the RPC connection as required
-  protected autoComplete: AutocompleteAdapter;
-  protected datatip: DatatipAdapter;
-  protected definitions: DefinitionAdapter;
-  protected findReferences: FindReferencesAdapter;
-  protected outlineView: OutlineViewAdapter;
+  protected autoComplete?: AutocompleteAdapter;
+  protected datatip?: DatatipAdapter;
+  protected definitions?: DefinitionAdapter;
+  protected findReferences?: FindReferencesAdapter;
+  protected outlineView?: OutlineViewAdapter;
 
   // You must implement these so we know how to deal with your language and server
   // -------------------------------------------------------------------------
@@ -231,6 +238,7 @@ export default class AutoLanguageClient {
 
   // Activate does very little for perf reasons - hooks in via ServerManager for later 'activation'
   public activate(): void {
+    this._disposable = new CompositeDisposable();
     this.name = `${this.getLanguageName()} (${this.getServerName()})`;
     this.logger = this.getLogger();
     this._serverManager = new ServerManager(
@@ -238,7 +246,7 @@ export default class AutoLanguageClient {
       this.logger,
       (e) => this.shouldStartForEditor(e),
       (filepath) => this.filterChangeWatchedFiles(filepath),
-      () => this.busySignalService,
+      this.reportBusyWhile,
       this.getServerName(),
     );
     this._serverManager.startListening();
@@ -272,21 +280,16 @@ export default class AutoLanguageClient {
 
   // Starts the server by starting the process, then initializing the language server and starting adapters
   private async startServer(projectPath: string): Promise<ActiveServer> {
-    const startingSignal = this.busySignalService && this.busySignalService.reportBusy(
+    const process = await this.reportBusyWhile(
       `Starting ${this.getServerName()} for ${path.basename(projectPath)}`,
+      async () => this.startServerProcess(projectPath),
     );
-    let process;
-    try {
-      process = await this.startServerProcess(projectPath);
-    } finally {
-      startingSignal && startingSignal.dispose();
-    }
     this.captureServerErrors(process, projectPath);
     const connection = new LanguageClientConnection(this.createRpcConnection(process), this.logger);
     this.preInitialization(connection);
     const initializeParams = this.getInitializeParams(projectPath, process);
     const initialization = connection.initialize(initializeParams);
-    this.busySignalService && this.busySignalService.reportBusyWhile(
+    this.reportBusyWhile(
       `${this.getServerName()} initializing for ${path.basename(projectPath)}`,
       () => initialization,
     );
@@ -395,35 +398,40 @@ export default class AutoLanguageClient {
     NotificationsAdapter.attach(server.connection, this.name, server.projectPath);
 
     if (DocumentSyncAdapter.canAdapt(server.capabilities)) {
-      server.docSyncAdapter =
+      const docSyncAdapter =
         new DocumentSyncAdapter(
           server.connection,
           (editor) => this.shouldSyncForEditor(editor, server.projectPath),
           server.capabilities.textDocumentSync,
-          this.busySignalService,
+          this.reportBusyWhile,
         );
-      server.disposable.add(server.docSyncAdapter);
+      server.disposable.add(docSyncAdapter);
     }
 
-    server.linterPushV2 = new LinterPushV2Adapter(server.connection);
+    const linterPushV2 = new LinterPushV2Adapter(server.connection);
     if (this._linterDelegate != null) {
-      server.linterPushV2.attach(this._linterDelegate);
+      linterPushV2.attach(this._linterDelegate);
     }
-    server.disposable.add(server.linterPushV2);
+    server.disposable.add(linterPushV2);
 
-    server.loggingConsole = new LoggingConsoleAdapter(server.connection);
+    const loggingConsole = new LoggingConsoleAdapter(server.connection);
     if (this._consoleDelegate != null) {
-      server.loggingConsole.attach(this._consoleDelegate({ id: this.name, name: 'abc' }));
+      loggingConsole.attach(this._consoleDelegate({ id: this.name, name: 'abc' }));
     }
-    server.disposable.add(server.loggingConsole);
+    server.disposable.add(loggingConsole);
 
+    let signatureHelpAdapter: SignatureHelpAdapter | undefined;
     if (SignatureHelpAdapter.canAdapt(server.capabilities)) {
-      server.signatureHelpAdapter = new SignatureHelpAdapter(server, this.getGrammarScopes());
+      signatureHelpAdapter = new SignatureHelpAdapter(server, this.getGrammarScopes());
       if (this._signatureHelpRegistry != null) {
-        server.signatureHelpAdapter.attach(this._signatureHelpRegistry);
+        signatureHelpAdapter.attach(this._signatureHelpRegistry);
       }
-      server.disposable.add(server.signatureHelpAdapter);
+      server.disposable.add(signatureHelpAdapter);
     }
+
+    this._serverAdapters.set(server, {
+      linterPushV2, loggingConsole, signatureHelpAdapter,
+    });
   }
 
   public shouldSyncForEditor(editor: TextEditor, projectPath: string): boolean {
@@ -538,8 +546,9 @@ export default class AutoLanguageClient {
     }
 
     for (const server of this._serverManager.getActiveServers()) {
-      if (server.linterPushV2 != null) {
-        server.linterPushV2.attach(this._linterDelegate);
+      const linterPushV2 = this.getServerAdapter(server, 'linterPushV2');
+      if (linterPushV2 != null) {
+        linterPushV2.attach(this._linterDelegate);
       }
     }
   }
@@ -592,10 +601,10 @@ export default class AutoLanguageClient {
     this._consoleDelegate = createConsole;
 
     for (const server of this._serverManager.getActiveServers()) {
-      if (server.loggingConsole == null) {
-        server.loggingConsole = new LoggingConsoleAdapter(server.connection);
+      const loggingConsole = this.getServerAdapter(server, 'loggingConsole');
+      if (loggingConsole) {
+        loggingConsole.attach(this._consoleDelegate({ id: this.name, name: 'abc' }));
       }
-      server.loggingConsole.attach(this._consoleDelegate({ id: this.name, name: 'abc' }));
     }
 
     // No way of detaching from client connections today
@@ -658,7 +667,7 @@ export default class AutoLanguageClient {
     return CodeActionAdapter.getCodeActions(
       server.connection,
       server.capabilities,
-      server.linterPushV2,
+      this.getServerAdapter(server, 'linterPushV2'),
       editor,
       range,
       diagnostics,
@@ -668,12 +677,13 @@ export default class AutoLanguageClient {
   public consumeSignatureHelp(registry: atomIde.SignatureHelpRegistry): Disposable {
     this._signatureHelpRegistry = registry;
     for (const server of this._serverManager.getActiveServers()) {
-      if (server.signatureHelpAdapter != null) {
-        server.signatureHelpAdapter.attach(registry);
+      const signatureHelpAdapter = this.getServerAdapter(server, 'signatureHelpAdapter');
+      if (signatureHelpAdapter != null) {
+        signatureHelpAdapter.attach(registry);
       }
     }
     return new Disposable(() => {
-      this._signatureHelpRegistry = null;
+      this._signatureHelpRegistry = undefined;
     });
   }
 
@@ -695,7 +705,33 @@ export default class AutoLanguageClient {
    * Called on language server stderr output.
    * @param stderr a chunk of stderr from a language server instance
    */
-  private handleServerStderr(stderr: string, projectPath: string) {
+  protected handleServerStderr(stderr: string, projectPath: string) {
     stderr.split('\n').filter((l) => l).forEach((line) => this.logger.warn(`stderr ${line}`));
+  }
+
+  private getServerAdapter<T extends keyof ServerAdapters>(
+    server: ActiveServer, adapter: T,
+  ): ServerAdapters[T] | undefined {
+    const adapters = this._serverAdapters.get(server);
+    return adapters && adapters[adapter];
+  }
+
+  protected reportBusyWhile: Utils.ReportBusyWhile = async (title, f) => {
+    if (this.busySignalService) {
+      return this.busySignalService.reportBusyWhile(title, f);
+    } else {
+      return this.reportBusyWhileDefault(title, f);
+    }
+  }
+
+  protected reportBusyWhileDefault: Utils.ReportBusyWhile = async (title, f) => {
+    this.logger.info(`[Started] ${title}`);
+    let res;
+    try {
+      res = await f();
+    } finally {
+      this.logger.info(`[Finished] ${title}`);
+    }
+    return res;
   }
 }

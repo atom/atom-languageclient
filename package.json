@@ -15,7 +15,7 @@
     "test": "npm run compile && npm run lint && atom --test build/test"
   },
   "dependencies": {
-    "@types/atom": "^1.24.1",
+    "@types/atom": "~1.25.0",
     "@types/node": "^8.0.41",
     "fuzzaldrin-plus": "^0.6.0",
     "vscode-jsonrpc": "^3.5.0",
@@ -35,6 +35,6 @@
     "mocha-appveyor-reporter": "^0.4.0",
     "sinon": "^2.0.0",
     "tslint": "^5.9.1",
-    "typescript": "^2.7.2"
+    "typescript": "~2.8.1"
   }
 }

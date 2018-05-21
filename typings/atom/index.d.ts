@@ -4,7 +4,7 @@ declare module 'atom' {
   interface TextEditor {
     getURI(): string | null;
     getBuffer(): TextBuffer;
-    getNonWordCharacters(scope: ScopeDescriptor): string;
+    getNonWordCharacters(position: Point): string;
   }
 
   export interface ProjectFileEvent {
@@ -50,7 +50,7 @@ declare module 'atom' {
   interface AutocompleteRequest {
     editor: TextEditor;
     bufferPosition: Point;
-    scopeDescriptor: string;
+    scopeDescriptor: ScopeDescriptor;
     prefix: string;
     activatedManually?: boolean;
   }

@@ -1,6 +1,6 @@
 import * as atomIde from 'atom-ide';
 import Convert from '../convert';
-import Utils from '../utils';
+import * as Utils from '../utils';
 import {
   Hover,
   LanguageClientConnection,

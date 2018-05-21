@@ -18,20 +18,16 @@ import {
   TextEditEvent,
   TextEditor,
 } from 'atom';
-import Utils from '../utils';
-import { BusySignalService } from 'atom-ide';
+import * as Utils from '../utils';
 
 // Public: Synchronizes the documents between Atom and the language server by notifying
 // each end of changes, opening, closing and other events as well as sending and applying
 // changes either in whole or in part depending on what the language server supports.
 export default class DocumentSyncAdapter {
-  private _editorSelector: (editor: TextEditor) => boolean;
   private _disposable = new CompositeDisposable();
   public _documentSync: TextDocumentSyncOptions;
   private _editors: WeakMap<TextEditor, TextEditorSyncAdapter> = new WeakMap();
-  private _connection: LanguageClientConnection;
   private _versions: Map<string, number> = new Map();
-  private _busySignalService?: BusySignalService;
 
   // Public: Determine whether this adapter can be used to adapt a language server
   // based on the serverCapabilities matrix textDocumentSync capability either being Full or
@@ -68,12 +64,11 @@ export default class DocumentSyncAdapter {
   // * `editorSelector` A predicate function that takes a {TextEditor} and returns a {boolean}
   //                    indicating whether this adapter should care about the contents of the editor.
   constructor(
-    connection: LanguageClientConnection,
-    editorSelector: (editor: TextEditor) => boolean,
-    documentSync?: TextDocumentSyncOptions | TextDocumentSyncKind,
-    busySignalService?: BusySignalService,
+    private _connection: LanguageClientConnection,
+    private _editorSelector: (editor: TextEditor) => boolean,
+    documentSync: TextDocumentSyncOptions | TextDocumentSyncKind | undefined,
+    private _reportBusyWhile: Utils.ReportBusyWhile,
   ) {
-    this._connection = connection;
     if (typeof documentSync === 'object') {
       this._documentSync = documentSync;
     } else {
@@ -81,8 +76,6 @@ export default class DocumentSyncAdapter {
         change: documentSync || TextDocumentSyncKind.Full,
       };
     }
-    this._editorSelector = editorSelector;
-    this._busySignalService = busySignalService;
     this._disposable.add(atom.textEditors.observe(this.observeTextEditor.bind(this)));
   }
 
@@ -96,7 +89,7 @@ export default class DocumentSyncAdapter {
   //
   // * `editor` A {TextEditor} to consider for observation.
   public observeTextEditor(editor: TextEditor): void {
-    const listener = editor.observeGrammar((grammar) => this._handleGrammarChange(editor));
+    const listener = editor.observeGrammar((_grammar) => this._handleGrammarChange(editor));
     this._disposable.add(
       editor.onDidDestroy(() => {
         this._disposable.remove(listener);
@@ -114,6 +107,7 @@ export default class DocumentSyncAdapter {
     if (sync != null && !this._editorSelector(editor)) {
       this._editors.delete(editor);
       this._disposable.remove(sync);
+      sync.didClose();
       sync.dispose();
     } else if (sync == null && this._editorSelector(editor)) {
       this._handleNewEditor(editor);
@@ -126,7 +120,7 @@ export default class DocumentSyncAdapter {
       this._connection,
       this._documentSync,
       this._versions,
-      this._busySignalService,
+      this._reportBusyWhile,
     );
     this._editors.set(editor, sync);
     this._disposable.add(sync);
@@ -150,13 +144,8 @@ export default class DocumentSyncAdapter {
 // Public: Keep a single {TextEditor} in sync with a given language server.
 export class TextEditorSyncAdapter {
   private _disposable = new CompositeDisposable();
-  private _editor: TextEditor;
   private _currentUri: string;
-  private _connection: LanguageClientConnection;
   private _fakeDidChangeWatchedFiles: boolean;
-  private _versions: Map<string, number>;
-  private _documentSync: TextDocumentSyncOptions;
-  private _busySignalService?: BusySignalService;
 
   // Public: Create a {TextEditorSyncAdapter} in sync with a given language server.
   //
@@ -164,43 +153,38 @@ export class TextEditorSyncAdapter {
   // * `connection` A {LanguageClientConnection} to a language server to keep in sync.
   // * `documentSync` The document syncing options.
   constructor(
-    editor: TextEditor,
-    connection: LanguageClientConnection,
-    documentSync: TextDocumentSyncOptions,
-    versions: Map<string, number>,
-    busySignalService?: BusySignalService,
+    private _editor: TextEditor,
+    private _connection: LanguageClientConnection,
+    private _documentSync: TextDocumentSyncOptions,
+    private _versions: Map<string, number>,
+    private _reportBusyWhile: Utils.ReportBusyWhile,
   ) {
-    this._editor = editor;
-    this._connection = connection;
-    this._versions = versions;
     this._fakeDidChangeWatchedFiles = atom.project.onDidChangeFiles == null;
-    this._documentSync = documentSync;
-    this._busySignalService = busySignalService;
 
-    const changeTracking = this.setupChangeTracking(documentSync);
+    const changeTracking = this.setupChangeTracking(_documentSync);
     if (changeTracking != null) {
       this._disposable.add(changeTracking);
     }
 
     // These handlers are attached only if server supports them
-    if (documentSync.willSave) {
-      this._disposable.add(editor.getBuffer().onWillSave(this.willSave.bind(this)));
+    if (_documentSync.willSave) {
+      this._disposable.add(_editor.getBuffer().onWillSave(this.willSave.bind(this)));
     }
-    if (documentSync.willSaveWaitUntil) {
-      this._disposable.add(editor.getBuffer().onWillSave(this.willSaveWaitUntil.bind(this)));
+    if (_documentSync.willSaveWaitUntil) {
+      this._disposable.add(_editor.getBuffer().onWillSave(this.willSaveWaitUntil.bind(this)));
     }
     // Send close notifications unless it's explicitly disabled
-    if (documentSync.openClose !== false) {
-      this._disposable.add(editor.onDidDestroy(this.didClose.bind(this)));
+    if (_documentSync.openClose !== false) {
+      this._disposable.add(_editor.onDidDestroy(this.didClose.bind(this)));
     }
     this._disposable.add(
-      editor.onDidSave(this.didSave.bind(this)),
-      editor.onDidChangePath(this.didRename.bind(this)),
+      _editor.onDidSave(this.didSave.bind(this)),
+      _editor.onDidChangePath(this.didRename.bind(this)),
     );
 
     this._currentUri = this.getEditorUri();
 
-    if (documentSync.openClose !== false) {
+    if (_documentSync.openClose !== false) {
       this.didOpen();
     }
   }
@@ -374,8 +358,7 @@ export class TextEditorSyncAdapter {
     });
 
     const withBusySignal =
-      this._busySignalService &&
-      this._busySignalService.reportBusyWhile(
+      this._reportBusyWhile(
         `Applying on-save edits for ${title}`,
         () => applyEditsOrTimeout,
       );
