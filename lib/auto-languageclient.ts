@@ -320,7 +320,7 @@ export default class AutoLanguageClient {
 
     const configurationKey = this.getRootConfigurationKey();
     if (configurationKey) {
-      this._disposable.add(
+      newServer.disposable.add(
         atom.config.observe(configurationKey, (config) => {
           const mappedConfig = this.mapConfigurationObject(config || {});
           if (mappedConfig) {
