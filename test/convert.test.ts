@@ -3,9 +3,9 @@ import Convert from '../lib/convert';
 import { expect } from 'chai';
 import {
   Point,
-  ProjectFileEvent,
   Range,
   TextEditor,
+  FilesystemChange,
 } from 'atom';
 
 let originalPlatform: NodeJS.Platform;
@@ -196,25 +196,25 @@ describe('Convert', () => {
 
   describe('atomFileEventToLSFileEvents', () => {
     it('converts a created event', () => {
-      const source: ProjectFileEvent = {path: '/a/b/c/d.txt', action: 'created'};
+      const source: FilesystemChange = {path: '/a/b/c/d.txt', action: 'created'};
       const converted = Convert.atomFileEventToLSFileEvents(source);
       expect(converted[0]).deep.equals({uri: 'file:///a/b/c/d.txt', type: ls.FileChangeType.Created});
     });
 
     it('converts a modified event', () => {
-      const source: ProjectFileEvent = {path: '/a/b/c/d.txt', action: 'modified'};
+      const source: FilesystemChange = {path: '/a/b/c/d.txt', action: 'modified'};
       const converted = Convert.atomFileEventToLSFileEvents(source);
       expect(converted[0]).deep.equals({uri: 'file:///a/b/c/d.txt', type: ls.FileChangeType.Changed});
     });
 
     it('converts a deleted event', () => {
-      const source: ProjectFileEvent = {path: '/a/b/c/d.txt', action: 'deleted'};
+      const source: FilesystemChange = {path: '/a/b/c/d.txt', action: 'deleted'};
       const converted = Convert.atomFileEventToLSFileEvents(source);
       expect(converted[0]).deep.equals({uri: 'file:///a/b/c/d.txt', type: ls.FileChangeType.Deleted});
     });
 
     it('converts a renamed event', () => {
-      const source: ProjectFileEvent = {path: '/a/b/c/d.txt', oldPath: '/a/z/e.lst', action: 'renamed'};
+      const source: FilesystemChange = {path: '/a/b/c/d.txt', oldPath: '/a/z/e.lst', action: 'renamed'};
       const converted = Convert.atomFileEventToLSFileEvents(source);
       expect(converted[0]).deep.equals({uri: 'file:///a/z/e.lst', type: ls.FileChangeType.Deleted});
       expect(converted[1]).deep.equals({uri: 'file:///a/b/c/d.txt', type: ls.FileChangeType.Created});

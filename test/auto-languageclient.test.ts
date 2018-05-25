@@ -13,7 +13,7 @@ describe('AutoLanguageClient', () => {
 
     function mockEditor(uri: string, scopeName: string): any {
       return {
-        getURI: () => uri,
+        getPath: () => uri,
         getGrammar: () => {
           return {scopeName};
         },

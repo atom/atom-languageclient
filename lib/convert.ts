@@ -3,7 +3,7 @@ import * as ls from './languageclient';
 import * as URL from 'url';
 import {
   Point,
-  ProjectFileEvent,
+  FilesystemChange,
   Range,
   TextEditor,
 } from 'atom';
@@ -159,7 +159,7 @@ export default class Convert {
   // * 'fileEvent' An {atom$ProjectFileEvent} to be converted.
   //
   // Returns an array of LSP {ls.FileEvent} objects that equivalent conversions to the fileEvent parameter.
-  public static atomFileEventToLSFileEvents(fileEvent: ProjectFileEvent): ls.FileEvent[] {
+  public static atomFileEventToLSFileEvents(fileEvent: FilesystemChange): ls.FileEvent[] {
     switch (fileEvent.action) {
       case 'created':
         return [{uri: Convert.pathToUri(fileEvent.path), type: ls.FileChangeType.Created}];

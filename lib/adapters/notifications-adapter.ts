@@ -7,7 +7,6 @@ import {
 } from '../languageclient';
 import {
   Notification,
-  NotificationButton,
   NotificationOptions,
   NotificationExt,
 } from 'atom';
@@ -93,7 +92,7 @@ export default class NotificationsAdapter {
   // Returns a {NotificationButton} equivalent to the {MessageActionItem} given.
   public static actionItemToNotificationButton(
     actionItem: MessageActionItem,
-  ): NotificationButton {
+  ) {
     return {
       text: actionItem.title,
     };
