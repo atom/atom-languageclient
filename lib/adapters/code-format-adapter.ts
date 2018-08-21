@@ -4,12 +4,14 @@ import {
   LanguageClientConnection,
   DocumentFormattingParams,
   DocumentRangeFormattingParams,
+  DocumentOnTypeFormattingParams,
   FormattingOptions,
   ServerCapabilities,
 } from '../languageclient';
 import {
   TextEditor,
   Range,
+  Point,
 } from 'atom';
 
 // Public: Adapts the language server protocol "textDocument/completion" to the
@@ -121,6 +123,50 @@ export default class CodeFormatAdapter {
     return {
       textDocument: Convert.editorToTextDocumentIdentifier(editor),
       range: Convert.atomRangeToLSRange(range),
+      options: CodeFormatAdapter.getFormatOptions(editor),
+    };
+  }
+
+  // Public: Format on type within an Atom {TextEditor} by using a given language server.
+  //
+  // * `connection` A {LanguageClientConnection} to the language server that will format the text.
+  // * `editor` The Atom {TextEditor} containing the document to be formatted.
+  // * `point` The {Point} at which the document to be formatted.
+  // * `character` A character that triggered formatting request.
+  //
+  // Returns a {Promise} of an {Array} of {TextEdit} objects that can be applied to the Atom TextEditor
+  // to format the document.
+  public static async formatOnType(
+    connection: LanguageClientConnection,
+    editor: TextEditor,
+    point: Point,
+    character: string,
+  ): Promise<atomIde.TextEdit[]> {
+    const edits = await connection.documentOnTypeFormatting(
+      CodeFormatAdapter.createDocumentOnTypeFormattingParams(editor, point, character),
+    );
+    return Convert.convertLsTextEdits(edits);
+  }
+
+  // Public: Create {DocumentOnTypeFormattingParams} to be sent to the language server when requesting an
+  // entire document is formatted.
+  //
+  // * `editor` The Atom {TextEditor} containing the document to be formatted.
+  // * `point` The {Point} at which the document to be formatted.
+  // * `character` A character that triggered formatting request.
+  //
+  // Returns {DocumentOnTypeFormattingParams} containing the identity of the text document, the
+  // position of the text to be formatted, the character that triggered formatting request
+  // as well as the options to be used in formatting the document such as tab size and tabs vs spaces.
+  public static createDocumentOnTypeFormattingParams(
+    editor: TextEditor,
+    point: Point,
+    character: string,
+  ): DocumentOnTypeFormattingParams {
+    return {
+      textDocument: Convert.editorToTextDocumentIdentifier(editor),
+      position: Convert.pointToPosition(point),
+      ch: character,
       options: CodeFormatAdapter.getFormatOptions(editor),
     };
   }

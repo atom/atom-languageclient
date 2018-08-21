@@ -627,6 +627,69 @@ export default class AutoLanguageClient {
     return CodeFormatAdapter.format(server.connection, server.capabilities, editor, range);
   }
 
+  public provideRangeCodeFormat(): atomIde.RangeCodeFormatProvider {
+    return {
+      grammarScopes: this.getGrammarScopes(),
+      priority: 1,
+      formatCode: this.getRangeCodeFormat.bind(this),
+    };
+  }
+
+  protected async getRangeCodeFormat(editor: TextEditor, range: Range): Promise<atomIde.TextEdit[]> {
+    const server = await this._serverManager.getServer(editor);
+    if (server == null || !server.capabilities.documentRangeFormattingProvider) {
+      return [];
+    }
+
+    return CodeFormatAdapter.formatRange(server.connection, editor, range);
+  }
+
+  public provideFileCodeFormat(): atomIde.FileCodeFormatProvider {
+    return {
+      grammarScopes: this.getGrammarScopes(),
+      priority: 1,
+      formatEntireFile: this.getFileCodeFormat.bind(this),
+    };
+  }
+
+  public provideOnSaveCodeFormat(): atomIde.OnSaveCodeFormatProvider {
+    return {
+      grammarScopes: this.getGrammarScopes(),
+      priority: 1,
+      formatOnSave: this.getFileCodeFormat.bind(this),
+    };
+  }
+
+  protected async getFileCodeFormat(editor: TextEditor): Promise<atomIde.TextEdit[]> {
+    const server = await this._serverManager.getServer(editor);
+    if (server == null || !server.capabilities.documentFormattingProvider) {
+      return [];
+    }
+
+    return CodeFormatAdapter.formatDocument(server.connection, editor);
+  }
+
+  public provideOnTypeCodeFormat(): atomIde.OnTypeCodeFormatProvider {
+    return {
+      grammarScopes: this.getGrammarScopes(),
+      priority: 1,
+      formatAtPosition: this.getOnTypeCodeFormat.bind(this),
+    };
+  }
+
+  protected async getOnTypeCodeFormat(
+    editor: TextEditor,
+    point: Point,
+    character: string,
+  ): Promise<atomIde.TextEdit[]> {
+    const server = await this._serverManager.getServer(editor);
+    if (server == null || !server.capabilities.documentOnTypeFormattingProvider) {
+      return [];
+    }
+
+    return CodeFormatAdapter.formatOnType(server.connection, editor, point, character);
+  }
+
   public provideCodeHighlight(): atomIde.CodeHighlightProvider {
     return {
       grammarScopes: this.getGrammarScopes(),
