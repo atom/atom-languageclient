@@ -45,7 +45,8 @@ The language server protocol consists of a number of capabilities. Some of these
 | textDocument/codeLens           | TBD                           |
 | textDocument/formatting         | Format File command           |
 | textDocument/rangeFormatting    | Format Selection command      |
-| textDocument/onTypeFormatting   | TBD                           |
+| textDocument/onTypeFormatting   | Atom-IDE on type formatting   |
+| textDocument/onSaveFormatting   | Atom-IDE on save formatting   |
 | textDocument/rename             | TBD                           |
 | textDocument/didChange          | Send on save                  |
 | textDocument/didOpen            | Send on open                  |
