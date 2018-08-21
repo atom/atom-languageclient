@@ -132,8 +132,26 @@ export type atomIde$DatatipService = {
   addProvider(provider: atomIde$DatatipProvider): IDisposable,
 };
 
+export type atomIde$FileCodeFormatProvider = {|
+  formatEntireFile: (editor: atom$TextEditor, range: atom$Range) => Promise<Array<atomIde$TextEdit>>,
+  priority: number,
+  grammarScopes: Array<string>,
+|};
+
 export type atomIde$RangeCodeFormatProvider = {|
   formatCode: (editor: atom$TextEditor, range: atom$Range) => Promise<Array<atomIde$TextEdit>>,
+  priority: number,
+  grammarScopes: Array<string>,
+|};
+
+export type atomIde$OnSaveCodeFormatProvider = {|
+  formatOnSave: (editor: atom$TextEditor) => Promise<Array<atomIde$TextEdit>>,
+  priority: number,
+  grammarScopes: Array<string>,
+|};
+
+export type atomIde$OnTypeCodeFormatProvider = {|
+  formatAtPosition: (editor: atom$TextEditor, position: atom$Point, character: string) => Promise<Array<atomIde$TextEdit>>,
   priority: number,
   grammarScopes: Array<string>,
 |};
