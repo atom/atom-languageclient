@@ -15,7 +15,7 @@
     "test": "npm run compile && npm run lint && atom --test build/test"
   },
   "dependencies": {
-    "@types/atom": "~1.25.1",
+    "@types/atom": "^1.28.0",
     "@types/node": "^8.0.41",
     "fuzzaldrin-plus": "^0.6.0",
     "vscode-jsonrpc": "^3.5.0",
