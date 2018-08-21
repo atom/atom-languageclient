@@ -5,10 +5,18 @@ import ApplyEditAdapter from '../../lib/adapters/apply-edit-adapter';
 import Convert from '../../lib/convert';
 import { TextEditor } from 'atom';
 
-const TEST_PATH1 = path.join(__dirname, 'test.txt');
-const TEST_PATH2 = path.join(__dirname, 'test2.txt');
-const TEST_PATH3 = path.join(__dirname, 'test3.txt');
-const TEST_PATH4 = path.join(__dirname, 'test4.txt');
+const TEST_PATH1 = normalizeDriveLetterName(path.join(__dirname, 'test.txt'));
+const TEST_PATH2 = normalizeDriveLetterName(path.join(__dirname, 'test2.txt'));
+const TEST_PATH3 = normalizeDriveLetterName(path.join(__dirname, 'test3.txt'));
+const TEST_PATH4 = normalizeDriveLetterName(path.join(__dirname, 'test4.txt'));
+
+function normalizeDriveLetterName(filePath: string): string {
+  if (process.platform === 'win32') {
+    return filePath.replace(/^([a-z]):/, ([driveLetter]) => driveLetter.toUpperCase() + ':');
+  } else {
+    return filePath;
+  }
+}
 
 describe('ApplyEditAdapter', () => {
   describe('onApplyEdit', () => {
