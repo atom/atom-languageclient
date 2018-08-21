@@ -1,3 +1,13 @@
+## v0.9.6
+
+- Add document formatting handlers #231
+- Correctly dispose config observer when servers are closed #219
+- Clean up atom typings #214
+- TypeScript refactorings and clean-up #213
+- Compare actual notification message text to determine duplicates #210
+- Do not use autocomplete cache unless explicit trigger character is set #209
+- Set a timeout on the willSaveWaitUntil handler #203
+
 ## v0.9.5
 
 - Respect server document sync capabilities #202
