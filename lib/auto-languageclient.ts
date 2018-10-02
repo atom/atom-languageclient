@@ -265,8 +265,10 @@ export default class AutoLanguageClient {
   protected spawnChildNode(args: string[], options: cp.SpawnOptions = {}): cp.ChildProcess {
     this.logger.debug(`starting child Node "${args.join(' ')}"`);
     options.env = options.env || Object.create(process.env);
-    options.env.ELECTRON_RUN_AS_NODE = '1';
-    options.env.ELECTRON_NO_ATTACH_CONSOLE = '1';
+    if (options.env) {
+      options.env.ELECTRON_RUN_AS_NODE = '1';
+      options.env.ELECTRON_NO_ATTACH_CONSOLE = '1';
+    }
     return cp.spawn(process.execPath, args, options);
   }
 
