@@ -88,6 +88,8 @@ else
   npm --version
   echo "Installing remaining dependencies..."
   npm install
+  echo "Using TSC version:"
+  tsc --version
 fi
 
 if [ -n "${APM_TEST_PACKAGES}" ]; then
