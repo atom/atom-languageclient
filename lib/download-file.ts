@@ -43,7 +43,7 @@ export default (async function downloadFile(
 //
 // * `length`           File length in bytes.
 // * `reader`           {ReadableStreamReader} to read from.
-// * `targwriteretFile` {WriteStream} to write to.
+// * `writer`           {WriteStream} to write to.
 // * `progressCallback` Callback function that will be given a {ByteProgressCallback} object containing
 //                      both bytesDone and percent.
 //
