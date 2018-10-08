@@ -1,3 +1,8 @@
+## v0.9.7
+
+- Lock package.json to avoid compiler errors/warnings with more recent TypeScript defs
+- Fix compiler warning related to options.env
+
 ## v0.9.6
 
 - Add document formatting handlers #231
