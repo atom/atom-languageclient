@@ -167,6 +167,7 @@ export default class AutoLanguageClient {
           },
           documentSymbol: {
             dynamicRegistration: false,
+            hierarchicalDocumentSymbolSupport: true,
           },
           formatting: {
             dynamicRegistration: false,

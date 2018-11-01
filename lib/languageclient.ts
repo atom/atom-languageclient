@@ -308,7 +308,7 @@ export class LanguageClientConnection extends EventEmitter {
   public documentSymbol(
     params: lsp.DocumentSymbolParams,
     cancellationToken?: jsonrpc.CancellationToken,
-  ): Promise<lsp.SymbolInformation[]> {
+  ): Promise<lsp.SymbolInformation[] | lsp.DocumentSymbol[]> {
     return this._sendRequest('textDocument/documentSymbol', params);
   }
 
