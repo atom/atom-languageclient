@@ -214,6 +214,10 @@ export default class OutlineViewAdapter {
         return 'type-string';
       case SymbolKind.Variable:
         return 'type-variable';
+      case SymbolKind.Struct:
+        return 'type-class';
+      case SymbolKind.EnumMember:
+        return 'type-constant';
       default:
         return null;
     }
