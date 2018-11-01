@@ -44,8 +44,13 @@ export default class OutlineViewAdapter {
       connection.documentSymbol({textDocument: Convert.editorToTextDocumentIdentifier(editor)}, cancellationToken),
     );
 
-    if ((results.length !== 0) &&
-        ((results[0] as DocumentSymbol).selectionRange !== undefined)) {
+    if (results.length === 0) {
+      return {
+        outlineTrees: [],
+      };
+    }
+
+    if ((results[0] as DocumentSymbol).selectionRange !== undefined) {
       // If the server is giving back the newer DocumentSymbol format.
       return {
         outlineTrees: OutlineViewAdapter.createHierarchicalOutlineTrees(
