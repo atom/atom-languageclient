@@ -116,12 +116,15 @@ export default class AutoLanguageClient {
       processId: process.pid,
       rootPath: projectPath,
       rootUri: Convert.pathToUri(projectPath),
+      workspaceFolders: [],
       capabilities: {
         workspace: {
           applyEdit: true,
+          configuration: false,
           workspaceEdit: {
             documentChanges: true,
           },
+          workspaceFolders: false,
           didChangeConfiguration: {
             dynamicRegistration: false,
           },
@@ -189,6 +192,13 @@ export default class AutoLanguageClient {
           rename: {
             dynamicRegistration: false,
           },
+
+          // We do not support these features yet.
+          // Need to set to undefined to appease TypeScript weak type detection.
+          implementation: undefined,
+          typeDefinition: undefined,
+          colorProvider: undefined,
+          foldingRange: undefined,
         },
         experimental: {},
       },
