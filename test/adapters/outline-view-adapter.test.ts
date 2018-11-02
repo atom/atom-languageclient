@@ -2,11 +2,16 @@ import OutlineViewAdapter from '../../lib/adapters/outline-view-adapter';
 import * as ls from '../../lib/languageclient';
 import * as sinon from 'sinon';
 import { expect } from 'chai';
+import { Point } from 'atom';
 
 describe('OutlineViewAdapter', () => {
+  const createRange = (a: any, b: any, c: any, d: any) => (
+    {start: {line: a, character: b}, end: {line: c, character: d}}
+  );
+
   const createLocation = (a: any, b: any, c: any, d: any) => ({
     uri: '',
-    range: {start: {line: a, character: b}, end: {line: c, character: d}},
+    range: createRange(a, b, c, d),
   });
 
   beforeEach(() => {
@@ -25,6 +30,108 @@ describe('OutlineViewAdapter', () => {
     it('returns false if documentSymbolProvider not supported', () => {
       const result = OutlineViewAdapter.canAdapt({});
       expect(result).to.be.false;
+    });
+  });
+
+  describe('createHierarchicalOutlineTrees', () => {
+    it('creates an empty array given an empty array', () => {
+      const result = OutlineViewAdapter.createHierarchicalOutlineTrees([]);
+      expect(result).to.deep.equal([]);
+    });
+
+    it('converts symbols without the children field', () => {
+      const sourceItem = {
+        name: 'test',
+        kind: ls.SymbolKind.Function,
+        range: createRange(1, 1, 2, 2),
+        selectionRange: createRange(1, 1, 2, 2),
+      };
+
+      const expected = [OutlineViewAdapter.hierarchicalSymbolToOutline(sourceItem)];
+      const result = OutlineViewAdapter.createHierarchicalOutlineTrees([sourceItem]);
+
+      expect(result).to.deep.equal(expected);
+    });
+
+    it('converts symbols with an empty children list', () => {
+      const sourceItem = {
+        name: 'test',
+        kind: ls.SymbolKind.Function,
+        range: createRange(1, 1, 2, 2),
+        selectionRange: createRange(1, 1, 2, 2),
+        children: [],
+      };
+
+      const expected = [OutlineViewAdapter.hierarchicalSymbolToOutline(sourceItem)];
+      const result = OutlineViewAdapter.createHierarchicalOutlineTrees([sourceItem]);
+
+      expect(result).to.deep.equal(expected);
+    });
+
+    it('sorts symbols by location', () => {
+      const sourceA = {
+        name: 'test',
+        kind: ls.SymbolKind.Function,
+        range: createRange(2, 2, 3, 3),
+        selectionRange: createRange(2, 2, 3, 3),
+      };
+
+      const sourceB = {
+        name: 'test',
+        kind: ls.SymbolKind.Function,
+        range: createRange(1, 1, 2, 2),
+        selectionRange: createRange(1, 1, 2, 2),
+      };
+
+      const expected = [
+        OutlineViewAdapter.hierarchicalSymbolToOutline(sourceB),
+        OutlineViewAdapter.hierarchicalSymbolToOutline(sourceA),
+      ];
+
+      const result = OutlineViewAdapter.createHierarchicalOutlineTrees([
+        sourceA,
+        sourceB,
+      ]);
+
+      expect(result).to.deep.equal(expected);
+    });
+
+    it('converts symbols with children', () => {
+      const sourceChildA = {
+        name: 'childA',
+        kind: ls.SymbolKind.Function,
+        range: createRange(2, 2, 3, 3),
+        selectionRange: createRange(2, 2, 3, 3),
+      };
+
+      const sourceChildB = {
+        name: 'childB',
+        kind: ls.SymbolKind.Function,
+        range: createRange(1, 1, 2, 2),
+        selectionRange: createRange(1, 1, 2, 2),
+      };
+
+      const sourceParent = {
+        name: 'parent',
+        kind: ls.SymbolKind.Function,
+        range: createRange(1, 1, 3, 3),
+        selectionRange: createRange(1, 1, 3, 3),
+        children: [sourceChildA, sourceChildB],
+      };
+
+      const expectedParent = OutlineViewAdapter.hierarchicalSymbolToOutline(
+        sourceParent);
+
+      expectedParent.children = [
+        OutlineViewAdapter.hierarchicalSymbolToOutline(sourceChildB),
+        OutlineViewAdapter.hierarchicalSymbolToOutline(sourceChildA),
+      ];
+
+      const result = OutlineViewAdapter.createHierarchicalOutlineTrees([
+        sourceParent,
+      ]);
+
+      expect(result).to.deep.equal([expectedParent]);
     });
   });
 
@@ -175,6 +282,35 @@ describe('OutlineViewAdapter', () => {
           }
         }
       }
+    });
+  });
+
+  describe('hierarchicalSymbolToOutline', () => {
+    it('converts an individual item', () => {
+      const sourceItem = {
+        name: 'test',
+        kind: ls.SymbolKind.Function,
+        range: createRange(1, 1, 2, 2),
+        selectionRange: createRange(1, 1, 2, 2),
+      };
+
+      const expected = {
+        tokenizedText: [
+          {
+            kind: 'method',
+            value: 'test',
+          },
+        ],
+        icon: 'type-function',
+        representativeName: 'test',
+        startPosition: new Point(1, 1),
+        endPosition: new Point(2, 2),
+        children: [],
+      };
+
+      const result = OutlineViewAdapter.hierarchicalSymbolToOutline(sourceItem);
+
+      expect(result).to.deep.equal(expected);
     });
   });
 

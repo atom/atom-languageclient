@@ -7,6 +7,7 @@ import {
   SymbolKind,
   ServerCapabilities,
   SymbolInformation,
+  DocumentSymbol,
 } from '../languageclient';
 import {
   Point,
@@ -42,15 +43,64 @@ export default class OutlineViewAdapter {
     const results = await Utils.doWithCancellationToken(connection, this._cancellationTokens, (cancellationToken) =>
       connection.documentSymbol({textDocument: Convert.editorToTextDocumentIdentifier(editor)}, cancellationToken),
     );
-    results.sort(
-      (a, b) =>
-        (a.location.range.start.line === b.location.range.start.line
-          ? a.location.range.start.character - b.location.range.start.character
-          : a.location.range.start.line - b.location.range.start.line),
-    );
-    return {
-      outlineTrees: OutlineViewAdapter.createOutlineTrees(results),
-    };
+
+    if (results.length === 0) {
+      return {
+        outlineTrees: [],
+      };
+    }
+
+    if ((results[0] as DocumentSymbol).selectionRange !== undefined) {
+      // If the server is giving back the newer DocumentSymbol format.
+      return {
+        outlineTrees: OutlineViewAdapter.createHierarchicalOutlineTrees(
+          results as DocumentSymbol[]),
+      };
+    } else {
+      // If the server is giving back the original SymbolInformation format.
+      return {
+        outlineTrees: OutlineViewAdapter.createOutlineTrees(
+          results as SymbolInformation[]),
+      };
+    }
+  }
+
+  // Public: Create an {Array} of {OutlineTree}s from the Array of {DocumentSymbol} recieved
+  // from the language server. This includes converting all the children nodes in the entire
+  // hierarchy.
+  //
+  // * `symbols` An {Array} of {DocumentSymbol}s received from the language server that
+  //             should be converted to an {Array} of {OutlineTree}.
+  //
+  // Returns an {Array} of {OutlineTree} containing the given symbols that the Outline View can display.
+  public static createHierarchicalOutlineTrees(symbols: DocumentSymbol[]): atomIde.OutlineTree[] {
+    // Sort all the incoming symbols
+    symbols.sort((a, b) => {
+      if (a.range.start.line !== b.range.start.line) {
+        return a.range.start.line - b.range.start.line;
+      }
+
+      if (a.range.start.character !== b.range.start.character) {
+        return a.range.start.character - b.range.start.character;
+      }
+
+      if (a.range.end.line !== b.range.end.line) {
+        return a.range.end.line - b.range.end.line;
+      }
+
+      return a.range.end.character - b.range.end.character;
+    });
+
+    return symbols.map((symbol) => {
+      const tree = OutlineViewAdapter.hierarchicalSymbolToOutline(symbol);
+
+      if (symbol.children != null) {
+        tree.children = OutlineViewAdapter.createHierarchicalOutlineTrees(
+          symbol.children);
+      }
+
+      return tree;
+    });
   }
 
   // Public: Create an {Array} of {OutlineTree}s from the Array of {SymbolInformation} recieved
@@ -62,6 +112,13 @@ export default class OutlineViewAdapter {
   //
   // Returns an {OutlineTree} containing the given symbols that the Outline View can display.
   public static createOutlineTrees(symbols: SymbolInformation[]): atomIde.OutlineTree[] {
+    symbols.sort(
+      (a, b) =>
+        (a.location.range.start.line === b.location.range.start.line
+          ? a.location.range.start.character - b.location.range.start.character
+          : a.location.range.start.line - b.location.range.start.line),
+    );
+
     // Temporarily keep containerName through the conversion process
     // Also filter out symbols without a name - it's part of the spec but some don't include it
     const allItems = symbols.filter((symbol) => symbol.name).map((symbol) => ({
@@ -145,6 +202,31 @@ export default class OutlineViewAdapter {
     }
 
     return parent || null;
+  }
+
+  // Public: Convert an individual {DocumentSymbol} from the language server
+  // to an {OutlineTree} for use by the Outline View. It does NOT recursively
+  // process the given symbol's children (if any).
+  //
+  // * `symbol` The {DocumentSymbol} to convert to an {OutlineTree}.
+  //
+  // Returns the {OutlineTree} corresponding to the given {DocumentSymbol}.
+  public static hierarchicalSymbolToOutline(symbol: DocumentSymbol): atomIde.OutlineTree {
+    const icon = OutlineViewAdapter.symbolKindToEntityKind(symbol.kind);
+
+    return {
+      tokenizedText: [
+        {
+          kind: OutlineViewAdapter.symbolKindToTokenKind(symbol.kind),
+          value: symbol.name,
+        },
+      ],
+      icon: icon != null ? icon : undefined,
+      representativeName: symbol.name,
+      startPosition: Convert.positionToPoint(symbol.selectionRange.start),
+      endPosition: Convert.positionToPoint(symbol.selectionRange.end),
+      children: [],
+    };
   }
 
   // Public: Convert an individual {SymbolInformation} from the language server
