@@ -63,10 +63,9 @@ export default class AutocompleteAdapter {
     const triggerChars =
       server.capabilities.completionProvider != null ?
         server.capabilities.completionProvider.triggerCharacters || [] : [];
-    const triggerChar = AutocompleteAdapter.getTriggerCharacter(request, triggerChars);
-    const prefixWithTrigger = triggerChar + request.prefix;
-    const triggerColumn = request.bufferPosition.column - prefixWithTrigger.length;
-    const triggerPoint = new Point(request.bufferPosition.row, triggerColumn);
+    // triggerOnly is true if we have just typed in the trigger character, and is false if we
+    // have typed additional characters following the trigger character.
+    const [triggerChar, triggerOnly] = AutocompleteAdapter.getTriggerCharacter(request, triggerChars);
 
     // Only auto-trigger on a trigger character or after the minimum number of characters from autocomplete-plus
     minimumWordLength = minimumWordLength || 0;
@@ -74,6 +73,11 @@ export default class AutocompleteAdapter {
         minimumWordLength > 0 && request.prefix.length < minimumWordLength) {
       return [];
     }
+
+    const triggerColumn = (triggerChar !== '' && triggerOnly) ?
+      request.bufferPosition.column - triggerChar.length :
+      request.bufferPosition.column - request.prefix.length - triggerChar.length;
+    const triggerPoint = new Point(request.bufferPosition.row, triggerColumn);
 
     const cache = this._suggestionCache.get(server);
     let suggestionMap = null;
@@ -99,9 +103,11 @@ export default class AutocompleteAdapter {
 
     // Filter the results to recalculate the score and ordering (unless only triggerChar)
     const suggestions = Array.from(suggestionMap.keys());
-    const replacementPrefix = request.prefix !== triggerChar ? request.prefix : '';
+    const replacementPrefix = (triggerChar !== '' && triggerOnly) ?
+      '' :
+      request.prefix;
     AutocompleteAdapter.setReplacementPrefixOnSuggestions(suggestions, replacementPrefix);
-    return request.prefix === "" || request.prefix === triggerChar
+    return request.prefix === "" || (triggerChar !== '' && triggerOnly)
       ? suggestions
       : filter(suggestions, request.prefix, {key: 'text'});
   }
@@ -156,28 +162,31 @@ export default class AutocompleteAdapter {
   // * `request` An {Array} of {atom$AutocompleteSuggestion}s to locate the prefix, editor, bufferPosition etc.
   // * `triggerChars` The {Array} of {string}s that can be trigger characters.
   //
-  // Returns a {string} containing the matching trigger character or an empty string if one was not matched.
-  public static getTriggerCharacter(request: ac.SuggestionsRequestedEvent, triggerChars: string[]): string {
+  // Returns a [{string}, boolean] where the string is the matching trigger character or an empty string
+  // if one was not matched, and the boolean is true if the trigger character is in request.prefix, and false
+  // if it is in the word before request.prefix. The boolean return value has no meaning if the string return
+  // value is an empty string.
+  public static getTriggerCharacter(request: ac.SuggestionsRequestedEvent, triggerChars: string[]): [string, boolean] {
     // AutoComplete-Plus considers text after a symbol to be a new trigger. So we should look backward
     // from the current cursor position to see if one is there and thus simulate it.
     const buffer = request.editor.getBuffer();
     const cursor = request.bufferPosition;
     const prefixStartColumn = cursor.column - request.prefix.length;
     for (const triggerChar of triggerChars) {
-      if (triggerChar === request.prefix) {
-        return triggerChar;
+      if (request.prefix.endsWith(triggerChar)) {
+        return [triggerChar, true];
       }
       if (prefixStartColumn >= triggerChar.length) { // Far enough along a line to fit the trigger char
         const start = new Point(cursor.row, prefixStartColumn - triggerChar.length);
         const possibleTrigger = buffer.getTextInRange([start, [cursor.row, prefixStartColumn]]);
         if (possibleTrigger === triggerChar) { // The text before our trigger is a trigger char!
-          return triggerChar;
+          return [triggerChar, false];
         }
       }
     }
 
     // There was no explicit trigger char
-    return '';
+    return ['', false];
   }
 
   // Public: Create TextDocumentPositionParams to be sent to the language server
