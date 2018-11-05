@@ -94,7 +94,7 @@ export default class AutocompleteAdapter {
           this._cancellationTokens,
           (cancellationToken) =>
             server.connection.completion(
-              AutocompleteAdapter.createCompletionParams(request, triggerChar), cancellationToken),
+              AutocompleteAdapter.createCompletionParams(request, triggerChar, triggerOnly), cancellationToken),
       );
       const isIncomplete = !Array.isArray(completions) && completions.isIncomplete;
       suggestionMap = this.completionItemsToSuggestions(completions, request, onDidConvertCompletionItem);
@@ -207,17 +207,18 @@ export default class AutocompleteAdapter {
   //
   // * `request` The {atom$AutocompleteRequest} containing the request details.
   // * `triggerCharacter` The {string} containing the trigger character (empty if none).
+  // * `triggerOnly` A {boolean} representing whether this completion is triggered right after a trigger character.
   //
   // Returns an {CompletionParams} with the keys:
   //  * `textDocument` the language server protocol textDocument identification.
   //  * `position` the position within the text document to display completion request for.
   //  * `context` containing the trigger character and kind.
   public static createCompletionParams(
-    request: ac.SuggestionsRequestedEvent, triggerCharacter: string): CompletionParams {
+    request: ac.SuggestionsRequestedEvent, triggerCharacter: string, triggerOnly: boolean): CompletionParams {
     return {
       textDocument: Convert.editorToTextDocumentIdentifier(request.editor),
       position: Convert.pointToPosition(request.bufferPosition),
-      context: AutocompleteAdapter.createCompletionContext(triggerCharacter),
+      context: AutocompleteAdapter.createCompletionContext(triggerCharacter, triggerOnly),
     };
   }
 
@@ -225,13 +226,18 @@ export default class AutocompleteAdapter {
   // based on the trigger character.
   //
   // * `triggerCharacter` The {string} containing the trigger character or '' if none.
+  // * `triggerOnly` A {boolean} representing whether this completion is triggered right after a trigger character.
   //
   // Returns an {CompletionContext} that specifies the triggerKind and the triggerCharacter
   // if there is one.
-  public static createCompletionContext(triggerCharacter: string): CompletionContext {
-    return triggerCharacter === ''
-      ? {triggerKind: CompletionTriggerKind.Invoked}
-      : {triggerKind: CompletionTriggerKind.TriggerCharacter, triggerCharacter};
+  public static createCompletionContext(triggerCharacter: string, triggerOnly: boolean): CompletionContext {
+    if (triggerCharacter === '') {
+      return {triggerKind: CompletionTriggerKind.Invoked};
+    } else {
+      return triggerOnly
+        ? {triggerKind: CompletionTriggerKind.TriggerCharacter, triggerCharacter}
+        : {triggerKind: CompletionTriggerKind.TriggerForIncompleteCompletions, triggerCharacter};
+    }
   }
 
   // Public: Convert a language server protocol CompletionItem array or CompletionList to
