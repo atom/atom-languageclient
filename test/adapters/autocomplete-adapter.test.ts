@@ -120,7 +120,7 @@ describe('AutoCompleteAdapter', () => {
 
   describe('createCompletionParams', () => {
     it('creates CompletionParams from an AutocompleteRequest with no trigger', () => {
-      const result = AutoCompleteAdapter.createCompletionParams(request, '');
+      const result = AutoCompleteAdapter.createCompletionParams(request, '', true);
       expect(result.textDocument.uri).equals('file:///a/b/c/d.js');
       expect(result.position).deep.equals({line: 123, character: 456});
       expect(result.context && result.context.triggerKind === ls.CompletionTriggerKind.Invoked);
@@ -128,10 +128,18 @@ describe('AutoCompleteAdapter', () => {
     });
 
     it('creates CompletionParams from an AutocompleteRequest with a trigger', () => {
-      const result = AutoCompleteAdapter.createCompletionParams(request, '.');
+      const result = AutoCompleteAdapter.createCompletionParams(request, '.', true);
       expect(result.textDocument.uri).equals('file:///a/b/c/d.js');
       expect(result.position).deep.equals({line: 123, character: 456});
       expect(result.context && result.context.triggerKind === ls.CompletionTriggerKind.TriggerCharacter);
+      expect(result.context && result.context.triggerCharacter === '.');
+    });
+
+    it('creates CompletionParams from an AutocompleteRequest for a follow-up request', () => {
+      const result = AutoCompleteAdapter.createCompletionParams(request, '.', false);
+      expect(result.textDocument.uri).equals('file:///a/b/c/d.js');
+      expect(result.position).deep.equals({line: 123, character: 456});
+      expect(result.context && result.context.triggerKind === ls.CompletionTriggerKind.TriggerForIncompleteCompletions);
       expect(result.context && result.context.triggerCharacter === '.');
     });
   });
