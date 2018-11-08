@@ -24,7 +24,7 @@ import { Socket } from 'net';
 import { LanguageClientConnection } from './languageclient';
 import {
   ConsoleLogger,
-  NullLogger,
+  FilteredLogger,
   Logger,
 } from './logger';
 import {
@@ -283,9 +283,12 @@ export default class AutoLanguageClient {
     return cp.spawn(process.execPath, args, options);
   }
 
-  // By default LSP logging is switched off but you can switch it on via the core.debugLSP setting
+  // LSP logging is only set for warnings & errors by default unless you turn on the core.debugLSP setting
   protected getLogger(): Logger {
-    return atom.config.get('core.debugLSP') ? new ConsoleLogger(this.name) : new NullLogger();
+    const filter = atom.config.get('core.debugLSP')
+      ? FilteredLogger.DeveloperLevelFilter
+      : FilteredLogger.UserLevelFilter;
+    return new FilteredLogger(new ConsoleLogger(this.name), filter);
   }
 
   // Starts the server by starting the process, then initializing the language server and starting adapters

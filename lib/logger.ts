@@ -15,23 +15,23 @@ export class ConsoleLogger {
     this.prefix = prefix;
   }
 
-  public warn(...args: any[]) {
+  public warn(...args: any[]): void {
     console.warn(...this.format(args));
   }
 
-  public error(...args: any[]) {
+  public error(...args: any[]): void {
     console.error(...this.format(args));
   }
 
-  public info(...args: any[]) {
+  public info(...args: any[]): void {
     console.info(...this.format(args));
   }
 
-  public debug(...args: any[]) {
+  public debug(...args: any[]): void {
     console.debug(...this.format(args));
   }
 
-  public log(...args: any[]) {
+  public log(...args: any[]): void {
     console.log(...this.format(args));
   }
 
@@ -57,4 +57,47 @@ export class NullLogger {
   public info(...args: any[]): void {}
   public log(...args: any[]): void {}
   public debug(...args: any[]): void {}
+}
+
+export class FilteredLogger {
+  private _logger: Logger;
+  private _predicate: (level: string, args: any[]) => boolean;
+
+  public static UserLevelFilter = (level: string, args: any[]) => level === 'warn' || level === 'error';
+  public static DeveloperLevelFilter = (level: string, args: any[]) => true;
+
+  constructor(logger: Logger, predicate?: (level: string, args: any[]) => boolean) {
+    this._logger = logger;
+    this._predicate = predicate || ((level, args) => true);
+  }
+
+  public warn(...args: any[]): void {
+    if (this._predicate('warn', args)) {
+      this._logger.warn(args);
+    }
+  }
+
+  public error(...args: any[]): void {
+    if (this._predicate('error', args)) {
+      this._logger.error(args);
+    }
+  }
+
+  public info(...args: any[]): void {
+    if (this._predicate('info', args)) {
+      this._logger.info(args);
+    }
+  }
+
+  public debug(...args: any[]): void {
+    if (this._predicate('debug', args)) {
+      this._logger.debug(args);
+    }
+  }
+
+  public log(...args: any[]): void {
+    if (this._predicate('log', args)) {
+      this._logger.log(args);
+    }
+  }
 }
