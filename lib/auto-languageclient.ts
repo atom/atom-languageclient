@@ -285,7 +285,9 @@ export default class AutoLanguageClient {
 
   // LSP logging is only set for warnings & errors by default unless you turn on the core.debugLSP setting
   protected getLogger(): Logger {
-    const filter = atom.config.get('core.debugLSP') ? FilteredLogger.DeveloperLevelFilter : FilteredLogger.UserLevelFilter;
+    const filter = atom.config.get('core.debugLSP')
+      ? FilteredLogger.DeveloperLevelFilter
+      : FilteredLogger.UserLevelFilter;
     return new FilteredLogger(new ConsoleLogger(this.name), filter);
   }
 

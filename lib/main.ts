@@ -5,7 +5,7 @@
 
 import AutoLanguageClient from './auto-languageclient';
 import Convert from './convert';
-import {Logger, ConsoleLogger, FilteredLogger} from './logger';
+import { Logger, ConsoleLogger, FilteredLogger } from './logger';
 import DownloadFile from './download-file';
 import LinterPushV2Adapter from './adapters/linter-push-v2-adapter';
 
@@ -17,5 +17,5 @@ export {
   ConsoleLogger,
   FilteredLogger,
   DownloadFile,
-  LinterPushV2Adapter
+  LinterPushV2Adapter,
 };
