@@ -25,7 +25,11 @@ interface SuggestionCacheEntry {
   isIncomplete: boolean;
   triggerPoint: Point;
   triggerChar: string;
-  suggestionMap: Map<ac.AnySuggestion, [CompletionItem, boolean]>;
+  suggestionMap: Map<ac.AnySuggestion, PossiblyResolvedCompletionItem>;
+}
+
+class PossiblyResolvedCompletionItem {
+  constructor(public completionItem: CompletionItem, public isResolved: boolean) { }
 }
 
 // Public: Adapts the language server protocol "textDocument/completion" to the Atom
@@ -131,13 +135,14 @@ export default class AutocompleteAdapter {
   ): Promise<ac.AnySuggestion> {
     const cache = this._suggestionCache.get(server);
     if (cache) {
-      const originalCompletionItem = cache.suggestionMap.get(suggestion);
-      if (originalCompletionItem != null && originalCompletionItem[1] === false) {
-        const resolvedCompletionItem = await server.connection.completionItemResolve(originalCompletionItem[0]);
+      const possiblyResolvedCompletionItem = cache.suggestionMap.get(suggestion);
+      if (possiblyResolvedCompletionItem != null && possiblyResolvedCompletionItem.isResolved === false) {
+        const resolvedCompletionItem = await
+          server.connection.completionItemResolve(possiblyResolvedCompletionItem.completionItem);
         if (resolvedCompletionItem != null) {
           AutocompleteAdapter.completionItemToSuggestion(
             resolvedCompletionItem, suggestion, request, onDidConvertCompletionItem);
-          originalCompletionItem[1] = true;
+          possiblyResolvedCompletionItem.isResolved = true;
         }
       }
     }
@@ -255,14 +260,14 @@ export default class AutocompleteAdapter {
     request: ac.SuggestionsRequestedEvent,
     onDidConvertCompletionItem?: (item: CompletionItem, suggestion: ac.AnySuggestion,
                                   request: ac.SuggestionsRequestedEvent) => void,
-  ): Map<ac.AnySuggestion, [CompletionItem, boolean]> {
+  ): Map<ac.AnySuggestion, PossiblyResolvedCompletionItem> {
     return new Map((Array.isArray(completionItems) ? completionItems : completionItems.items || [])
       .sort((a, b) => (a.sortText || a.label).localeCompare(b.sortText || b.label))
-      .map<[ac.AnySuggestion, [CompletionItem, boolean]]>(
+      .map<[ac.AnySuggestion, PossiblyResolvedCompletionItem]>(
         (s) => [
           AutocompleteAdapter.completionItemToSuggestion(
             s, {} as ac.AnySuggestion, request, onDidConvertCompletionItem),
-          [s, false]]));
+            new PossiblyResolvedCompletionItem(s, false)]));
   }
 
   // Public: Convert a language server protocol CompletionItem to an AutoComplete+ suggestion.

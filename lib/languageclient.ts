@@ -415,17 +415,19 @@ export class LanguageClientConnection extends EventEmitter {
     return this._sendRequest('workspace/executeCommand', params);
   }
 
-  private _onRequest<T extends keyof KnownRequests>(type: {method: T}, callback: RequestCallback<T>): void {
+  private _onRequest<T extends Extract<keyof KnownRequests, string>>(
+    type: {method: T}, callback: RequestCallback<T>,
+  ): void {
     this._rpc.onRequest(type.method, (value) => {
       this._log.debug(`rpc.onRequest ${type.method}`, value);
       return callback(value);
     });
   }
 
-  private _onNotification<T extends keyof KnownNotifications>(
+  private _onNotification<T extends Extract<keyof KnownNotifications, string>>(
     type: {method: T}, callback: (obj: KnownNotifications[T]) => void,
   ): void {
-    this._rpc.onNotification(type.method, (value) => {
+    this._rpc.onNotification(type.method, (value: any) => {
       this._log.debug(`rpc.onNotification ${type.method}`, value);
       callback(value);
     });
