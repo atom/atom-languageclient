@@ -1,3 +1,20 @@
+## v0.9.8
+
+- Support CodeActions that do not return Commands #239
+- AutoComplete
+  - Trigger on last character in multi-character sequences (e.g. `::`) #241
+- Outline view
+  - Add icon mappings for Struct and EnumMember #236
+  - Add textDocument/documentSymbol support for hierarchical outlines #237
+- Logging #242
+  - Can now be filtered and intercepted by packages
+  - Defaults to logging warnings and errors to console in non-dev mode
+- Dependencies updated (including tweaks to make it work where necessary)
+  - TypeScript (3.1.6)
+  - vscode-jsonrpc (4.0.0)
+  - vscode-languageserver-protocol/types (3.12.0)
+  - sinon, mocha, chai, tslint, @types/* (latest)
+
 ## v0.9.7
 
 - Lock package.json to avoid compiler errors/warnings with more recent TypeScript defs
