@@ -2,9 +2,13 @@ import * as atomIde from 'atom-ide';
 import LinterPushV2Adapter from './linter-push-v2-adapter';
 import assert = require('assert');
 import Convert from '../convert';
+import ApplyEditAdapter from './apply-edit-adapter';
 import {
   LanguageClientConnection,
   ServerCapabilities,
+  ApplyWorkspaceEditParams,
+  Command,
+  CodeAction,
 } from '../languageclient';
 import {
   TextEditor,
@@ -62,10 +66,20 @@ export default class CodeActionAdapter {
     });
     return commands.map((command) => ({
       async apply() {
-        await connection.executeCommand({
-          command: command.command,
-          arguments: command.arguments,
-        });
+        if (CodeAction.is(command)) {
+          if (command.edit != null) {
+            const e: ApplyWorkspaceEditParams = {
+              edit : command.edit,
+            };
+            ApplyEditAdapter.onApplyEdit(e);
+          }
+        }
+        if (Command.is(command)) {
+          await connection.executeCommand({
+            command: command.command,
+            arguments: command.arguments,
+          });
+        }
       },
       getTitle() {
         return Promise.resolve(command.title);

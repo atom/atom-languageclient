@@ -326,7 +326,7 @@ export class LanguageClientConnection extends EventEmitter {
   // * `params` The {CodeActionParams} identifying the document, range and context for the code action.
   // Returns a {Promise} containing an {Array} of {Commands}s that can be performed against the given
   // documents range.
-  public codeAction(params: lsp.CodeActionParams): Promise<lsp.Command[]> {
+  public codeAction(params: lsp.CodeActionParams): Promise<Array<lsp.Command | lsp.CodeAction>> {
     return this._sendRequest('textDocument/codeAction', params);
   }
 
