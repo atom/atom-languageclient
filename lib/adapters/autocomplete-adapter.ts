@@ -4,14 +4,14 @@ import { CancellationTokenSource } from 'vscode-jsonrpc';
 import { ActiveServer } from '../server-manager';
 import { filter } from 'fuzzaldrin-plus';
 import {
+  CompletionContext,
+  CompletionItem,
   CompletionItemKind,
+  CompletionList,
+  CompletionParams,
   CompletionTriggerKind,
   InsertTextFormat,
   LanguageClientConnection,
-  CompletionContext,
-  CompletionItem,
-  CompletionList,
-  CompletionParams,
   ServerCapabilities,
   TextEdit,
 } from '../languageclient';
@@ -28,8 +28,15 @@ interface SuggestionCacheEntry {
   suggestionMap: Map<ac.AnySuggestion, PossiblyResolvedCompletionItem>;
 }
 
+type CompletionItemAdjuster =
+  (item: CompletionItem, suggestion: ac.AnySuggestion, request: ac.SuggestionsRequestedEvent) => void;
+
 class PossiblyResolvedCompletionItem {
-  constructor(public completionItem: CompletionItem, public isResolved: boolean) { }
+  constructor(
+    public completionItem: CompletionItem,
+    public isResolved: boolean,
+  ) {
+  }
 }
 
 // Public: Adapts the language server protocol "textDocument/completion" to the Atom
@@ -60,60 +67,78 @@ export default class AutocompleteAdapter {
   public async getSuggestions(
     server: ActiveServer,
     request: ac.SuggestionsRequestedEvent,
-    onDidConvertCompletionItem?: (item: CompletionItem, suggestion: ac.AnySuggestion,
-                                  request: ac.SuggestionsRequestedEvent) => void,
+    onDidConvertCompletionItem?: CompletionItemAdjuster,
     minimumWordLength?: number,
   ): Promise<ac.AnySuggestion[]> {
-    const triggerChars =
-      server.capabilities.completionProvider != null ?
-        server.capabilities.completionProvider.triggerCharacters || [] : [];
+    const triggerChars = server.capabilities.completionProvider != null
+      ? server.capabilities.completionProvider.triggerCharacters || []
+      : [];
+
     // triggerOnly is true if we have just typed in the trigger character, and is false if we
     // have typed additional characters following the trigger character.
     const [triggerChar, triggerOnly] = AutocompleteAdapter.getTriggerCharacter(request, triggerChars);
 
-    // Only auto-trigger on a trigger character or after the minimum number of characters from autocomplete-plus
-    minimumWordLength = minimumWordLength || 0;
-    if (!request.activatedManually && triggerChar === '' &&
-        minimumWordLength > 0 && request.prefix.length < minimumWordLength) {
+    if (!this.shouldTrigger(request, triggerChar, minimumWordLength || 0)) {
       return [];
     }
 
-    const triggerColumn = (triggerChar !== '' && triggerOnly) ?
-      request.bufferPosition.column - triggerChar.length :
-      request.bufferPosition.column - request.prefix.length - triggerChar.length;
-    const triggerPoint = new Point(request.bufferPosition.row, triggerColumn);
+    // Get the suggestions either from the cache or by calling the language server
+    const suggestions = await
+      this.getOrBuildSuggestions(server, request, triggerChar, triggerOnly, onDidConvertCompletionItem);
 
-    const cache = this._suggestionCache.get(server);
-    let suggestionMap = null;
-
-    // Do we have complete cached suggestions that are still valid for this request
-    if (cache && !cache.isIncomplete && triggerChar !== '' &&
-        cache.triggerChar === triggerChar && cache.triggerPoint.isEqual(triggerPoint)) {
-      suggestionMap = cache.suggestionMap;
-    } else {
-      // Our cached suggestions can't be used so obtain new ones from the language server
-      const completions =
-        await Utils.doWithCancellationToken(
-          server.connection,
-          this._cancellationTokens,
-          (cancellationToken) =>
-            server.connection.completion(
-              AutocompleteAdapter.createCompletionParams(request, triggerChar, triggerOnly), cancellationToken),
-      );
-      const isIncomplete = !Array.isArray(completions) && completions.isIncomplete;
-      suggestionMap = this.completionItemsToSuggestions(completions, request, onDidConvertCompletionItem);
-      this._suggestionCache.set(server, {isIncomplete, triggerChar, triggerPoint, suggestionMap});
+    // As the user types more characters to refine filter we must replace those characters on acceptance
+    const replacementPrefix = (triggerChar !== '' && triggerOnly) ? '' : request.prefix;
+    for (const suggestion of suggestions) {
+      suggestion.replacementPrefix = replacementPrefix;
     }
 
-    // Filter the results to recalculate the score and ordering (unless only triggerChar)
-    const suggestions = Array.from(suggestionMap.keys());
-    const replacementPrefix = (triggerChar !== '' && triggerOnly) ?
-      '' :
-      request.prefix;
-    AutocompleteAdapter.setReplacementPrefixOnSuggestions(suggestions, replacementPrefix);
-    return request.prefix === "" || (triggerChar !== '' && triggerOnly)
-      ? suggestions
-      : filter(suggestions, request.prefix, {key: 'text'});
+    const filtered = !(request.prefix === "" || (triggerChar !== '' && triggerOnly));
+    return filtered ? filter(suggestions, request.prefix, {key: 'text'}) : suggestions;
+  }
+
+  private shouldTrigger(
+    request: ac.SuggestionsRequestedEvent,
+    triggerChar: string,
+    minWordLength: number,
+  ): boolean {
+    return request.activatedManually
+        || triggerChar !== ''
+        || minWordLength <= 0
+        || request.prefix.length >= minWordLength;
+  }
+
+  private async getOrBuildSuggestions(
+    server: ActiveServer,
+    request: ac.SuggestionsRequestedEvent,
+    triggerChar: string,
+    triggerOnly: boolean,
+    onDidConvertCompletionItem?: CompletionItemAdjuster,
+  ): Promise<ac.AnySuggestion[]> {
+    const cache = this._suggestionCache.get(server);
+
+    const triggerColumn = (triggerChar !== '' && triggerOnly)
+      ? request.bufferPosition.column - triggerChar.length
+      : request.bufferPosition.column - request.prefix.length - triggerChar.length;
+    const triggerPoint = new Point(request.bufferPosition.row, triggerColumn);
+
+    // Do we have complete cached suggestions that are still valid for this request?
+    if (cache && !cache.isIncomplete && cache.triggerChar === triggerChar
+      && cache.triggerPoint.isEqual(triggerPoint)) {
+      return Array.from(cache.suggestionMap.keys());
+    }
+
+    // Our cached suggestions can't be used so obtain new ones from the language server
+    const completions = await Utils.doWithCancellationToken(server.connection, this._cancellationTokens,
+        (cancellationToken) => server.connection.completion(
+            AutocompleteAdapter.createCompletionParams(request, triggerChar, triggerOnly), cancellationToken),
+    );
+
+    // Setup the cache for subsequent filtered results
+    const isIncomplete = !Array.isArray(completions) && completions.isIncomplete;
+    const suggestionMap = this.completionItemsToSuggestions(completions, request, onDidConvertCompletionItem);
+    this._suggestionCache.set(server, {isIncomplete, triggerChar, triggerPoint, suggestionMap});
+
+    return Array.from(suggestionMap.keys());
   }
 
   // Public: Obtain a complete version of a suggestion with additional information
@@ -130,8 +155,7 @@ export default class AutocompleteAdapter {
     server: ActiveServer,
     suggestion: ac.AnySuggestion,
     request: ac.SuggestionsRequestedEvent,
-    onDidConvertCompletionItem?: (item: CompletionItem, suggestion: ac.AnySuggestion,
-                                  request: ac.SuggestionsRequestedEvent) => void,
+    onDidConvertCompletionItem?: CompletionItemAdjuster,
   ): Promise<ac.AnySuggestion> {
     const cache = this._suggestionCache.get(server);
     if (cache) {
@@ -149,17 +173,6 @@ export default class AutocompleteAdapter {
     return suggestion;
   }
 
-  // Public: Set the replacementPrefix property on all given suggestions to the
-  // prefix specified.
-  //
-  // * `suggestions` An {Array} of {atom$AutocompleteSuggestion}s to set the replacementPrefix on.
-  // * `prefix` The {string} containing the prefix that should be set as replacementPrefix on all suggestions.
-  public static setReplacementPrefixOnSuggestions(suggestions: ac.AnySuggestion[], prefix: string): void {
-    for (const suggestion of suggestions) {
-      suggestion.replacementPrefix = prefix;
-    }
-  }
-
   // Public: Get the trigger character that caused the autocomplete (if any).  This is required because
   // AutoComplete-plus does not have trigger characters.  Although the terminology is 'character' we treat
   // them as variable length strings as this will almost certainly change in the future to support '->' etc.
@@ -171,7 +184,10 @@ export default class AutocompleteAdapter {
   // if one was not matched, and the boolean is true if the trigger character is in request.prefix, and false
   // if it is in the word before request.prefix. The boolean return value has no meaning if the string return
   // value is an empty string.
-  public static getTriggerCharacter(request: ac.SuggestionsRequestedEvent, triggerChars: string[]): [string, boolean] {
+  public static getTriggerCharacter(
+    request: ac.SuggestionsRequestedEvent,
+    triggerChars: string[],
+  ): [string, boolean] {
     // AutoComplete-Plus considers text after a symbol to be a new trigger. So we should look backward
     // from the current cursor position to see if one is there and thus simulate it.
     const buffer = request.editor.getBuffer();
@@ -201,7 +217,10 @@ export default class AutocompleteAdapter {
   // * `triggerPoint` The {atom$Point} where the trigger started.
   //
   // Returns a {string} containing the prefix including the trigger character.
-  public static getPrefixWithTrigger(request: ac.SuggestionsRequestedEvent, triggerPoint: Point): string {
+  public static getPrefixWithTrigger(
+    request: ac.SuggestionsRequestedEvent,
+    triggerPoint: Point,
+  ): string {
     return request.editor
       .getBuffer()
       .getTextInRange([[triggerPoint.row, triggerPoint.column], request.bufferPosition]);
@@ -219,7 +238,10 @@ export default class AutocompleteAdapter {
   //  * `position` the position within the text document to display completion request for.
   //  * `context` containing the trigger character and kind.
   public static createCompletionParams(
-    request: ac.SuggestionsRequestedEvent, triggerCharacter: string, triggerOnly: boolean): CompletionParams {
+    request: ac.SuggestionsRequestedEvent,
+    triggerCharacter: string,
+    triggerOnly: boolean,
+  ): CompletionParams {
     return {
       textDocument: Convert.editorToTextDocumentIdentifier(request.editor),
       position: Convert.pointToPosition(request.bufferPosition),
@@ -258,8 +280,7 @@ export default class AutocompleteAdapter {
   public completionItemsToSuggestions(
     completionItems: CompletionItem[] | CompletionList,
     request: ac.SuggestionsRequestedEvent,
-    onDidConvertCompletionItem?: (item: CompletionItem, suggestion: ac.AnySuggestion,
-                                  request: ac.SuggestionsRequestedEvent) => void,
+    onDidConvertCompletionItem?: CompletionItemAdjuster,
   ): Map<ac.AnySuggestion, PossiblyResolvedCompletionItem> {
     return new Map((Array.isArray(completionItems) ? completionItems : completionItems.items || [])
       .sort((a, b) => (a.sortText || a.label).localeCompare(b.sortText || b.label))
@@ -283,8 +304,7 @@ export default class AutocompleteAdapter {
     item: CompletionItem,
     suggestion: ac.AnySuggestion,
     request: ac.SuggestionsRequestedEvent,
-    onDidConvertCompletionItem?: (item: CompletionItem, suggestion: ac.AnySuggestion,
-                                  request: ac.SuggestionsRequestedEvent) => void,
+    onDidConvertCompletionItem?: CompletionItemAdjuster,
   ): ac.AnySuggestion {
     AutocompleteAdapter.applyCompletionItemToSuggestion(item, suggestion as ac.TextSuggestion);
     AutocompleteAdapter.applyTextEditToSuggestion(item.textEdit, request.editor, suggestion as ac.TextSuggestion);
@@ -302,7 +322,10 @@ export default class AutocompleteAdapter {
   // * `suggestion` The {atom$AutocompleteSuggestion} to merge the conversion into.
   //
   // Returns an {atom$AutocompleteSuggestion} created from the {CompletionItem}.
-  public static applyCompletionItemToSuggestion(item: CompletionItem, suggestion: ac.TextSuggestion) {
+  public static applyCompletionItemToSuggestion(
+    item: CompletionItem,
+    suggestion: ac.TextSuggestion,
+  ) {
     suggestion.text = item.insertText || item.label;
     suggestion.displayText = item.label;
     suggestion.type = AutocompleteAdapter.completionKindToSuggestionType(item.kind);
