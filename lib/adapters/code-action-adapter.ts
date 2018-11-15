@@ -4,15 +4,16 @@ import assert = require('assert');
 import Convert from '../convert';
 import ApplyEditAdapter from './apply-edit-adapter';
 import {
+  CodeAction,
+  CodeActionParams,
+  Command,
   LanguageClientConnection,
   ServerCapabilities,
-  ApplyWorkspaceEditParams,
-  Command,
-  CodeAction,
+  WorkspaceEdit,
 } from '../languageclient';
 import {
-  TextEditor,
   Range,
+  TextEditor,
 } from 'atom';
 
 export default class CodeActionAdapter {
@@ -36,7 +37,7 @@ export default class CodeActionAdapter {
   public static async getCodeActions(
     connection: LanguageClientConnection,
     serverCapabilities: ServerCapabilities,
-    linterAdapter: LinterPushV2Adapter | undefined ,
+    linterAdapter: LinterPushV2Adapter | undefined,
     editor: TextEditor,
     range: Range,
     diagnostics: atomIde.Diagnostic[],
@@ -45,7 +46,60 @@ export default class CodeActionAdapter {
       return [];
     }
     assert(serverCapabilities.codeActionProvider, 'Must have the textDocument/codeAction capability');
-    const commands = await connection.codeAction({
+
+    const params = CodeActionAdapter.createCodeActionParams(linterAdapter, editor, range, diagnostics);
+    const actions = await connection.codeAction(params);
+    return actions.map((action) => CodeActionAdapter.createCodeAction(action, connection));
+  }
+
+  private static createCodeAction(
+    action: Command | CodeAction,
+    connection: LanguageClientConnection,
+  ): atomIde.CodeAction {
+    return {
+      async apply() {
+        if (CodeAction.is(action)) {
+          CodeActionAdapter.applyWorkspaceEdit(action.edit);
+          await CodeActionAdapter.executeCommand(action.command, connection);
+        } else {
+          await CodeActionAdapter.executeCommand(action, connection);
+        }
+      },
+      getTitle(): Promise<string> {
+        return Promise.resolve(action.title);
+      },
+      // tslint:disable-next-line:no-empty
+      dispose(): void {},
+    };
+  }
+
+  private static applyWorkspaceEdit(
+    edit: WorkspaceEdit | undefined,
+  ): void {
+    if (WorkspaceEdit.is(edit)) {
+      ApplyEditAdapter.onApplyEdit({ edit });
+    }
+  }
+
+  private static async executeCommand(
+    command: any,
+    connection: LanguageClientConnection,
+  ): Promise<void> {
+    if (Command.is(command)) {
+      await connection.executeCommand({
+        command: command.command,
+        arguments: command.arguments,
+      });
+    }
+  }
+
+  private static createCodeActionParams(
+    linterAdapter: LinterPushV2Adapter,
+    editor: TextEditor,
+    range: Range,
+    diagnostics: atomIde.Diagnostic[],
+  ): CodeActionParams {
+    return {
       textDocument: Convert.editorToTextDocumentIdentifier(editor),
       range: Convert.atomRangeToLSRange(range),
       context: {
@@ -63,29 +117,6 @@ export default class CodeActionAdapter {
           return converted;
         }),
       },
-    });
-    return commands.map((command) => ({
-      async apply() {
-        if (CodeAction.is(command)) {
-          if (command.edit != null) {
-            const e: ApplyWorkspaceEditParams = {
-              edit : command.edit,
-            };
-            ApplyEditAdapter.onApplyEdit(e);
-          }
-        }
-        if (Command.is(command)) {
-          await connection.executeCommand({
-            command: command.command,
-            arguments: command.arguments,
-          });
-        }
-      },
-      getTitle() {
-        return Promise.resolve(command.title);
-      },
-      // tslint:disable-next-line:no-empty
-      dispose() {},
-    }));
+    };
   }
 }
