@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@types/atom": "^1.31.0",
-    "@types/node": "^8.0.41",
+    "@types/node": "8.9.3",
     "fuzzaldrin-plus": "^0.6.0",
     "vscode-jsonrpc": "4.0.0",
     "vscode-languageserver-protocol": "3.12.0",
