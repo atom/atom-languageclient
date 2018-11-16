@@ -15,8 +15,6 @@
     "test": "npm run compile && npm run lint && atom --test build/test"
   },
   "dependencies": {
-    "@types/atom": "^1.31.0",
-    "@types/node": "8.9.3",
     "fuzzaldrin-plus": "^0.6.0",
     "vscode-jsonrpc": "4.0.0",
     "vscode-languageserver-protocol": "3.12.0",
@@ -24,10 +22,12 @@
   },
   "atomTestRunner": "./build/test/runner",
   "devDependencies": {
+    "@types/atom": "^1.31.0",
     "@types/atom-mocha-test-runner": "^1.0.2",
     "@types/chai": "^4.1.7",
     "@types/fuzzaldrin-plus": "0.0.1",
     "@types/mocha": "^5.2.5",
+    "@types/node": "8.9.3",
     "@types/sinon": "^5.0.5",
     "atom-mocha-test-runner": "^1.2.0",
     "chai": "^4.2.0",
