@@ -73,31 +73,31 @@ export class FilteredLogger {
 
   public warn(...args: any[]): void {
     if (this._predicate('warn', args)) {
-      this._logger.warn(args);
+      this._logger.warn(...args);
     }
   }
 
   public error(...args: any[]): void {
     if (this._predicate('error', args)) {
-      this._logger.error(args);
+      this._logger.error(...args);
     }
   }
 
   public info(...args: any[]): void {
     if (this._predicate('info', args)) {
-      this._logger.info(args);
+      this._logger.info(...args);
     }
   }
 
   public debug(...args: any[]): void {
     if (this._predicate('debug', args)) {
-      this._logger.debug(args);
+      this._logger.debug(...args);
     }
   }
 
   public log(...args: any[]): void {
     if (this._predicate('log', args)) {
-      this._logger.log(args);
+      this._logger.log(...args);
     }
   }
 }
