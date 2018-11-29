@@ -1,3 +1,12 @@
+## v0.9.9
+
+- Fixes (bugs introduced in v0.9.8)
+  - Logging expands the parameters out again #245
+  - CompletionItems returning null handled again
+- Removed
+  - Atom-mocha-test-runner because of vulnerable deps
+  - Flow libraries - no longer supported here
+
 ## v0.9.8
 
 - Support CodeActions that do not return Commands #239
