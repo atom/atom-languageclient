@@ -229,7 +229,7 @@ export class TextEditorSyncAdapter {
     this._bumpVersion();
     this._connection.didChangeTextDocument({
       textDocument: this.getVersionedTextDocumentIdentifier(),
-      contentChanges: [{text: this._editor.getText()}],
+      contentChanges: [{ text: this._editor.getText() }],
     });
   }
 
@@ -315,7 +315,7 @@ export class TextEditorSyncAdapter {
       return; // Other windows or editors still have this file open
     }
 
-    this._connection.didCloseTextDocument({textDocument: {uri: this.getEditorUri()}});
+    this._connection.didCloseTextDocument({ textDocument: { uri: this.getEditorUri() } });
   }
 
   // Called just before the {TextEditor} saves and sends the 'willSaveTextDocument' notification to
@@ -325,7 +325,7 @@ export class TextEditorSyncAdapter {
 
     const uri = this.getEditorUri();
     this._connection.willSaveTextDocument({
-      textDocument: {uri},
+      textDocument: { uri },
       reason: TextDocumentSaveReason.Manual,
     });
   }
@@ -342,7 +342,7 @@ export class TextEditorSyncAdapter {
     const applyEditsOrTimeout = Utils.promiseWithTimeout(
       2500, // 2.5 seconds timeout
       this._connection.willSaveWaitUntilTextDocument({
-        textDocument: {uri},
+        textDocument: { uri },
         reason: TextDocumentSaveReason.Manual,
       }),
     ).then((edits) => {
@@ -374,7 +374,7 @@ export class TextEditorSyncAdapter {
 
     const uri = this.getEditorUri();
     const didSaveNotification = {
-      textDocument: {uri, version: this._getVersion((uri))},
+      textDocument: { uri, version: this._getVersion((uri)) },
     } as DidSaveTextDocumentParams;
     if (this._documentSync.save && this._documentSync.save.includeText) {
       didSaveNotification.text = this._editor.getText();
@@ -382,7 +382,7 @@ export class TextEditorSyncAdapter {
     this._connection.didSaveTextDocument(didSaveNotification);
     if (this._fakeDidChangeWatchedFiles) {
       this._connection.didChangeWatchedFiles({
-        changes: [{uri, type: FileChangeType.Changed}],
+        changes: [{ uri, type: FileChangeType.Changed }],
       });
     }
   }
@@ -397,12 +397,15 @@ export class TextEditorSyncAdapter {
     }
 
     if (this._documentSync.openClose !== false) {
-      this._connection.didCloseTextDocument({textDocument: {uri: oldUri}});
+      this._connection.didCloseTextDocument({ textDocument: { uri: oldUri } });
     }
 
     if (this._fakeDidChangeWatchedFiles) {
       this._connection.didChangeWatchedFiles({
-        changes: [{uri: oldUri, type: FileChangeType.Deleted}, {uri: this._currentUri, type: FileChangeType.Created}],
+        changes: [
+          { uri: oldUri, type: FileChangeType.Deleted },
+          { uri: this._currentUri, type: FileChangeType.Created },
+        ],
       });
     }
 

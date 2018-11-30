@@ -8,14 +8,14 @@ describe('SignatureHelpAdapter', () => {
   describe('canAdapt', () => {
     it('checks for signatureHelpProvider', () => {
       expect(SignatureHelpAdapter.canAdapt({})).to.equal(false);
-      expect(SignatureHelpAdapter.canAdapt({signatureHelpProvider: {}})).to.equal(true);
+      expect(SignatureHelpAdapter.canAdapt({ signatureHelpProvider: {} })).to.equal(true);
     });
   });
 
   describe('can attach to a server', () => {
     it('subscribes to onPublishDiagnostics', async () => {
       const connection = createSpyConnection();
-      (connection as any).signatureHelp = sinon.stub().resolves({signatures: []});
+      (connection as any).signatureHelp = sinon.stub().resolves({ signatures: [] });
 
       const adapter = new SignatureHelpAdapter(
         {
@@ -41,10 +41,10 @@ describe('SignatureHelpAdapter', () => {
       expect((connection as any).signatureHelp.calledOnce).to.be.true;
       const params = (connection as any).signatureHelp.firstCall.args[0];
       expect(params).to.deep.equal({
-        textDocument: {uri: 'file:///test.txt'},
-        position: {line: 0, character: 1},
+        textDocument: { uri: 'file:///test.txt' },
+        position: { line: 0, character: 1 },
       });
-      expect(result).to.deep.equal({signatures: []});
+      expect(result).to.deep.equal({ signatures: [] });
     });
   });
 });

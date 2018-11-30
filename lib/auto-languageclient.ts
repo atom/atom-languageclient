@@ -207,10 +207,10 @@ export default class AutoLanguageClient {
   }
 
   // Early wire-up of listeners before initialize method is sent
-  protected preInitialization(connection: LanguageClientConnection): void {}
+  protected preInitialization(connection: LanguageClientConnection): void { }
 
   // Late wire-up of listeners after initialize method has been sent
-  protected postInitialization(server: ActiveServer): void {}
+  protected postInitialization(server: ActiveServer): void { }
 
   // Determine whether to use ipc, stdio or socket to connect to the server
   protected getConnectionType(): ConnectionType {
@@ -396,9 +396,9 @@ export default class AutoLanguageClient {
     }
 
     return rpc.createMessageConnection(reader, writer, {
-      log: (...args: any[]) => {},
-      warn: (...args: any[]) => {},
-      info: (...args: any[]) => {},
+      log: (...args: any[]) => { },
+      warn: (...args: any[]) => { },
+      info: (...args: any[]) => { },
       error: (...args: any[]) => {
         this.logger.error(args);
       },
@@ -504,7 +504,7 @@ export default class AutoLanguageClient {
   ): void {
   }
 
-  protected onDidInsertSuggestion(arg: ac.SuggestionInsertedEvent): void {}
+  protected onDidInsertSuggestion(arg: ac.SuggestionInsertedEvent): void { }
 
   // Definitions via LS documentHighlight and gotoDefinition------------
   public provideDefinitions(): atomIde.DefinitionProvider {
@@ -553,8 +553,8 @@ export default class AutoLanguageClient {
   }
 
   // Linter push v2 API via LS publishDiagnostics
-  public consumeLinterV2(registerIndie: (params: {name: string}) => linter.IndieDelegate): void {
-    this._linterDelegate = registerIndie({name: this.name});
+  public consumeLinterV2(registerIndie: (params: { name: string }) => linter.IndieDelegate): void {
+    this._linterDelegate = registerIndie({ name: this.name });
     if (this._linterDelegate == null) {
       return;
     }

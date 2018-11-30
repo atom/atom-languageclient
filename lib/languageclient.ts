@@ -19,9 +19,9 @@ export interface KnownNotifications {
 
 export interface KnownRequests {
   'window/showMessageRequest':
-    [lsp.ShowMessageRequestParams, lsp.MessageActionItem | null];
+  [lsp.ShowMessageRequestParams, lsp.MessageActionItem | null];
   'workspace/applyEdit':
-    [lsp.ApplyWorkspaceEditParams, lsp.ApplyWorkspaceEditResponse];
+  [lsp.ApplyWorkspaceEditParams, lsp.ApplyWorkspaceEditResponse];
 }
 
 export type RequestCallback<T extends keyof KnownRequests> =
@@ -99,7 +99,7 @@ export class LanguageClientConnection extends EventEmitter {
   // * `callback` The function to be called when the message is received.
   //              The payload from the message is passed to the function.
   public onCustom(method: string, callback: (obj: object) => void): void {
-    this._onNotification({method}, callback);
+    this._onNotification({ method }, callback);
   }
 
   // Public: Send a custom request
@@ -123,7 +123,7 @@ export class LanguageClientConnection extends EventEmitter {
   // * `callback` The function to be called when the `window/showMessage` message is
   //              received with {ShowMessageParams} being passed.
   public onShowMessage(callback: (params: lsp.ShowMessageParams) => void): void {
-    this._onNotification({method: 'window/showMessage'}, callback);
+    this._onNotification({ method: 'window/showMessage' }, callback);
   }
 
   // Public: Register a callback for the `window/showMessageRequest` message.
@@ -132,8 +132,8 @@ export class LanguageClientConnection extends EventEmitter {
   //              received with {ShowMessageRequestParam}' being passed.
   // Returns a {Promise} containing the {MessageActionItem}.
   public onShowMessageRequest(callback: (params: lsp.ShowMessageRequestParams)
-  => Promise<lsp.MessageActionItem | null>): void {
-    this._onRequest({method: 'window/showMessageRequest'}, callback);
+    => Promise<lsp.MessageActionItem | null>): void {
+    this._onRequest({ method: 'window/showMessageRequest' }, callback);
   }
 
   // Public: Register a callback for the `window/logMessage` message.
@@ -141,7 +141,7 @@ export class LanguageClientConnection extends EventEmitter {
   // * `callback` The function to be called when the `window/logMessage` message is
   //              received with {LogMessageParams} being passed.
   public onLogMessage(callback: (params: lsp.LogMessageParams) => void): void {
-    this._onNotification({method: 'window/logMessage'}, callback);
+    this._onNotification({ method: 'window/logMessage' }, callback);
   }
 
   // Public: Register a callback for the `telemetry/event` message.
@@ -149,7 +149,7 @@ export class LanguageClientConnection extends EventEmitter {
   // * `callback` The function to be called when the `telemetry/event` message is
   //              received with any parameters received being passed on.
   public onTelemetryEvent(callback: (...args: any[]) => void): void {
-    this._onNotification({method: 'telemetry/event'}, callback);
+    this._onNotification({ method: 'telemetry/event' }, callback);
   }
 
   // Public: Register a callback for the `workspace/applyEdit` message.
@@ -158,8 +158,8 @@ export class LanguageClientConnection extends EventEmitter {
   //              received with {ApplyWorkspaceEditParams} being passed.
   // Returns a {Promise} containing the {ApplyWorkspaceEditResponse}.
   public onApplyEdit(callback: (params: lsp.ApplyWorkspaceEditParams) =>
-  Promise<lsp.ApplyWorkspaceEditResponse>): void {
-    this._onRequest({method: 'workspace/applyEdit'}, callback);
+    Promise<lsp.ApplyWorkspaceEditResponse>): void {
+    this._onRequest({ method: 'workspace/applyEdit' }, callback);
   }
 
   // Public: Send a `workspace/didChangeConfiguration` notification.
@@ -229,7 +229,7 @@ export class LanguageClientConnection extends EventEmitter {
   // * `callback` The function to be called when the `textDocument/publishDiagnostics` message is
   //              received a {PublishDiagnosticsParams} containing new {Diagnostic} messages for a given uri.
   public onPublishDiagnostics(callback: (params: lsp.PublishDiagnosticsParams) => void): void {
-    this._onNotification({method: 'textDocument/publishDiagnostics'}, callback);
+    this._onNotification({ method: 'textDocument/publishDiagnostics' }, callback);
   }
 
   // Public: Send a `textDocument/completion` request.
@@ -416,7 +416,7 @@ export class LanguageClientConnection extends EventEmitter {
   }
 
   private _onRequest<T extends Extract<keyof KnownRequests, string>>(
-    type: {method: T}, callback: RequestCallback<T>,
+    type: { method: T }, callback: RequestCallback<T>,
   ): void {
     this._rpc.onRequest(type.method, (value) => {
       this._log.debug(`rpc.onRequest ${type.method}`, value);
@@ -425,7 +425,7 @@ export class LanguageClientConnection extends EventEmitter {
   }
 
   private _onNotification<T extends Extract<keyof KnownNotifications, string>>(
-    type: {method: T}, callback: (obj: KnownNotifications[T]) => void,
+    type: { method: T }, callback: (obj: KnownNotifications[T]) => void,
   ): void {
     this._rpc.onNotification(type.method, (value: any) => {
       this._log.debug(`rpc.onNotification ${type.method}`, value);

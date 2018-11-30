@@ -74,7 +74,7 @@ export default class ApplyEditAdapter {
       // Get an existing editor for the file, or open a new one if it doesn't exist.
       const edits = Convert.convertLsTextEdits(changes[uri]);
       const checkpoint = ApplyEditAdapter.applyEdits(buffer, edits);
-      checkpoints.push({buffer, checkpoint});
+      checkpoints.push({ buffer, checkpoint });
     });
 
     // Apply all edits or fail and revert everything
@@ -85,13 +85,13 @@ export default class ApplyEditAdapter {
           description: 'Failed to apply edits.',
           detail: err.message,
         });
-        checkpoints.forEach(({buffer, checkpoint}) => {
+        checkpoints.forEach(({ buffer, checkpoint }) => {
           buffer.revertToCheckpoint(checkpoint);
         });
         return false;
       });
 
-    return {applied};
+    return { applied };
   }
 
   // Private: Do some basic sanity checking on the edit ranges.

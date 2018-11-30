@@ -6,7 +6,7 @@ import { Point } from 'atom';
 
 describe('OutlineViewAdapter', () => {
   const createRange = (a: any, b: any, c: any, d: any) => (
-    {start: {line: a, character: b}, end: {line: c, character: d}}
+    { start: { line: a, character: b }, end: { line: c, character: d } }
   );
 
   const createLocation = (a: any, b: any, c: any, d: any) => ({
@@ -23,7 +23,7 @@ describe('OutlineViewAdapter', () => {
 
   describe('canAdapt', () => {
     it('returns true if documentSymbolProvider is supported', () => {
-      const result = OutlineViewAdapter.canAdapt({documentSymbolProvider: true});
+      const result = OutlineViewAdapter.canAdapt({ documentSymbolProvider: true });
       expect(result).to.be.true;
     });
 
@@ -142,7 +142,7 @@ describe('OutlineViewAdapter', () => {
     });
 
     it('creates a single converted root item from a single source item', () => {
-      const sourceItem = {kind: ls.SymbolKind.Namespace, name: 'R', location: createLocation(5, 6, 7, 8)};
+      const sourceItem = { kind: ls.SymbolKind.Namespace, name: 'R', location: createLocation(5, 6, 7, 8) };
       const expected = OutlineViewAdapter.symbolToOutline(sourceItem);
       const result = OutlineViewAdapter.createOutlineTrees([sourceItem]);
       expect(result).to.deep.equal([expected]);
@@ -183,9 +183,19 @@ describe('OutlineViewAdapter', () => {
 
     it('creates a simple named hierarchy', () => {
       const sourceItems = [
-        {kind: ls.SymbolKind.Namespace, name: 'java.com', location: createLocation(1, 0, 10, 0)},
-        {kind: ls.SymbolKind.Class, name: 'Program', location: createLocation(2, 0, 7, 0), containerName: 'java.com'},
-        {kind: ls.SymbolKind.Function, name: 'main', location: createLocation(4, 0, 5, 0), containerName: 'Program'},
+        { kind: ls.SymbolKind.Namespace, name: 'java.com', location: createLocation(1, 0, 10, 0) },
+        {
+          kind: ls.SymbolKind.Class,
+          name: 'Program',
+          location: createLocation(2, 0, 7, 0),
+          containerName: 'java.com',
+        },
+        {
+          kind: ls.SymbolKind.Function,
+          name: 'main',
+          location: createLocation(4, 0, 5, 0),
+          containerName: 'Program',
+        },
       ];
       const result = OutlineViewAdapter.createOutlineTrees(sourceItems);
       expect(result.length).to.equal(1);
@@ -197,9 +207,14 @@ describe('OutlineViewAdapter', () => {
 
     it('retains duplicate named items', () => {
       const sourceItems = [
-        {kind: ls.SymbolKind.Namespace, name: 'duplicate', location: createLocation(1, 0, 5, 0)},
-        {kind: ls.SymbolKind.Namespace, name: 'duplicate', location: createLocation(6, 0, 10, 0)},
-        {kind: ls.SymbolKind.Function, name: 'main', location: createLocation(7, 0, 8, 0), containerName: 'duplicate'},
+        { kind: ls.SymbolKind.Namespace, name: 'duplicate', location: createLocation(1, 0, 5, 0) },
+        { kind: ls.SymbolKind.Namespace, name: 'duplicate', location: createLocation(6, 0, 10, 0) },
+        {
+          kind: ls.SymbolKind.Function,
+          name: 'main',
+          location: createLocation(7, 0, 8, 0),
+          containerName: 'duplicate',
+        },
       ];
       const result = OutlineViewAdapter.createOutlineTrees(sourceItems);
       expect(result.length).to.equal(2);
@@ -209,9 +224,14 @@ describe('OutlineViewAdapter', () => {
 
     it('disambiguates containerName based on range', () => {
       const sourceItems = [
-        {kind: ls.SymbolKind.Namespace, name: 'duplicate', location: createLocation(1, 0, 5, 0)},
-        {kind: ls.SymbolKind.Namespace, name: 'duplicate', location: createLocation(6, 0, 10, 0)},
-        {kind: ls.SymbolKind.Function, name: 'main', location: createLocation(7, 0, 8, 0), containerName: 'duplicate'},
+        { kind: ls.SymbolKind.Namespace, name: 'duplicate', location: createLocation(1, 0, 5, 0) },
+        { kind: ls.SymbolKind.Namespace, name: 'duplicate', location: createLocation(6, 0, 10, 0) },
+        {
+          kind: ls.SymbolKind.Function,
+          name: 'main',
+          location: createLocation(7, 0, 8, 0),
+          containerName: 'duplicate',
+        },
       ];
       const result = OutlineViewAdapter.createOutlineTrees(sourceItems);
       expect(result[1].children.length).to.equal(1);
@@ -220,7 +240,7 @@ describe('OutlineViewAdapter', () => {
 
     it("does not become it's own parent", () => {
       const sourceItems = [
-        {kind: ls.SymbolKind.Namespace, name: 'duplicate', location: createLocation(1, 0, 10, 0)},
+        { kind: ls.SymbolKind.Namespace, name: 'duplicate', location: createLocation(1, 0, 10, 0) },
         {
           kind: ls.SymbolKind.Namespace,
           name: 'duplicate',
@@ -248,14 +268,14 @@ describe('OutlineViewAdapter', () => {
 
     it('parents to the innnermost named container', () => {
       const sourceItems = [
-        {kind: ls.SymbolKind.Namespace, name: 'turtles', location: createLocation(1, 0, 10, 0)},
+        { kind: ls.SymbolKind.Namespace, name: 'turtles', location: createLocation(1, 0, 10, 0) },
         {
           kind: ls.SymbolKind.Namespace,
           name: 'turtles',
           location: createLocation(4, 0, 8, 0),
           containerName: 'turtles',
         },
-        {kind: ls.SymbolKind.Class, name: 'disc', location: createLocation(4, 0, 5, 0), containerName: 'turtles'},
+        { kind: ls.SymbolKind.Class, name: 'disc', location: createLocation(4, 0, 5, 0), containerName: 'turtles' },
       ];
       const result = OutlineViewAdapter.createOutlineTrees(sourceItems);
       expect(result.length).to.equal(1);
@@ -316,7 +336,7 @@ describe('OutlineViewAdapter', () => {
 
   describe('symbolToOutline', () => {
     it('converts an individual item', () => {
-      const sourceItem = {kind: ls.SymbolKind.Class, name: 'Program', location: createLocation(1, 2, 3, 4)};
+      const sourceItem = { kind: ls.SymbolKind.Class, name: 'Program', location: createLocation(1, 2, 3, 4) };
       const result = OutlineViewAdapter.symbolToOutline(sourceItem);
       expect(result.icon).to.equal('type-class');
       expect(result.representativeName).to.equal('Program');

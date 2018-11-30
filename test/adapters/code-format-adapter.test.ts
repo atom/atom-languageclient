@@ -58,7 +58,7 @@ describe('CodeFormatAdapter', () => {
     it('falls back to document formatting if range formatting not available', () => {
       const rangeStub = sinon.spy(connection, 'documentRangeFormatting');
       const docStub = sinon.spy(connection, 'documentFormatting');
-      CodeFormatAdapter.format(connection, {documentFormattingProvider: true}, fakeEditor, range);
+      CodeFormatAdapter.format(connection, { documentFormattingProvider: true }, fakeEditor, range);
       expect(rangeStub.called).to.be.false;
       expect(docStub.called).to.be.true;
     });
@@ -73,15 +73,15 @@ describe('CodeFormatAdapter', () => {
       sinon.stub(connection, 'documentFormatting').resolves([
         {
           range: {
-            start: {line: 0, character: 1},
-            end: {line: 0, character: 2},
+            start: { line: 0, character: 1 },
+            end: { line: 0, character: 2 },
           },
           newText: 'abc',
         },
         {
           range: {
-            start: {line: 5, character: 10},
-            end: {line: 15, character: 20},
+            start: { line: 5, character: 10 },
+            end: { line: 15, character: 20 },
           },
           newText: 'def',
         },
@@ -105,7 +105,7 @@ describe('CodeFormatAdapter', () => {
 
       const actual = CodeFormatAdapter.createDocumentFormattingParams(fakeEditor);
 
-      expect(actual.textDocument).to.eql({uri: 'file:///a/b/c/d.txt'});
+      expect(actual.textDocument).to.eql({ uri: 'file:///a/b/c/d.txt' });
       expect(actual.options.tabSize).to.equal(1);
       expect(actual.options.insertSpaces).to.equal(false);
     });
@@ -116,15 +116,15 @@ describe('CodeFormatAdapter', () => {
       sinon.stub(connection, 'documentRangeFormatting').resolves([
         {
           range: {
-            start: {line: 0, character: 1},
-            end: {line: 0, character: 2},
+            start: { line: 0, character: 1 },
+            end: { line: 0, character: 2 },
           },
           newText: 'abc',
         },
         {
           range: {
-            start: {line: 5, character: 10},
-            end: {line: 15, character: 20},
+            start: { line: 5, character: 10 },
+            end: { line: 15, character: 20 },
           },
           newText: 'def',
         },
@@ -148,10 +148,10 @@ describe('CodeFormatAdapter', () => {
 
       const actual = CodeFormatAdapter.createDocumentRangeFormattingParams(fakeEditor, new Range([1, 0], [2, 3]));
 
-      expect(actual.textDocument).to.eql({uri: 'file:///a/b/c/d.txt'});
+      expect(actual.textDocument).to.eql({ uri: 'file:///a/b/c/d.txt' });
       expect(actual.range).to.eql({
-        start: {line: 1, character: 0},
-        end: {line: 2, character: 3},
+        start: { line: 1, character: 0 },
+        end: { line: 2, character: 3 },
       });
       expect(actual.options.tabSize).to.equal(1);
       expect(actual.options.insertSpaces).to.equal(false);
@@ -176,8 +176,8 @@ describe('CodeFormatAdapter', () => {
     it('returns oldRange and newText from a textEdit', () => {
       const textEdit = {
         range: {
-          start: {line: 1, character: 0},
-          end: {line: 2, character: 3},
+          start: { line: 1, character: 0 },
+          end: { line: 2, character: 3 },
         },
         newText: 'abc-def',
       };

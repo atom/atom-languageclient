@@ -93,7 +93,7 @@ export default class AutocompleteAdapter {
     }
 
     const filtered = !(request.prefix === "" || (triggerChar !== '' && triggerOnly));
-    return filtered ? filter(suggestions, request.prefix, {key: 'text'}) : suggestions;
+    return filtered ? filter(suggestions, request.prefix, { key: 'text' }) : suggestions;
   }
 
   private shouldTrigger(
@@ -102,9 +102,9 @@ export default class AutocompleteAdapter {
     minWordLength: number,
   ): boolean {
     return request.activatedManually
-        || triggerChar !== ''
-        || minWordLength <= 0
-        || request.prefix.length >= minWordLength;
+      || triggerChar !== ''
+      || minWordLength <= 0
+      || request.prefix.length >= minWordLength;
   }
 
   private async getOrBuildSuggestions(
@@ -129,14 +129,14 @@ export default class AutocompleteAdapter {
 
     // Our cached suggestions can't be used so obtain new ones from the language server
     const completions = await Utils.doWithCancellationToken(server.connection, this._cancellationTokens,
-        (cancellationToken) => server.connection.completion(
-            AutocompleteAdapter.createCompletionParams(request, triggerChar, triggerOnly), cancellationToken),
+      (cancellationToken) => server.connection.completion(
+        AutocompleteAdapter.createCompletionParams(request, triggerChar, triggerOnly), cancellationToken),
     );
 
     // Setup the cache for subsequent filtered results
     const isComplete = Array.isArray(completions) || completions.isIncomplete === false;
     const suggestionMap = this.completionItemsToSuggestions(completions, request, onDidConvertCompletionItem);
-    this._suggestionCache.set(server, {isIncomplete: !isComplete, triggerChar, triggerPoint, suggestionMap});
+    this._suggestionCache.set(server, { isIncomplete: !isComplete, triggerChar, triggerPoint, suggestionMap });
 
     return Array.from(suggestionMap.keys());
   }
@@ -259,11 +259,11 @@ export default class AutocompleteAdapter {
   // if there is one.
   public static createCompletionContext(triggerCharacter: string, triggerOnly: boolean): CompletionContext {
     if (triggerCharacter === '') {
-      return {triggerKind: CompletionTriggerKind.Invoked};
+      return { triggerKind: CompletionTriggerKind.Invoked };
     } else {
       return triggerOnly
-        ? {triggerKind: CompletionTriggerKind.TriggerCharacter, triggerCharacter}
-        : {triggerKind: CompletionTriggerKind.TriggerForIncompleteCompletions, triggerCharacter};
+        ? { triggerKind: CompletionTriggerKind.TriggerCharacter, triggerCharacter }
+        : { triggerKind: CompletionTriggerKind.TriggerForIncompleteCompletions, triggerCharacter };
     }
   }
 
@@ -288,7 +288,7 @@ export default class AutocompleteAdapter {
         (s) => [
           AutocompleteAdapter.completionItemToSuggestion(
             s, {} as ac.AnySuggestion, request, onDidConvertCompletionItem),
-            new PossiblyResolvedCompletionItem(s, false)]));
+          new PossiblyResolvedCompletionItem(s, false)]));
   }
 
   // Public: Convert a language server protocol CompletionItem to an AutoComplete+ suggestion.
@@ -332,12 +332,12 @@ export default class AutocompleteAdapter {
     suggestion.rightLabel = item.detail;
 
     // Older format, can't know what it is so assign to both and hope for best
-    if (typeof(item.documentation) === 'string') {
+    if (typeof (item.documentation) === 'string') {
       suggestion.descriptionMarkdown = item.documentation;
       suggestion.description = item.documentation;
     }
 
-    if (item.documentation != null && typeof(item.documentation) === 'object') {
+    if (item.documentation != null && typeof (item.documentation) === 'object') {
       // Newer format specifies the kind of documentation, assign appropriately
       if (item.documentation.kind === 'markdown') {
         suggestion.descriptionMarkdown = item.documentation.value;

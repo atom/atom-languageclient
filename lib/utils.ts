@@ -38,12 +38,12 @@ export function escapeRegExp(string: string): string {
 }
 
 function _getRegexpRangeAtPosition(buffer: TextBuffer, position: Point, wordRegex: RegExp): Range | null {
-  const {row, column} = position;
+  const { row, column } = position;
   const rowRange = buffer.rangeForRow(row, false);
   let matchData: BufferScanResult | undefined | null;
   // Extract the expression from the row text.
   buffer.scanInRange(wordRegex, rowRange, (data) => {
-    const {range} = data;
+    const { range } = data;
     if (
       position.isGreaterThanOrEqual(range.start) &&
       // Range endpoints are exclusive.

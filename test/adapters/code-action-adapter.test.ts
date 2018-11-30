@@ -39,7 +39,7 @@ describe('CodeActionAdapter', () => {
       const testPath = '/test.txt';
       const actions = await CodeActionAdapter.getCodeActions(
         languageClient,
-        {codeActionProvider: true},
+        { codeActionProvider: true },
         linterAdapter,
         createFakeEditor(testPath),
         new Range([1, 2], [3, 4]),
@@ -59,14 +59,14 @@ describe('CodeActionAdapter', () => {
       const params: ls.CodeActionParams = args[0];
       expect(params.textDocument.uri).to.equal('file://' + testPath);
       expect(params.range).to.deep.equal({
-        start: {line: 1, character: 2},
-        end: {line: 3, character: 4},
+        start: { line: 1, character: 2 },
+        end: { line: 3, character: 4 },
       });
       expect(params.context.diagnostics).to.deep.equal([
         {
           range: {
-            start: {line: 1, character: 2},
-            end: {line: 3, character: 3},
+            start: { line: 1, character: 2 },
+            end: { line: 3, character: 3 },
           },
           severity: ls.DiagnosticSeverity.Error,
           code: 'test code',

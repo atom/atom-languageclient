@@ -41,7 +41,7 @@ export default class OutlineViewAdapter {
   // Returns a {Promise} containing the {Outline} of this document.
   public async getOutline(connection: LanguageClientConnection, editor: TextEditor): Promise<atomIde.Outline | null> {
     const results = await Utils.doWithCancellationToken(connection, this._cancellationTokens, (cancellationToken) =>
-      connection.documentSymbol({textDocument: Convert.editorToTextDocumentIdentifier(editor)}, cancellationToken),
+      connection.documentSymbol({ textDocument: Convert.editorToTextDocumentIdentifier(editor) }, cancellationToken),
     );
 
     if (results.length === 0) {

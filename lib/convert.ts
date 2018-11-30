@@ -59,7 +59,7 @@ export default class Convert {
   //
   // Returns the {Position} representation of the Atom {PointObject}.
   public static pointToPosition(point: Point): ls.Position {
-    return {line: point.row, character: point.column};
+    return { line: point.row, character: point.column };
   }
 
   // Public: Convert a language server {Position} into an Atom {PointObject}.
@@ -99,7 +99,7 @@ export default class Convert {
   // Returns a {TextDocumentIdentifier} that has a `uri` property with the Uri for the
   // given editor's path.
   public static editorToTextDocumentIdentifier(editor: TextEditor): ls.TextDocumentIdentifier {
-    return {uri: Convert.pathToUri(editor.getPath() || '')};
+    return { uri: Convert.pathToUri(editor.getPath() || '') };
   }
 
   // Public: Create a {TextDocumentPositionParams} from a {TextEditor} and optional {Point}.
@@ -162,18 +162,18 @@ export default class Convert {
   public static atomFileEventToLSFileEvents(fileEvent: FilesystemChange): ls.FileEvent[] {
     switch (fileEvent.action) {
       case 'created':
-        return [{uri: Convert.pathToUri(fileEvent.path), type: ls.FileChangeType.Created}];
+        return [{ uri: Convert.pathToUri(fileEvent.path), type: ls.FileChangeType.Created }];
       case 'modified':
-        return [{uri: Convert.pathToUri(fileEvent.path), type: ls.FileChangeType.Changed}];
+        return [{ uri: Convert.pathToUri(fileEvent.path), type: ls.FileChangeType.Changed }];
       case 'deleted':
-        return [{uri: Convert.pathToUri(fileEvent.path), type: ls.FileChangeType.Deleted}];
+        return [{ uri: Convert.pathToUri(fileEvent.path), type: ls.FileChangeType.Deleted }];
       case 'renamed': {
         const results: Array<{ uri: string, type: ls.FileChangeType }> = [];
         if (fileEvent.oldPath) {
-          results.push({uri: Convert.pathToUri(fileEvent.oldPath), type: ls.FileChangeType.Deleted});
+          results.push({ uri: Convert.pathToUri(fileEvent.oldPath), type: ls.FileChangeType.Deleted });
         }
         if (fileEvent.path) {
-          results.push({uri: Convert.pathToUri(fileEvent.path), type: ls.FileChangeType.Created});
+          results.push({ uri: Convert.pathToUri(fileEvent.path), type: ls.FileChangeType.Created });
         }
         return results;
       }

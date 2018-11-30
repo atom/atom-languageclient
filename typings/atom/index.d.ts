@@ -1,4 +1,4 @@
-export {};
+export { };
 declare module 'atom' {
   interface TextEditor {
     getNonWordCharacters(position: Point): string;

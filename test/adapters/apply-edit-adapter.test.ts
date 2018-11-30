@@ -38,15 +38,15 @@ describe('ApplyEditAdapter', () => {
             [Convert.pathToUri(TEST_PATH1)]: [
               {
                 range: {
-                  start: {line: 0, character: 0},
-                  end: {line: 0, character: 3},
+                  start: { line: 0, character: 0 },
+                  end: { line: 0, character: 3 },
                 },
                 newText: 'def',
               },
               {
                 range: {
-                  start: {line: 1, character: 0},
-                  end: {line: 1, character: 3},
+                  start: { line: 1, character: 0 },
+                  end: { line: 1, character: 3 },
                 },
                 newText: 'ghi',
               },
@@ -77,15 +77,15 @@ describe('ApplyEditAdapter', () => {
             edits: [
               {
                 range: {
-                  start: {line: 0, character: 0},
-                  end: {line: 0, character: 3},
+                  start: { line: 0, character: 0 },
+                  end: { line: 0, character: 3 },
                 },
                 newText: 'def',
               },
               {
                 range: {
-                  start: {line: 1, character: 0},
-                  end: {line: 1, character: 3},
+                  start: { line: 1, character: 0 },
+                  end: { line: 1, character: 3 },
                 },
                 newText: 'ghi',
               },
@@ -109,8 +109,8 @@ describe('ApplyEditAdapter', () => {
             [TEST_PATH2]: [
               {
                 range: {
-                  start: {line: 0, character: 0},
-                  end: {line: 0, character: 0},
+                  start: { line: 0, character: 0 },
+                  end: { line: 0, character: 0 },
                 },
                 newText: 'abc',
               },
@@ -134,15 +134,15 @@ describe('ApplyEditAdapter', () => {
             [TEST_PATH3]: [
               {
                 range: {
-                  start: {line: 0, character: 0},
-                  end: {line: 0, character: 3},
+                  start: { line: 0, character: 0 },
+                  end: { line: 0, character: 3 },
                 },
                 newText: 'def',
               },
               {
                 range: {
-                  start: {line: 0, character: 2},
-                  end: {line: 0, character: 4},
+                  start: { line: 0, character: 2 },
+                  end: { line: 0, character: 4 },
                 },
                 newText: 'ghi',
               },
@@ -169,8 +169,8 @@ describe('ApplyEditAdapter', () => {
             [TEST_PATH4]: [
               {
                 range: {
-                  start: {line: 0, character: 1},
-                  end: {line: 0, character: 2},
+                  start: { line: 0, character: 1 },
+                  end: { line: 0, character: 2 },
                 },
                 newText: 'def',
               },

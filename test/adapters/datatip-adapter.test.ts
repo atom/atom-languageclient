@@ -21,7 +21,7 @@ describe('DatatipAdapter', () => {
 
   describe('canAdapt', () => {
     it('returns true if hoverProvider is supported', () => {
-      const result = DatatipAdapter.canAdapt({hoverProvider: true});
+      const result = DatatipAdapter.canAdapt({ hoverProvider: true });
       expect(result).to.be.true;
     });
 
@@ -35,10 +35,10 @@ describe('DatatipAdapter', () => {
     it('calls LSP document/hover at the given position', async () => {
       sinon.stub(connection, 'hover').resolves({
         range: {
-          start: {line: 0, character: 1},
-          end: {line: 0, character: 2},
+          start: { line: 0, character: 1 },
+          end: { line: 0, character: 2 },
         },
-        contents: ['test', {language: 'testlang', value: 'test snippet'}],
+        contents: ['test', { language: 'testlang', value: 'test snippet' }],
       });
 
       const grammarSpy = sinon.spy(atom.grammars, 'grammarForScopeName');
@@ -55,7 +55,7 @@ describe('DatatipAdapter', () => {
         expect(datatip.range.end.column).equal(2);
 
         expect(datatip.markedStrings).to.have.lengthOf(2);
-        expect(datatip.markedStrings[0]).eql({type: 'markdown', value: 'test'});
+        expect(datatip.markedStrings[0]).eql({ type: 'markdown', value: 'test' });
 
         const snippet = datatip.markedStrings[1];
         expect(snippet.type).equal('snippet');

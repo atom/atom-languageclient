@@ -27,21 +27,21 @@ describe('DocumentSyncAdapter', () => {
 
     it('returns true if v3 incremental change notifications are supported', () => {
       const result = DocumentSyncAdapter.canAdapt({
-        textDocumentSync: {change: TextDocumentSyncKind.Incremental},
+        textDocumentSync: { change: TextDocumentSyncKind.Incremental },
       });
       expect(result).to.be.true;
     });
 
     it('returns true if v3 full change notifications are supported', () => {
       const result = DocumentSyncAdapter.canAdapt({
-        textDocumentSync: {change: TextDocumentSyncKind.Full},
+        textDocumentSync: { change: TextDocumentSyncKind.Full },
       });
       expect(result).to.be.true;
     });
 
     it('returns false if v3 none change notifications are supported', () => {
       const result = DocumentSyncAdapter.canAdapt({
-        textDocumentSync: {change: TextDocumentSyncKind.None},
+        textDocumentSync: { change: TextDocumentSyncKind.None },
       });
       expect(result).to.be.false;
     });
@@ -63,12 +63,12 @@ describe('DocumentSyncAdapter', () => {
     });
 
     it('sets _documentSync.change correctly Incremental for v3 capabilities', () => {
-      const result = create({change: TextDocumentSyncKind.Incremental})._documentSync.change;
+      const result = create({ change: TextDocumentSyncKind.Incremental })._documentSync.change;
       expect(result).equals(TextDocumentSyncKind.Incremental);
     });
 
     it('sets _documentSync.change correctly Full for v3 capabilities', () => {
-      const result = create({change: TextDocumentSyncKind.Full})._documentSync.change;
+      const result = create({ change: TextDocumentSyncKind.Full })._documentSync.change;
       expect(result).equals(TextDocumentSyncKind.Full);
     });
 

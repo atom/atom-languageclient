@@ -69,7 +69,7 @@ export default class CodeActionAdapter {
         return Promise.resolve(action.title);
       },
       // tslint:disable-next-line:no-empty
-      dispose(): void {},
+      dispose(): void { },
     };
   }
 

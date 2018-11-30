@@ -67,7 +67,7 @@ export default class FindReferencesAdapter {
     return {
       textDocument: Convert.editorToTextDocumentIdentifier(editor),
       position: Convert.pointToPosition(point),
-      context: {includeDeclaration: true},
+      context: { includeDeclaration: true },
     };
   }
 

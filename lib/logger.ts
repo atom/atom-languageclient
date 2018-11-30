@@ -1,4 +1,4 @@
- // tslint:disable:no-console
+// tslint:disable:no-console
 
 export interface Logger {
   warn(...args: any[]): void;
@@ -52,11 +52,11 @@ export class ConsoleLogger {
 }
 
 export class NullLogger {
-  public warn(...args: any[]): void {}
-  public error(...args: any[]): void {}
-  public info(...args: any[]): void {}
-  public log(...args: any[]): void {}
-  public debug(...args: any[]): void {}
+  public warn(...args: any[]): void { }
+  public error(...args: any[]): void { }
+  public info(...args: any[]): void { }
+  public log(...args: any[]): void { }
+  public debug(...args: any[]): void { }
 }
 
 export class FilteredLogger {

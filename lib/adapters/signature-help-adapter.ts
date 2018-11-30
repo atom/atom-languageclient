@@ -36,7 +36,7 @@ export default class SignatureHelpAdapter {
   }
 
   public attach(register: atomIde.SignatureHelpRegistry): void {
-    const {signatureHelpProvider} = this._capabilities;
+    const { signatureHelpProvider } = this._capabilities;
     assert(signatureHelpProvider != null);
 
     let triggerCharacters: Set<string> | undefined;

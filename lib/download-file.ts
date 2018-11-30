@@ -18,7 +18,7 @@ export default (async function downloadFile(
   length?: number,
 ): Promise<void> {
   const request = new Request(sourceUrl, {
-    headers: new Headers({'Content-Type': 'application/octet-stream'}),
+    headers: new Headers({ 'Content-Type': 'application/octet-stream' }),
   });
 
   const response = await fetch(request);

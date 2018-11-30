@@ -30,15 +30,15 @@ describe('LinterPushV2Adapter', () => {
       const diagnostic: ls.Diagnostic = {
         message: 'This is a message',
         range: {
-          start: {line: 1, character: 2},
-          end: {line: 3, character: 4},
+          start: { line: 1, character: 2 },
+          end: { line: 3, character: 4 },
         },
         source: 'source',
         code: 'code',
         severity: ls.DiagnosticSeverity.Information,
       };
 
-      const connection: any = {onPublishDiagnostics() {}};
+      const connection: any = { onPublishDiagnostics() { } };
       const adapter = new LinterPushV2Adapter(connection);
       const result = adapter.diagnosticToV2Message(filePath, diagnostic);
 
@@ -83,8 +83,8 @@ describe('LinterPushV2Adapter', () => {
           {
             message: 'Test message',
             range: {
-              start: {line: 1, character: 2},
-              end: {line: 3, character: 4},
+              start: { line: 1, character: 2 },
+              end: { line: 3, character: 4 },
             },
             source: 'source',
             code: 'test code',

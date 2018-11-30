@@ -92,7 +92,7 @@ export class ServerManager {
   private async _handleTextEditor(editor: TextEditor): Promise<void> {
     if (!this._editorToServer.has(editor)) {
       // editor hasn't been processed yet, so process it by allocating LS for it if necessary
-      const server = await this.getServer(editor, {shouldStart: true});
+      const server = await this.getServer(editor, { shouldStart: true });
       if (server != null) {
         // There LS for the editor (either started now and already running)
         this._editorToServer.set(editor, server);
@@ -129,7 +129,7 @@ export class ServerManager {
 
   public async getServer(
     textEditor: TextEditor,
-    {shouldStart}: {shouldStart?: boolean} = {shouldStart: false},
+    { shouldStart }: { shouldStart?: boolean } = { shouldStart: false },
   ): Promise<ActiveServer | null> {
     const finalProjectPath = this.determineProjectPath(textEditor);
     if (finalProjectPath == null) {
@@ -297,7 +297,7 @@ export class ServerManager {
         }
       }
       if (changes.length > 0) {
-        activeServer.connection.didChangeWatchedFiles({changes});
+        activeServer.connection.didChangeWatchedFiles({ changes });
       }
     }
   }

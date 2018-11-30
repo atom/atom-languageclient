@@ -10,7 +10,7 @@ import {
 
 let originalPlatform: NodeJS.Platform;
 const setProcessPlatform = (platform: any) => {
-  Object.defineProperty(process, 'platform', {value: platform});
+  Object.defineProperty(process, 'platform', { value: platform });
 };
 
 const createFakeEditor = (path: string, text?: string): TextEditor => {
@@ -27,7 +27,7 @@ describe('Convert', () => {
     originalPlatform = process.platform;
   });
   afterEach(() => {
-    Object.defineProperty(process, 'platform', {value: originalPlatform});
+    Object.defineProperty(process, 'platform', { value: originalPlatform });
   });
 
   describe('pathToUri', () => {
@@ -101,7 +101,7 @@ describe('Convert', () => {
 
   describe('positionToPoint', () => {
     it('converts a LSP position to an Atom Point-array', () => {
-      const position = {line: 3, character: 4};
+      const position = { line: 3, character: 4 };
       const point = Convert.positionToPoint(position);
       expect(point.row).equals(position.line);
       expect(point.column).equals(position.character);
@@ -111,8 +111,8 @@ describe('Convert', () => {
   describe('lsRangeToAtomRange', () => {
     it('converts a LSP range to an Atom Range-array', () => {
       const lspRange = {
-        start: {character: 5, line: 6},
-        end: {line: 7, character: 8},
+        start: { character: 5, line: 6 },
+        end: { line: 7, character: 8 },
       };
       const atomRange = Convert.lsRangeToAtomRange(lspRange);
       expect(atomRange.start.row).equals(lspRange.start.line);
@@ -148,7 +148,7 @@ describe('Convert', () => {
       editor.setCursorBufferPosition(new Point(1, 2));
       const params = Convert.editorToTextDocumentPositionParams(editor);
       expect(params.textDocument.uri).equals('file://' + path);
-      expect(params.position).deep.equals({line: 1, character: 2});
+      expect(params.position).deep.equals({ line: 1, character: 2 });
     });
 
     it('uses the cursor position parameter when specified', () => {
@@ -158,7 +158,7 @@ describe('Convert', () => {
       editor.setCursorBufferPosition(new Point(1, 1));
       const params = Convert.editorToTextDocumentPositionParams(editor, specifiedPoint);
       expect(params.textDocument.uri).equals('file://' + path);
-      expect(params.position).deep.equals({line: 911, character: 112});
+      expect(params.position).deep.equals({ line: 911, character: 112 });
     });
   });
 
@@ -196,28 +196,28 @@ describe('Convert', () => {
 
   describe('atomFileEventToLSFileEvents', () => {
     it('converts a created event', () => {
-      const source: FilesystemChange = {path: '/a/b/c/d.txt', action: 'created'};
+      const source: FilesystemChange = { path: '/a/b/c/d.txt', action: 'created' };
       const converted = Convert.atomFileEventToLSFileEvents(source);
-      expect(converted[0]).deep.equals({uri: 'file:///a/b/c/d.txt', type: ls.FileChangeType.Created});
+      expect(converted[0]).deep.equals({ uri: 'file:///a/b/c/d.txt', type: ls.FileChangeType.Created });
     });
 
     it('converts a modified event', () => {
-      const source: FilesystemChange = {path: '/a/b/c/d.txt', action: 'modified'};
+      const source: FilesystemChange = { path: '/a/b/c/d.txt', action: 'modified' };
       const converted = Convert.atomFileEventToLSFileEvents(source);
-      expect(converted[0]).deep.equals({uri: 'file:///a/b/c/d.txt', type: ls.FileChangeType.Changed});
+      expect(converted[0]).deep.equals({ uri: 'file:///a/b/c/d.txt', type: ls.FileChangeType.Changed });
     });
 
     it('converts a deleted event', () => {
-      const source: FilesystemChange = {path: '/a/b/c/d.txt', action: 'deleted'};
+      const source: FilesystemChange = { path: '/a/b/c/d.txt', action: 'deleted' };
       const converted = Convert.atomFileEventToLSFileEvents(source);
-      expect(converted[0]).deep.equals({uri: 'file:///a/b/c/d.txt', type: ls.FileChangeType.Deleted});
+      expect(converted[0]).deep.equals({ uri: 'file:///a/b/c/d.txt', type: ls.FileChangeType.Deleted });
     });
 
     it('converts a renamed event', () => {
-      const source: FilesystemChange = {path: '/a/b/c/d.txt', oldPath: '/a/z/e.lst', action: 'renamed'};
+      const source: FilesystemChange = { path: '/a/b/c/d.txt', oldPath: '/a/z/e.lst', action: 'renamed' };
       const converted = Convert.atomFileEventToLSFileEvents(source);
-      expect(converted[0]).deep.equals({uri: 'file:///a/z/e.lst', type: ls.FileChangeType.Deleted});
-      expect(converted[1]).deep.equals({uri: 'file:///a/b/c/d.txt', type: ls.FileChangeType.Created});
+      expect(converted[0]).deep.equals({ uri: 'file:///a/z/e.lst', type: ls.FileChangeType.Deleted });
+      expect(converted[1]).deep.equals({ uri: 'file:///a/b/c/d.txt', type: ls.FileChangeType.Created });
     });
   });
 });

@@ -83,13 +83,13 @@ export default class DatatipAdapter {
     // Must check as <{language: string}> to disambiguate between
     // string and the more explicit object type because MarkedString
     // is a union of the two types
-    if ((markedString as {language: string}).language) {
+    if ((markedString as { language: string }).language) {
       return {
         type: 'snippet',
         // TODO: find a better mapping from language -> grammar
         grammar:
           atom.grammars.grammarForScopeName(
-            `source.${(markedString as {language: string}).language}`) || editor.getGrammar(),
+            `source.${(markedString as { language: string }).language}`) || editor.getGrammar(),
         value: markedString.value,
       };
     }

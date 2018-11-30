@@ -35,15 +35,15 @@ describe('CodeHighlightAdapter', () => {
         Promise.resolve([
           {
             range: {
-              start: {line: 0, character: 1},
-              end: {line: 0, character: 2},
+              start: { line: 0, character: 1 },
+              end: { line: 0, character: 2 },
             },
           },
         ]),
       );
       const result = await CodeHighlightAdapter.highlight(
         connection,
-        {documentHighlightProvider: true},
+        { documentHighlightProvider: true },
         fakeEditor,
         new Point(0, 0),
       );

@@ -101,14 +101,14 @@ declare module 'atom-ide' {
 
   export type MarkedString =
     | {
-        type: 'markdown',
-        value: string,
-      }
+      type: 'markdown',
+      value: string,
+    }
     | {
-        type: 'snippet',
-        grammar: Grammar,
-        value: string,
-      };
+      type: 'snippet',
+      grammar: Grammar,
+      value: string,
+    };
 
   // This omits the React variant.
   export interface Datatip {

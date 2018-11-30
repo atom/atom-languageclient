@@ -29,8 +29,8 @@ describe('LanguageClientConnection', () => {
 
   describe('send requests', () => {
     const textDocumentPositionParams: ls.TextDocumentPositionParams = {
-      textDocument: {uri: 'file:///1/z80.asm'},
-      position: {line: 24, character: 32},
+      textDocument: { uri: 'file:///1/z80.asm' },
+      position: { line: 24, character: 32 },
     };
     let lc: any;
 
@@ -40,7 +40,7 @@ describe('LanguageClientConnection', () => {
     });
 
     it('sends a request for initialize', async () => {
-      const params = {capabilities: {}};
+      const params = { capabilities: {} };
       await lc.initialize(params);
 
       expect(lc._sendRequest.called).equals(true);
@@ -64,7 +64,7 @@ describe('LanguageClientConnection', () => {
     });
 
     it('sends a request for completionItemResolve', async () => {
-      const completionItem: ls.CompletionItem = {label: 'abc'};
+      const completionItem: ls.CompletionItem = { label: 'abc' };
       await lc.completionItemResolve(completionItem);
 
       expect(lc._sendRequest.called).equals(true);
@@ -121,7 +121,7 @@ describe('LanguageClientConnection', () => {
     });
 
     it('sends a request for workspaceSymbol', async () => {
-      const params: ls.WorkspaceSymbolParams = {query: 'something'};
+      const params: ls.WorkspaceSymbolParams = { query: 'something' };
       await lc.workspaceSymbol(params);
 
       expect(lc._sendRequest.called).equals(true);
@@ -133,10 +133,10 @@ describe('LanguageClientConnection', () => {
       const params: ls.CodeActionParams = {
         textDocument: textDocumentPositionParams.textDocument,
         range: {
-          start: {line: 1, character: 1},
-          end: {line: 24, character: 32},
+          start: { line: 1, character: 1 },
+          end: { line: 24, character: 32 },
         },
-        context: {diagnostics: []},
+        context: { diagnostics: [] },
       };
       await lc.codeAction(params);
 
@@ -159,8 +159,8 @@ describe('LanguageClientConnection', () => {
     it('sends a request for codeLensResolve', async () => {
       const params: ls.CodeLens = {
         range: {
-          start: {line: 1, character: 1},
-          end: {line: 24, character: 32},
+          start: { line: 1, character: 1 },
+          end: { line: 24, character: 32 },
         },
       };
       await lc.codeLensResolve(params);
@@ -184,8 +184,8 @@ describe('LanguageClientConnection', () => {
     it('sends a request for documentLinkResolve', async () => {
       const params: ls.DocumentLink = {
         range: {
-          start: {line: 1, character: 1},
-          end: {line: 24, character: 32},
+          start: { line: 1, character: 1 },
+          end: { line: 24, character: 32 },
         },
         target: 'abc.def.ghi',
       };
@@ -199,7 +199,7 @@ describe('LanguageClientConnection', () => {
     it('sends a request for documentFormatting', async () => {
       const params: ls.DocumentFormattingParams = {
         textDocument: textDocumentPositionParams.textDocument,
-        options: {tabSize: 6, insertSpaces: true, someValue: 'optional'},
+        options: { tabSize: 6, insertSpaces: true, someValue: 'optional' },
       };
       await lc.documentFormatting(params);
 
@@ -212,10 +212,10 @@ describe('LanguageClientConnection', () => {
       const params: ls.DocumentRangeFormattingParams = {
         textDocument: textDocumentPositionParams.textDocument,
         range: {
-          start: {line: 1, character: 1},
-          end: {line: 24, character: 32},
+          start: { line: 1, character: 1 },
+          end: { line: 24, character: 32 },
         },
-        options: {tabSize: 6, insertSpaces: true, someValue: 'optional'},
+        options: { tabSize: 6, insertSpaces: true, someValue: 'optional' },
       };
       await lc.documentRangeFormatting(params);
 
@@ -227,9 +227,9 @@ describe('LanguageClientConnection', () => {
     it('sends a request for documentOnTypeFormatting', async () => {
       const params: ls.DocumentOnTypeFormattingParams = {
         textDocument: textDocumentPositionParams.textDocument,
-        position: {line: 1, character: 1},
+        position: { line: 1, character: 1 },
         ch: '}',
-        options: {tabSize: 6, insertSpaces: true, someValue: 'optional'},
+        options: { tabSize: 6, insertSpaces: true, someValue: 'optional' },
       };
       await lc.documentOnTypeFormatting(params);
 
@@ -240,8 +240,8 @@ describe('LanguageClientConnection', () => {
 
     it('sends a request for rename', async () => {
       const params: ls.RenameParams = {
-        textDocument: {uri: 'file:///a/b.txt'},
-        position: {line: 1, character: 2},
+        textDocument: { uri: 'file:///a/b.txt' },
+        position: { line: 1, character: 2 },
         newName: 'abstractConstructorFactory',
       };
       await lc.rename(params);
@@ -290,7 +290,7 @@ describe('LanguageClientConnection', () => {
 
     it('didChangeConfiguration sends notification', () => {
       const params: ls.DidChangeConfigurationParams = {
-        settings: {a: {b: 'c'}},
+        settings: { a: { b: 'c' } },
       };
       lc.didChangeConfiguration(params);
 
@@ -345,7 +345,7 @@ describe('LanguageClientConnection', () => {
     });
 
     it('didChangeWatchedFiles sends notification', () => {
-      const params: ls.DidChangeWatchedFilesParams = {changes: []};
+      const params: ls.DidChangeWatchedFilesParams = { changes: [] };
       lc.didChangeWatchedFiles(params);
 
       expect(lc._sendNotification.called).equals(true);
