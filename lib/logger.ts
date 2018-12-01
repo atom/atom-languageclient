@@ -52,23 +52,23 @@ export class ConsoleLogger {
 }
 
 export class NullLogger {
-  public warn(...args: any[]): void { }
-  public error(...args: any[]): void { }
-  public info(...args: any[]): void { }
-  public log(...args: any[]): void { }
-  public debug(...args: any[]): void { }
+  public warn(..._args: any[]): void { }
+  public error(..._args: any[]): void { }
+  public info(..._args: any[]): void { }
+  public log(..._args: any[]): void { }
+  public debug(..._args: any[]): void { }
 }
 
 export class FilteredLogger {
   private _logger: Logger;
   private _predicate: (level: string, args: any[]) => boolean;
 
-  public static UserLevelFilter = (level: string, args: any[]) => level === 'warn' || level === 'error';
-  public static DeveloperLevelFilter = (level: string, args: any[]) => true;
+  public static UserLevelFilter = (level: string, _args: any[]) => level === 'warn' || level === 'error';
+  public static DeveloperLevelFilter = (_level: string, _args: any[]) => true;
 
   constructor(logger: Logger, predicate?: (level: string, args: any[]) => boolean) {
     this._logger = logger;
-    this._predicate = predicate || ((level, args) => true);
+    this._predicate = predicate || ((_level, _args) => true);
   }
 
   public warn(...args: any[]): void {
