@@ -134,7 +134,7 @@ export default class AutocompleteAdapter {
     );
 
     // Setup the cache for subsequent filtered results
-    const isComplete = Array.isArray(completions) || completions.isIncomplete === false;
+    const isComplete = completions == null || Array.isArray(completions) || completions.isIncomplete === false;
     const suggestionMap = this.completionItemsToSuggestions(completions, request, onDidConvertCompletionItem);
     this._suggestionCache.set(server, { isIncomplete: !isComplete, triggerChar, triggerPoint, suggestionMap });
 
