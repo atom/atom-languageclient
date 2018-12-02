@@ -94,13 +94,18 @@ export class LanguageClientConnection extends EventEmitter {
     this._sendNotification('exit');
   }
 
-  // Public: Register a callback for a custom message.
+  // Public: Register a callback for a custom notification.
   //
   // * `method`   A string containing the name of the message to listen for.
   // * `callback` The function to be called when the message is received.
   //              The payload from the message is passed to the function.
-  public onCustom(method: string, callback: (obj: object) => void): void {
+  public onCustomNotification(method: string, callback: (obj: object) => void): void {
     this._onNotification({ method }, callback);
+  }
+
+  // @deprecated Use onCustomNotification method instead
+  public onCustom(method: string, callback: (obj: object) => void): void {
+    this.onCustomNotification(method, callback);
   }
 
   // Public: Register a callback for a custom request.
