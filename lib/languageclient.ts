@@ -22,6 +22,7 @@ export interface KnownRequests {
   [lsp.ShowMessageRequestParams, lsp.MessageActionItem | null];
   'workspace/applyEdit':
   [lsp.ApplyWorkspaceEditParams, lsp.ApplyWorkspaceEditResponse];
+  [custom: string]: [object, object | null];
 }
 
 export type RequestCallback<T extends keyof KnownRequests> =
@@ -100,6 +101,15 @@ export class LanguageClientConnection extends EventEmitter {
   //              The payload from the message is passed to the function.
   public onCustom(method: string, callback: (obj: object) => void): void {
     this._onNotification({ method }, callback);
+  }
+
+  // Public: Register a callback for a custom request.
+  //
+  // * `method`   A string containing the name of the message to listen for.
+  // * `callback` The function to be called when the message is received.
+  //              The payload from the message is passed to the function.
+  public onCustomRequest(method: string, callback: (obj: object) => Promise<object>): void {
+    this._onRequest({ method }, callback);
   }
 
   // Public: Send a custom request
