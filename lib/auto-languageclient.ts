@@ -429,7 +429,7 @@ export default class AutoLanguageClient {
 
     const loggingConsole = new LoggingConsoleAdapter(server.connection);
     if (this._consoleDelegate != null) {
-      loggingConsole.attach(this._consoleDelegate({ id: this.name, name: 'abc' }));
+      loggingConsole.attach(this._consoleDelegate({ id: this.name, name: this.getLanguageName() }));
     }
     server.disposable.add(loggingConsole);
 
@@ -617,7 +617,7 @@ export default class AutoLanguageClient {
     for (const server of this._serverManager.getActiveServers()) {
       const loggingConsole = this.getServerAdapter(server, 'loggingConsole');
       if (loggingConsole) {
-        loggingConsole.attach(this._consoleDelegate({ id: this.name, name: 'abc' }));
+        loggingConsole.attach(this._consoleDelegate({ id: this.name, name: this.getLanguageName() }));
       }
     }
 
