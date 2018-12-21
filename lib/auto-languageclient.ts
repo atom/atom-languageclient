@@ -227,6 +227,17 @@ export default class AutoLanguageClient {
     return configuration;
   }
 
+  // Determine the project path
+  protected async determineProjectPath(editor: TextEditor): Promise<string | null> {
+    const filePath = editor.getPath();
+    if (filePath == null) {
+      return null;
+    }
+    return atom.project.getDirectories()
+      .map((d) => Utils.normalizePath(d.getPath()))
+      .find((d) => filePath.startsWith(d)) || null;
+  }
+
   // Helper methods that are useful for implementors
   // ---------------------------------------------------------------------------
 
@@ -256,6 +267,7 @@ export default class AutoLanguageClient {
       (filepath) => this.filterChangeWatchedFiles(filepath),
       this.reportBusyWhile,
       this.getServerName(),
+      (e) => this.determineProjectPath(e),
     );
     this._serverManager.startListening();
     process.on('exit', () => this.exitCleanup.bind(this));
