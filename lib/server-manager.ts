@@ -269,9 +269,9 @@ export class ServerManager {
       return projectPath;
     }
 
-    let serverWithClaim = this._activeServers
-      .find(s => s.additionalPaths.has(path.dirname(filePath)));
-    return serverWithClaim && this.normalizePath(serverWithClaim.projectPath) || null
+    const serverWithClaim = this._activeServers
+      .find((s) => s.additionalPaths.has(path.dirname(filePath)));
+    return serverWithClaim && this.normalizePath(serverWithClaim.projectPath) || null;
   }
 
   public updateNormalizedProjectPaths(): void {

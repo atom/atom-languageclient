@@ -318,7 +318,7 @@ export default class AutoLanguageClient {
         if (!defPath.startsWith(projectPath)) {
           newServer.additionalPaths.add(path.dirname(defPath));
         }
-      }
+      },
     };
     this.postInitialization(newServer);
     connection.initialized();
@@ -538,7 +538,7 @@ export default class AutoLanguageClient {
     );
 
     if (this.serversSupportDefinitionDestinations()) {
-      queryPromise.then(query => {
+      queryPromise.then((query) => {
         if (query) {
           for (const def of query.definitions) {
             server.considerDefinitionPath(def.path);
