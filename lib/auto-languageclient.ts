@@ -313,6 +313,12 @@ export default class AutoLanguageClient {
       connection,
       capabilities: initializeResponse.capabilities,
       disposable: new CompositeDisposable(),
+      additionalPaths: new Set(),
+      considerDefinitionPath: (defPath: string): void => {
+        if (!defPath.startsWith(projectPath)) {
+          newServer.additionalPaths.add(path.dirname(defPath));
+        }
+      }
     };
     this.postInitialization(newServer);
     connection.initialized();
@@ -523,13 +529,25 @@ export default class AutoLanguageClient {
     }
 
     this.definitions = this.definitions || new DefinitionAdapter();
-    return this.definitions.getDefinition(
+    const queryPromise = this.definitions.getDefinition(
       server.connection,
       server.capabilities,
       this.getLanguageName(),
       editor,
       point,
     );
+
+    if (this.serversSupportDefinitionDestinations()) {
+      queryPromise.then(query => {
+        if (query) {
+          for (const def of query.definitions) {
+            server.considerDefinitionPath(def.path);
+          }
+        }
+      });
+    }
+
+    return queryPromise;
   }
 
   // Outline View via LS documentSymbol---------------------------------
@@ -784,6 +802,16 @@ export default class AutoLanguageClient {
    */
   protected handleServerStderr(stderr: string, _projectPath: string) {
     stderr.split('\n').filter((l) => l).forEach((line) => this.logger.warn(`stderr ${line}`));
+  }
+
+  /**
+   * Indicates that the language server can support LSP functionality for
+   * out of project files indicated by `textDocument/definition` responses.
+   *
+   * Default: false
+   */
+  protected serversSupportDefinitionDestinations(): boolean {
+    return false;
   }
 
   private getServerAdapter<T extends keyof ServerAdapters>(

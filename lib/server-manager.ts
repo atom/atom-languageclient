@@ -33,6 +33,10 @@ export interface ActiveServer {
   process: LanguageServerProcess;
   connection: ls.LanguageClientConnection;
   capabilities: ls.ServerCapabilities;
+  // Out of project directories that this server can also support.
+  additionalPaths: Set<string>;
+  // Considers a path from `textDocument/definition` for inclusion in `additionalPaths`.
+  considerDefinitionPath(path: string): void;
 }
 
 interface RestartCounter {
@@ -259,7 +263,15 @@ export class ServerManager {
     if (filePath == null) {
       return null;
     }
-    return this._normalizedProjectPaths.find((d) => filePath.startsWith(d)) || null;
+
+    const projectPath = this._normalizedProjectPaths.find((d) => filePath.startsWith(d));
+    if (projectPath) {
+      return projectPath;
+    }
+
+    let serverWithClaim = this._activeServers
+      .find(s => s.additionalPaths.has(path.dirname(filePath)));
+    return serverWithClaim && this.normalizePath(serverWithClaim.projectPath) || null
   }
 
   public updateNormalizedProjectPaths(): void {
