@@ -25,7 +25,15 @@ interface SuggestionCacheEntry {
   isIncomplete: boolean;
   triggerPoint: Point;
   triggerChar: string;
+  triggerPrefix: string;
   suggestionMap: Map<ac.AnySuggestion, PossiblyResolvedCompletionItem>;
+
+  // Original replacement prefixes as returned by the LSP server.
+  //
+  // If the server used the `textEdit` field, this value will be non-null.
+  // Otherwise, it means that the server did not give us an explicit replacement
+  // prefix, and therefore this value will be null.
+  originalReplacementPrefixMap: Map<ac.AnySuggestion, string | null>;
 }
 
 type CompletionItemAdjuster =
@@ -84,12 +92,25 @@ export default class AutocompleteAdapter {
 
     // Get the suggestions either from the cache or by calling the language server
     const suggestions = await
-      this.getOrBuildSuggestions(server, request, triggerChar, triggerOnly, onDidConvertCompletionItem);
+      this.getOrBuildSuggestions(server, request, triggerChar, triggerOnly, request.prefix, onDidConvertCompletionItem);
 
+    // Force unwrapping here is okay since this.getOrBuildSuggestions ensured that the following get()
+    // would not return undefined.
+    const cache = this._suggestionCache.get(server)!;
     // As the user types more characters to refine filter we must replace those characters on acceptance
     const replacementPrefix = (triggerChar !== '' && triggerOnly) ? '' : request.prefix;
+    const originalReplacementPrefixMap = cache.originalReplacementPrefixMap;
     for (const suggestion of suggestions) {
-      suggestion.replacementPrefix = replacementPrefix;
+      // Force unwrapping here is okay for similar reasons as in the comment above.
+      const originalReplacementPrefix = originalReplacementPrefixMap.get(suggestion);
+      if (originalReplacementPrefix) {
+        // The server gave us a replacement prefix via the `textEdit` field, which we must honor. However,
+        // we also need to append the extra bits that the user has typed since we made the initial request.
+        const extraReplacementPrefix = replacementPrefix.substr(cache.triggerPrefix.length);
+        suggestion.replacementPrefix = originalReplacementPrefix + extraReplacementPrefix;
+      } else {
+        suggestion.replacementPrefix = replacementPrefix;
+      }
     }
 
     const filtered = !(request.prefix === "" || (triggerChar !== '' && triggerOnly));
@@ -112,6 +133,7 @@ export default class AutocompleteAdapter {
     request: ac.SuggestionsRequestedEvent,
     triggerChar: string,
     triggerOnly: boolean,
+    triggerPrefix: string,
     onDidConvertCompletionItem?: CompletionItemAdjuster,
   ): Promise<ac.AnySuggestion[]> {
     const cache = this._suggestionCache.get(server);
@@ -136,7 +158,20 @@ export default class AutocompleteAdapter {
     // Setup the cache for subsequent filtered results
     const isComplete = completions == null || Array.isArray(completions) || completions.isIncomplete === false;
     const suggestionMap = this.completionItemsToSuggestions(completions, request, onDidConvertCompletionItem);
-    this._suggestionCache.set(server, { isIncomplete: !isComplete, triggerChar, triggerPoint, suggestionMap });
+    const originalReplacementPrefixMap = new Map<ac.AnySuggestion, string>(
+      Array.from(suggestionMap.keys()).map<[ac.AnySuggestion, string]>(
+        (suggestion) => [suggestion, suggestion.replacementPrefix || ''],
+      ),
+    );
+
+    this._suggestionCache.set(server, {
+      isIncomplete: !isComplete,
+      triggerChar,
+      triggerPoint,
+      triggerPrefix: (triggerChar !== '' && triggerOnly) ? '' : triggerPrefix,
+      suggestionMap,
+      originalReplacementPrefixMap,
+    });
 
     return Array.from(suggestionMap.keys());
   }
