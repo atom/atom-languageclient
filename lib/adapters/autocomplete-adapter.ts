@@ -92,7 +92,7 @@ export default class AutocompleteAdapter {
 
     // Get the suggestions either from the cache or by calling the language server
     const suggestions = await
-      this.getOrBuildSuggestions(server, request, triggerChar, triggerOnly, request.prefix, onDidConvertCompletionItem);
+      this.getOrBuildSuggestions(server, request, triggerChar, triggerOnly, onDidConvertCompletionItem);
 
     // Force unwrapping here is okay since this.getOrBuildSuggestions ensured that the following get()
     // would not return undefined.
@@ -133,7 +133,6 @@ export default class AutocompleteAdapter {
     request: ac.SuggestionsRequestedEvent,
     triggerChar: string,
     triggerOnly: boolean,
-    triggerPrefix: string,
     onDidConvertCompletionItem?: CompletionItemAdjuster,
   ): Promise<ac.AnySuggestion[]> {
     const cache = this._suggestionCache.get(server);
@@ -168,7 +167,7 @@ export default class AutocompleteAdapter {
       isIncomplete: !isComplete,
       triggerChar,
       triggerPoint,
-      triggerPrefix: (triggerChar !== '' && triggerOnly) ? '' : triggerPrefix,
+      triggerPrefix: (triggerChar !== '' && triggerOnly) ? '' : request.prefix,
       suggestionMap,
       originalReplacementPrefixMap,
     });
