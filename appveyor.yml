@@ -5,6 +5,10 @@ platform:
   - x64
   - x86
 
+branches:
+  only:
+    - master
+
 install:
   - ps: Install-Product node $env:nodejs_version
   - npm install
