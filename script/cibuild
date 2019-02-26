@@ -103,4 +103,4 @@ echo "Running lint..."
 npm run lint
 
 echo "Running specs..."
-"$ATOM_SCRIPT_PATH" --test test
+npm test
