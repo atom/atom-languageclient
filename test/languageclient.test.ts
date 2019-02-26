@@ -5,13 +5,6 @@ import { createSpyConnection } from './helpers.js';
 import { NullLogger } from '../lib/logger';
 
 describe('LanguageClientConnection', () => {
-  beforeEach(() => {
-    (global as any).sinon = sinon.sandbox.create();
-  });
-  afterEach(() => {
-    (global as any).sinon.restore();
-  });
-
   it('listens to the RPC connection it is given', () => {
     const rpc = createSpyConnection();
 

@@ -8,13 +8,6 @@ import { Point, Range } from 'atom';
 import { createSpyConnection, createFakeEditor } from '../helpers.js';
 
 describe('LinterPushV2Adapter', () => {
-  beforeEach(() => {
-    (global as any).sinon = sinon.sandbox.create();
-  });
-  afterEach(() => {
-    (global as any).sinon.restore();
-  });
-
   describe('constructor', () => {
     it('subscribes to onPublishDiagnostics', () => {
       const languageClient = new ls.LanguageClientConnection(createSpyConnection());
