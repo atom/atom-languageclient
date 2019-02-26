@@ -11,12 +11,8 @@ describe('DatatipAdapter', () => {
   let connection: any;
 
   beforeEach(() => {
-    (global as any).sinon = sinon.sandbox.create();
     connection = new ls.LanguageClientConnection(createSpyConnection());
     fakeEditor = createFakeEditor();
-  });
-  afterEach(() => {
-    (global as any).sinon.restore();
   });
 
   describe('canAdapt', () => {
