@@ -1,5 +1,5 @@
 const { TestRunnerParams } = require("atom");
-const { createRunner } = require('@smashwilson/atom-mocha-test-runner');
+const { createRunner } = require('@atom/mocha-test-runner');
 
 module.exports = createRunner({
     htmlTitle: `atom-languageclient Tests - pid ${process.pid}`,
