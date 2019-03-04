@@ -241,7 +241,7 @@ export class LanguageClientConnection extends EventEmitter {
   // Returns a {Promise} containing either a {CompletionList} or an {Array} of {CompletionItem}s.
   public completion(
     params: lsp.TextDocumentPositionParams | CompletionParams,
-    cancellationToken?: jsonrpc.CancellationToken): Promise<lsp.CompletionItem[] | lsp.CompletionList> {
+    cancellationToken?: jsonrpc.CancellationToken): Promise<lsp.CompletionItem[] | lsp.CompletionList | null> {
     // Cancel prior request if necessary
     return this._sendRequest('textDocument/completion', params, cancellationToken);
   }

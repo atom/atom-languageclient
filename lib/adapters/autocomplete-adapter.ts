@@ -278,11 +278,11 @@ export default class AutocompleteAdapter {
   //
   // Returns a {Map} of AutoComplete+ suggestions ordered by the CompletionItems sortText.
   public completionItemsToSuggestions(
-    completionItems: CompletionItem[] | CompletionList,
+    completionItems: CompletionItem[] | CompletionList | null,
     request: ac.SuggestionsRequestedEvent,
     onDidConvertCompletionItem?: CompletionItemAdjuster,
   ): Map<ac.AnySuggestion, PossiblyResolvedCompletionItem> {
-    return new Map((Array.isArray(completionItems) ? completionItems : completionItems.items || [])
+    return new Map((Array.isArray(completionItems) ? completionItems : (completionItems && completionItems.items || []))
       .sort((a, b) => (a.sortText || a.label).localeCompare(b.sortText || b.label))
       .map<[ac.AnySuggestion, PossiblyResolvedCompletionItem]>(
         (s) => [
