@@ -20,12 +20,13 @@ import {
   TextEditor,
 } from 'atom';
 import * as ac from 'atom/autocomplete-plus';
+import { Suggestion, TextSuggestion, SnippetSuggestion } from 'atom-ide';
 
 interface SuggestionCacheEntry {
   isIncomplete: boolean;
   triggerPoint: Point;
   triggerChar: string;
-  suggestionMap: Map<ac.AnySuggestion, PossiblyResolvedCompletionItem>;
+  suggestionMap: Map<Suggestion, PossiblyResolvedCompletionItem>;
 }
 
 type CompletionItemAdjuster =
@@ -93,7 +94,7 @@ export default class AutocompleteAdapter {
     }
 
     const filtered = !(request.prefix === "" || (triggerChar !== '' && triggerOnly));
-    return filtered ? filter(suggestions, request.prefix, { key: 'text' }) : suggestions;
+    return filtered ? filter(suggestions, request.prefix, { key: 'filterText' }) : suggestions;
   }
 
   private shouldTrigger(
@@ -113,7 +114,7 @@ export default class AutocompleteAdapter {
     triggerChar: string,
     triggerOnly: boolean,
     onDidConvertCompletionItem?: CompletionItemAdjuster,
-  ): Promise<ac.AnySuggestion[]> {
+  ): Promise<Suggestion[]> {
     const cache = this._suggestionCache.get(server);
 
     const triggerColumn = (triggerChar !== '' && triggerOnly)
@@ -134,7 +135,7 @@ export default class AutocompleteAdapter {
     );
 
     // Setup the cache for subsequent filtered results
-    const isComplete = completions == null || Array.isArray(completions) || completions.isIncomplete === false;
+    const isComplete = completions === null || Array.isArray(completions) || completions.isIncomplete === false;
     const suggestionMap = this.completionItemsToSuggestions(completions, request, onDidConvertCompletionItem);
     this._suggestionCache.set(server, { isIncomplete: !isComplete, triggerChar, triggerPoint, suggestionMap });
 
@@ -281,13 +282,16 @@ export default class AutocompleteAdapter {
     completionItems: CompletionItem[] | CompletionList | null,
     request: ac.SuggestionsRequestedEvent,
     onDidConvertCompletionItem?: CompletionItemAdjuster,
-  ): Map<ac.AnySuggestion, PossiblyResolvedCompletionItem> {
-    return new Map((Array.isArray(completionItems) ? completionItems : (completionItems && completionItems.items || []))
+  ): Map<Suggestion, PossiblyResolvedCompletionItem> {
+    const completionsArray = Array.isArray(completionItems)
+      ? completionItems
+      : (completionItems && completionItems.items) || [];
+    return new Map(completionsArray
       .sort((a, b) => (a.sortText || a.label).localeCompare(b.sortText || b.label))
-      .map<[ac.AnySuggestion, PossiblyResolvedCompletionItem]>(
+      .map<[Suggestion, PossiblyResolvedCompletionItem]>(
         (s) => [
           AutocompleteAdapter.completionItemToSuggestion(
-            s, {} as ac.AnySuggestion, request, onDidConvertCompletionItem),
+            s, {} as Suggestion, request, onDidConvertCompletionItem),
           new PossiblyResolvedCompletionItem(s, false)]));
   }
 
@@ -302,15 +306,15 @@ export default class AutocompleteAdapter {
   // Returns the {atom$AutocompleteSuggestion} passed in as suggestion with the conversion applied.
   public static completionItemToSuggestion(
     item: CompletionItem,
-    suggestion: ac.AnySuggestion,
+    suggestion: Suggestion,
     request: ac.SuggestionsRequestedEvent,
     onDidConvertCompletionItem?: CompletionItemAdjuster,
-  ): ac.AnySuggestion {
-    AutocompleteAdapter.applyCompletionItemToSuggestion(item, suggestion as ac.TextSuggestion);
-    AutocompleteAdapter.applyTextEditToSuggestion(item.textEdit, request.editor, suggestion as ac.TextSuggestion);
-    AutocompleteAdapter.applySnippetToSuggestion(item, suggestion as ac.SnippetSuggestion);
+  ): Suggestion {
+    AutocompleteAdapter.applyCompletionItemToSuggestion(item, suggestion as TextSuggestion);
+    AutocompleteAdapter.applyTextEditToSuggestion(item.textEdit, request.editor, suggestion as TextSuggestion);
+    AutocompleteAdapter.applySnippetToSuggestion(item, suggestion as SnippetSuggestion);
     if (onDidConvertCompletionItem != null) {
-      onDidConvertCompletionItem(item, suggestion, request);
+      onDidConvertCompletionItem(item, suggestion as ac.AnySuggestion, request);
     }
 
     return suggestion;
@@ -319,14 +323,15 @@ export default class AutocompleteAdapter {
   // Public: Convert the primary parts of a language server protocol CompletionItem to an AutoComplete+ suggestion.
   //
   // * `item` An {CompletionItem} containing the completion items to be merged into.
-  // * `suggestion` The {atom$AutocompleteSuggestion} to merge the conversion into.
+  // * `suggestion` The {Suggestion} to merge the conversion into.
   //
-  // Returns an {atom$AutocompleteSuggestion} created from the {CompletionItem}.
+  // Returns the {Suggestion} with details added from the {CompletionItem}.
   public static applyCompletionItemToSuggestion(
     item: CompletionItem,
-    suggestion: ac.TextSuggestion,
+    suggestion: TextSuggestion,
   ) {
     suggestion.text = item.insertText || item.label;
+    suggestion.filterText = item.filterText || item.label;
     suggestion.displayText = item.label;
     suggestion.type = AutocompleteAdapter.completionKindToSuggestionType(item.kind);
     suggestion.rightLabel = item.detail;
@@ -356,7 +361,7 @@ export default class AutocompleteAdapter {
   public static applyTextEditToSuggestion(
     textEdit: TextEdit | undefined,
     editor: TextEditor,
-    suggestion: ac.TextSuggestion,
+    suggestion: TextSuggestion,
   ): void {
     if (textEdit) {
       suggestion.replacementPrefix = editor.getTextInBufferRange(Convert.lsRangeToAtomRange(textEdit.range));
@@ -370,7 +375,7 @@ export default class AutocompleteAdapter {
   // * `item` An {CompletionItem} containing the completion items to be merged into.
   // * `suggestion` The {atom$AutocompleteSuggestion} to merge the conversion into.
   //
-  public static applySnippetToSuggestion(item: CompletionItem, suggestion: ac.SnippetSuggestion): void {
+  public static applySnippetToSuggestion(item: CompletionItem, suggestion: SnippetSuggestion): void {
     if (item.insertTextFormat === InsertTextFormat.Snippet) {
       suggestion.snippet = item.textEdit != null ? item.textEdit.newText : (item.insertText || '');
     }
