@@ -1,5 +1,6 @@
 declare module 'atom-ide' {
   import { Disposable, Grammar, Point, Range, TextEditor } from 'atom';
+  import * as ac from 'atom/autocomplete-plus';
 
   export interface OutlineProvider {
     name: string;
@@ -330,8 +331,6 @@ declare module 'atom-ide' {
   export type MessageKind = 'message' | 'request' | 'response';
 
   // Autocomplete service
-
-  import * as ac from 'atom/autocomplete-plus';
 
   /**
    * Adds LSP specific properties to the Atom SuggestionBase type
