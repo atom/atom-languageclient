@@ -1,5 +1,6 @@
 declare module 'atom-ide' {
   import { Disposable, Grammar, Point, Range, TextEditor } from 'atom';
+  import * as ac from 'atom/autocomplete-plus';
 
   export interface OutlineProvider {
     name: string;
@@ -328,4 +329,24 @@ declare module 'atom-ide' {
     | 'rainbow';
 
   export type MessageKind = 'message' | 'request' | 'response';
+
+  // Autocomplete service
+
+  /**
+   * Adds LSP specific properties to the Atom SuggestionBase type
+   */
+  interface SuggestionBase extends ac.SuggestionBase {
+    /**
+     * A string that should be used when filtering a set of
+     * completion items. When `falsy` the [displayText](#ac.SuggestionBase.displayText)
+     * is used.
+     */
+    filterText?: string;
+  }
+
+  export type TextSuggestion = SuggestionBase & ac.TextSuggestion;
+
+  export type SnippetSuggestion = SuggestionBase & ac.SnippetSuggestion;
+
+  export type Suggestion =  TextSuggestion | SnippetSuggestion;
 }
