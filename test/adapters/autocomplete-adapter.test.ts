@@ -33,11 +33,12 @@ describe('AutoCompleteAdapter', () => {
 
   const completionItems = [
     {
-      label: 'label1',
+      label: 'thisHasFiltertext',
       kind: ls.CompletionItemKind.Keyword,
       detail: 'description1',
       documentation: 'a very exciting keyword',
       sortText: 'z',
+      filterText: 'labrador',
     },
     {
       label: 'label2',
@@ -69,9 +70,31 @@ describe('AutoCompleteAdapter', () => {
       const autoCompleteAdapter = new AutoCompleteAdapter();
       const results = await autoCompleteAdapter.getSuggestions(server, request);
       expect(results.length).equals(3);
+    });
+
+    it('uses the sortText property to arrange completions when there is no prefix', async () => {
+      const autoCompleteAdapter = new AutoCompleteAdapter();
+      const results = await autoCompleteAdapter.getSuggestions(server, {
+        editor: createFakeEditor(),
+        bufferPosition: new Point(123, 456),
+        prefix: '',
+        scopeDescriptor: { getScopesArray() { return ['some.scope']; } },
+        activatedManually: true,
+      });
+      expect(results.length).equals(4);
       expect((results[0] as ac.TextSuggestion).text).equals('label2');
       expect(results[1].description).equals('a very exciting variable');
       expect(results[2].type).equals('keyword');
+      expect(results[3].displayText).equals('filteredout');
+    });
+
+    it('uses the filterText property to arrange completions when there is a prefix', async () => {
+      const autoCompleteAdapter = new AutoCompleteAdapter();
+      const results = await autoCompleteAdapter.getSuggestions(server, request);
+      expect(results.length).equals(3);
+      expect(results[0].displayText).equals('label2');
+      expect(results[1].displayText).equals('label3');
+      expect(results[2].displayText).equals('thisHasFiltertext');
     });
   });
 
