@@ -362,9 +362,10 @@ declare module 'atom-ide' {
   /** Adds LSP specific properties to the Atom SuggestionBase type */
   interface SuggestionBase extends ac.SuggestionBase {
     /**
-     * A string that should be used when filtering and sorting a set of
-     * completion items when a prefix is present. When `falsy` the
-     * [displayText](#ac.SuggestionBase.displayText) is used.
+     * A string that is used when filtering and sorting a set of
+     * completion items with a prefix present. When `falsy` the
+     * [displayText](#ac.SuggestionBase.displayText) is used. When
+     * no prefix, the `sortText` property is used.
      */
     filterText?: string;
   }
