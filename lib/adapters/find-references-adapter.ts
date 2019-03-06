@@ -11,30 +11,34 @@ import {
   ReferenceParams,
 } from '../languageclient';
 
-// Public: Adapts the language server definition provider to the
-// Atom IDE UI Definitions package for 'Go To Definition' functionality.
+/**
+ * Public: Adapts the language server definition provider to the
+ * Atom IDE UI Definitions package for 'Go To Definition' functionality.
+ */
 export default class FindReferencesAdapter {
-  // Public: Determine whether this adapter can be used to adapt a language server
-  // based on the serverCapabilities matrix containing a referencesProvider.
-  //
-  // * `serverCapabilities` The {ServerCapabilities} of the language server to consider.
-  //
-  // Returns a {Boolean} indicating adapter can adapt the server based on the
-  // given serverCapabilities.
+  /**
+   * Public: Determine whether this adapter can be used to adapt a language server
+   * based on the serverCapabilities matrix containing a referencesProvider.
+   *
+   * @param serverCapabilities The {ServerCapabilities} of the language server to consider.
+   * @returns A {Boolean} indicating adapter can adapt the server based on the
+   *   given serverCapabilities.
+   */
   public static canAdapt(serverCapabilities: ServerCapabilities): boolean {
     return serverCapabilities.referencesProvider === true;
   }
 
-  // Public: Get the references for a specific symbol within the document as represented by
-  // the {TextEditor} and {Point} within it via the language server.
-  //
-  // * `connection` A {LanguageClientConnection} to the language server that will be queried
-  //                for the references.
-  // * `editor` The Atom {TextEditor} containing the text the references should relate to.
-  // * `point` The Atom {Point} containing the point within the text the references should relate to.
-  //
-  // Returns a {Promise} containing a {FindReferencesReturn} with all the references the language server
-  // could find.
+  /**
+   * Public: Get the references for a specific symbol within the document as represented by
+   * the {TextEditor} and {Point} within it via the language server.
+   *
+   * @param connection A {LanguageClientConnection} to the language server that will be queried
+   *                for the references.
+   * @param editor The Atom {TextEditor} containing the text the references should relate to.
+   * @param point The Atom {Point} containing the point within the text the references should relate to.
+   * @returns A {Promise} containing a {FindReferencesReturn} with all the references the language server
+   *   could find.
+   */
   public async getReferences(
     connection: LanguageClientConnection,
     editor: TextEditor,
@@ -57,12 +61,13 @@ export default class FindReferencesAdapter {
     };
   }
 
-  // Public: Create a {ReferenceParams} from a given {TextEditor} for a specific {Point}.
-  //
-  // * `editor` A {TextEditor} that represents the document.
-  // * `point` A {Point} within the document.
-  //
-  // Returns a {ReferenceParams} built from the given parameters.
+  /**
+   * Public: Create a {ReferenceParams} from a given {TextEditor} for a specific {Point}.
+   *
+   * @param editor A {TextEditor} that represents the document.
+   * @param point A {Point} within the document.
+   * @returns A {ReferenceParams} built from the given parameters.
+   */
   public static createReferenceParams(editor: TextEditor, point: Point): ReferenceParams {
     return {
       textDocument: Convert.editorToTextDocumentIdentifier(editor),
@@ -71,11 +76,12 @@ export default class FindReferencesAdapter {
     };
   }
 
-  // Public: Convert a {Location} into a {Reference}.
-  //
-  // * `location` A {Location} to convert.
-  //
-  // Returns a {Reference} equivalent to the given {Location}.
+  /**
+   * Public: Convert a {Location} into a {Reference}.
+   *
+   * @param location A {Location} to convert.
+   * @returns A {Reference} equivalent to the given {Location}.
+   */
   public static locationToReference(location: Location): atomIde.Reference {
     return {
       uri: Convert.uriToPath(location.uri),
@@ -84,7 +90,7 @@ export default class FindReferencesAdapter {
     };
   }
 
-  // Public: Get a symbol name from a {TextEditor} for a specific {Point} in the document.
+  /**  Public: Get a symbol name from a {TextEditor} for a specific {Point} in the document. */
   public static getReferencedSymbolName(
     editor: TextEditor,
     point: Point,

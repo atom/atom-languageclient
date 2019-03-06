@@ -1,16 +1,17 @@
 import * as fs from 'fs';
 
-// Public: Download a file and store it on a file system using streaming with appropriate progress callback.
-//
-// * `sourceUrl`        Url to download from.
-// * `targetFile`       File path to save to.
-// * `progressCallback` Callback function that will be given a {ByteProgressCallback} object containing
-//                      both bytesDone and percent.
-// * `length`           File length in bytes if you want percentage progress indication and the server is
-//                      unable to provide a Content-Length header and whitelist CORS access via a
-//                      `Access-Control-Expose-Headers "content-length"` header.
-//
-// Returns a {Promise} that will accept when complete.
+/**
+ * Public: Download a file and store it on a file system using streaming with appropriate progress callback.
+ *
+ * @param sourceUrl        Url to download from.
+ * @param targetFile       File path to save to.
+ * @param progressCallback Callback function that will be given a {ByteProgressCallback} object containing
+ *                         both bytesDone and percent.
+ * @param length           File length in bytes if you want percentage progress indication and the server is
+ *                         unable to provide a Content-Length header and whitelist CORS access via a
+ *                         `Access-Control-Expose-Headers "content-length"` header.
+ * @returns A {Promise} that will accept when complete.
+ */
 export default (async function downloadFile(
   sourceUrl: string,
   targetFile: string,
@@ -39,15 +40,16 @@ export default (async function downloadFile(
   writer.end();
 });
 
-// Stream from a {ReadableStreamReader} to a {WriteStream} with progress callback.
-//
-// * `length`           File length in bytes.
-// * `reader`           {ReadableStreamReader} to read from.
-// * `writer`           {WriteStream} to write to.
-// * `progressCallback` Callback function that will be given a {ByteProgressCallback} object containing
-//                      both bytesDone and percent.
-//
-// Returns a {Promise} that will accept when complete.
+/**
+ * Stream from a {ReadableStreamReader} to a {WriteStream} with progress callback.
+ *
+ * @param length           File length in bytes.
+ * @param reader           A {ReadableStreamReader} to read from.
+ * @param writer           A {WriteStream} to write to.
+ * @param progressCallback Callback function that will be given a {ByteProgressCallback} object containing
+ *                         both bytesDone and percent.
+ * @returns A {Promise} that will accept when complete.
+ */
 async function streamWithProgress(
   length: number,
   reader: ReadableStreamReader,
@@ -79,6 +81,8 @@ async function streamWithProgress(
   }
 }
 
-// Public: Progress callback function signature indicating the bytesDone and
-// optional percentage when length is known.
+/**
+ * Public: Progress callback function signature indicating the bytesDone and
+ * optional percentage when length is known.
+ */
 export type ByteProgressCallback = (bytesDone: number, percent?: number) => void;

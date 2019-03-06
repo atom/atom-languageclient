@@ -11,10 +11,12 @@ import {
   NotificationExt,
 } from 'atom';
 
-// Public: Adapts Atom's user notifications to those of the language server protocol.
+/**  Public: Adapts Atom's user notifications to those of the language server protocol. */
 export default class NotificationsAdapter {
-  // Public: Attach to a {LanguageClientConnection} to recieve events indicating
-  // when user notifications should be displayed.
+  /**
+   * Public: Attach to a {LanguageClientConnection} to recieve events indicating
+   * when user notifications should be displayed.
+   */
   public static attach(
     connection: LanguageClientConnection,
     name: string,
@@ -24,13 +26,15 @@ export default class NotificationsAdapter {
     connection.onShowMessageRequest((m) => NotificationsAdapter.onShowMessageRequest(m, name, projectPath));
   }
 
-  // Public: Show a notification message with buttons using the Atom notifications API.
-  //
-  // * `params` The {ShowMessageRequestParams} received from the language server
-  //            indicating the details of the notification to be displayed.
-  // * `name`   The name of the language server so the user can identify the
-  //            context of the message.
-  // * `projectPath`   The path of the current project.
+  /**
+   * Public: Show a notification message with buttons using the Atom notifications API.
+   *
+   * @param params The {ShowMessageRequestParams} received from the language server
+   *               indicating the details of the notification to be displayed.
+   * @param name   The name of the language server so the user can identify the
+   *               context of the message.
+   * @param projectPath The path of the current project.
+   */
   public static onShowMessageRequest(
     params: ShowMessageRequestParams,
     name: string,
@@ -66,13 +70,15 @@ export default class NotificationsAdapter {
     });
   }
 
-  // Public: Show a notification message using the Atom notifications API.
-  //
-  // * `params` The {ShowMessageParams} received from the language server
-  //            indicating the details of the notification to be displayed.
-  // * `name`   The name of the language server so the user can identify the
-  //            context of the message.
-  // * `projectPath`   The path of the current project.
+  /**
+   * Public: Show a notification message using the Atom notifications API.
+   *
+   * @param params The {ShowMessageParams} received from the language server
+   *               indicating the details of the notification to be displayed.
+   * @param name   The name of the language server so the user can identify the
+   *               context of the message.
+   * @param projectPath The path of the current project.
+   */
   public static onShowMessage(
     params: ShowMessageParams,
     name: string,
@@ -84,12 +90,13 @@ export default class NotificationsAdapter {
     });
   }
 
-  // Public: Convert a {MessageActionItem} from the language server into an
-  // equivalent {NotificationButton} within Atom.
-  //
-  // * `actionItem` The {MessageActionItem} to be converted.
-  //
-  // Returns a {NotificationButton} equivalent to the {MessageActionItem} given.
+  /**
+   * Public: Convert a {MessageActionItem} from the language server into an
+   * equivalent {NotificationButton} within Atom.
+   *
+   * @param actionItem The {MessageActionItem} to be converted.
+   * @returns A {NotificationButton} equivalent to the {MessageActionItem} given.
+   */
   public static actionItemToNotificationButton(
     actionItem: MessageActionItem,
   ) {

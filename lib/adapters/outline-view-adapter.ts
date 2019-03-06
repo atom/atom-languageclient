@@ -14,31 +14,35 @@ import {
   TextEditor,
 } from 'atom';
 
-// Public: Adapts the documentSymbolProvider of the language server to the Outline View
-// supplied by Atom IDE UI.
+/**
+ * Public: Adapts the documentSymbolProvider of the language server to the Outline View
+ * supplied by Atom IDE UI.
+ */
 export default class OutlineViewAdapter {
 
   private _cancellationTokens: WeakMap<LanguageClientConnection, CancellationTokenSource> = new WeakMap();
 
-  // Public: Determine whether this adapter can be used to adapt a language server
-  // based on the serverCapabilities matrix containing a documentSymbolProvider.
-  //
-  // * `serverCapabilities` The {ServerCapabilities} of the language server to consider.
-  //
-  // Returns a {Boolean} indicating adapter can adapt the server based on the
-  // given serverCapabilities.
+  /**
+   * Public: Determine whether this adapter can be used to adapt a language server
+   * based on the serverCapabilities matrix containing a documentSymbolProvider.
+   *
+   * @param serverCapabilities The {ServerCapabilities} of the language server to consider.
+   * @returns A {Boolean} indicating adapter can adapt the server based on the
+   *   given serverCapabilities.
+   */
   public static canAdapt(serverCapabilities: ServerCapabilities): boolean {
     return serverCapabilities.documentSymbolProvider === true;
   }
 
-  // Public: Obtain the Outline for document via the {LanguageClientConnection} as identified
-  // by the {TextEditor}.
-  //
-  // * `connection` A {LanguageClientConnection} to the language server that will be queried
-  //                for the outline.
-  // * `editor` The Atom {TextEditor} containing the text the Outline should represent.
-  //
-  // Returns a {Promise} containing the {Outline} of this document.
+  /**
+   * Public: Obtain the Outline for document via the {LanguageClientConnection} as identified
+   * by the {TextEditor}.
+   *
+   * @param connection A {LanguageClientConnection} to the language server that will be queried
+   *                   for the outline.
+   * @param editor The Atom {TextEditor} containing the text the Outline should represent.
+   * @returns A {Promise} containing the {Outline} of this document.
+   */
   public async getOutline(connection: LanguageClientConnection, editor: TextEditor): Promise<atomIde.Outline | null> {
     const results = await Utils.doWithCancellationToken(connection, this._cancellationTokens, (cancellationToken) =>
       connection.documentSymbol({ textDocument: Convert.editorToTextDocumentIdentifier(editor) }, cancellationToken),
@@ -65,14 +69,15 @@ export default class OutlineViewAdapter {
     }
   }
 
-  // Public: Create an {Array} of {OutlineTree}s from the Array of {DocumentSymbol} recieved
-  // from the language server. This includes converting all the children nodes in the entire
-  // hierarchy.
-  //
-  // * `symbols` An {Array} of {DocumentSymbol}s received from the language server that
-  //             should be converted to an {Array} of {OutlineTree}.
-  //
-  // Returns an {Array} of {OutlineTree} containing the given symbols that the Outline View can display.
+  /**
+   * Public: Create an {Array} of {OutlineTree}s from the Array of {DocumentSymbol} recieved
+   * from the language server. This includes converting all the children nodes in the entire
+   * hierarchy.
+   *
+   * @param symbols An {Array} of {DocumentSymbol}s received from the language server that
+   *                should be converted to an {Array} of {OutlineTree}.
+   * @returns An {Array} of {OutlineTree} containing the given symbols that the Outline View can display.
+   */
   public static createHierarchicalOutlineTrees(symbols: DocumentSymbol[]): atomIde.OutlineTree[] {
     // Sort all the incoming symbols
     symbols.sort((a, b) => {
@@ -103,14 +108,15 @@ export default class OutlineViewAdapter {
     });
   }
 
-  // Public: Create an {Array} of {OutlineTree}s from the Array of {SymbolInformation} recieved
-  // from the language server. This includes determining the appropriate child and parent
-  // relationships for the hierarchy.
-  //
-  // * `symbols` An {Array} of {SymbolInformation}s received from the language server that
-  //             should be converted to an {OutlineTree}.
-  //
-  // Returns an {OutlineTree} containing the given symbols that the Outline View can display.
+  /**
+   * Public: Create an {Array} of {OutlineTree}s from the Array of {SymbolInformation} recieved
+   * from the language server. This includes determining the appropriate child and parent
+   * relationships for the hierarchy.
+   *
+   * @param symbols An {Array} of {SymbolInformation}s received from the language server that
+   *                should be converted to an {OutlineTree}.
+   * @returns An {OutlineTree} containing the given symbols that the Outline View can display.
+   */
   public static createOutlineTrees(symbols: SymbolInformation[]): atomIde.OutlineTree[] {
     symbols.sort(
       (a, b) =>
@@ -204,13 +210,14 @@ export default class OutlineViewAdapter {
     return parent || null;
   }
 
-  // Public: Convert an individual {DocumentSymbol} from the language server
-  // to an {OutlineTree} for use by the Outline View. It does NOT recursively
-  // process the given symbol's children (if any).
-  //
-  // * `symbol` The {DocumentSymbol} to convert to an {OutlineTree}.
-  //
-  // Returns the {OutlineTree} corresponding to the given {DocumentSymbol}.
+  /**
+   * Public: Convert an individual {DocumentSymbol} from the language server
+   * to an {OutlineTree} for use by the Outline View. It does NOT recursively
+   * process the given symbol's children (if any).
+   *
+   * @param symbol The {DocumentSymbol} to convert to an {OutlineTree}.
+   * @returns The {OutlineTree} corresponding to the given {DocumentSymbol}.
+   */
   public static hierarchicalSymbolToOutline(symbol: DocumentSymbol): atomIde.OutlineTree {
     const icon = OutlineViewAdapter.symbolKindToEntityKind(symbol.kind);
 
@@ -229,12 +236,13 @@ export default class OutlineViewAdapter {
     };
   }
 
-  // Public: Convert an individual {SymbolInformation} from the language server
-  // to an {OutlineTree} for use by the Outline View.
-  //
-  // * `symbol` The {SymbolInformation} to convert to an {OutlineTree}.
-  //
-  // Returns the {OutlineTree} equivalent to the given {SymbolInformation}.
+  /**
+   * Public: Convert an individual {SymbolInformation} from the language server
+   * to an {OutlineTree} for use by the Outline View.
+   *
+   * @param symbol The {SymbolInformation} to convert to an {OutlineTree}.
+   * @returns The {OutlineTree} equivalent to the given {SymbolInformation}.
+   */
   public static symbolToOutline(symbol: SymbolInformation): atomIde.OutlineTree {
     const icon = OutlineViewAdapter.symbolKindToEntityKind(symbol.kind);
     return {
@@ -252,12 +260,13 @@ export default class OutlineViewAdapter {
     };
   }
 
-  // Public: Convert a symbol kind into an outline entity kind used to determine
-  // the styling such as the appropriate icon in the Outline View.
-  //
-  // * `symbol` The numeric symbol kind received from the language server.
-  //
-  // Returns a string representing the equivalent OutlineView entity kind.
+  /**
+   * Public: Convert a symbol kind into an outline entity kind used to determine
+   * the styling such as the appropriate icon in the Outline View.
+   *
+   * @param symbol The numeric symbol kind received from the language server.
+   * @returns A string representing the equivalent OutlineView entity kind.
+   */
   public static symbolKindToEntityKind(symbol: number): string | null {
     switch (symbol) {
       case SymbolKind.Array:
@@ -305,12 +314,13 @@ export default class OutlineViewAdapter {
     }
   }
 
-  // Public: Convert a symbol kind to the appropriate token kind used to syntax
-  // highlight the symbol name in the Outline View.
-  //
-  // * `symbol` The numeric symbol kind received from the language server.
-  //
-  // Returns a string representing the equivalent syntax token kind.
+  /**
+   * Public: Convert a symbol kind to the appropriate token kind used to syntax
+   * highlight the symbol name in the Outline View.
+   *
+   * @param symbol The numeric symbol kind received from the language server.
+   * @returns A string representing the equivalent syntax token kind.
+   */
   public static symbolKindToTokenKind(symbol: number): atomIde.TokenKind {
     switch (symbol) {
       case SymbolKind.Class:
