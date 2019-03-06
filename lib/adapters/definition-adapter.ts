@@ -39,7 +39,7 @@ export default class DefinitionAdapter {
    * @param languageName The name of the programming language.
    * @param editor The Atom {TextEditor} containing the symbol and potential highlights.
    * @param point The Atom {Point} containing the position of the text that represents the symbol
-   *           for which the definition and highlights should be provided.
+   *   for which the definition and highlights should be provided.
    * @returns A {Promise} indicating adapter can adapt the server based on the
    *   given serverCapabilities.
    */
@@ -76,7 +76,7 @@ export default class DefinitionAdapter {
    * Public: Normalize the locations so a single {Location} becomes an {Array} of just
    * one. The language server protocol return either as the protocol evolved between v1 and v2.
    *
-   * @param locationResult Either a single {Location} object or an {Array} of {Locations}
+   * @param locationResult Either a single {Location} object or an {Array} of {Locations}.
    * @returns An {Array} of {Location}s or {null} if the locationResult was null.
    */
   public static normalizeLocations(locationResult: Location | Location[]): Location[] | null {

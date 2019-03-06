@@ -28,7 +28,7 @@ export interface LanguageServerProcess extends EventEmitter {
   on(event: 'exit', listener: (code: number, signal: string) => void): this;
 }
 
-/**  The necessary elements for a server that has started or is starting. */
+/** The necessary elements for a server that has started or is starting. */
 export interface ActiveServer {
   disposable: CompositeDisposable;
   projectPath: string;

@@ -51,7 +51,7 @@ export interface ServerAdapters {
 }
 
 /**
- * AutoLanguageClient provides a simple way to have all the supported
+ * Public: AutoLanguageClient provides a simple way to have all the supported
  * Atom-IDE services wired up entirely for you by just subclassing it and
  * implementing at least
  * - `startServerProcess`
@@ -69,9 +69,7 @@ export default class AutoLanguageClient {
   private _isDeactivating: boolean = false;
   private _serverAdapters = new WeakMap<ActiveServer, ServerAdapters>();
 
-  /**
-   * Available if consumeBusySignal is setup
-   */
+  /** Available if consumeBusySignal is setup */
   protected busySignalService?: atomIde.BusySignalService;
 
   protected processStdErr: string = '';
@@ -89,30 +87,22 @@ export default class AutoLanguageClient {
   // You must implement these so we know how to deal with your language and server
   // -------------------------------------------------------------------------
 
-  /**
-   * Return an array of the grammar scopes you handle, e.g. [ 'source.js' ]
-   */
+  /** Return an array of the grammar scopes you handle, e.g. [ 'source.js' ] */
   protected getGrammarScopes(): string[] {
     throw Error('Must implement getGrammarScopes when extending AutoLanguageClient');
   }
 
-  /**
-   * Return the name of the language you support, e.g. 'JavaScript'
-   */
+  /** Return the name of the language you support, e.g. 'JavaScript' */
   protected getLanguageName(): string {
     throw Error('Must implement getLanguageName when extending AutoLanguageClient');
   }
 
-  /**
-   * Return the name of your server, e.g. 'Eclipse JDT'
-   */
+  /** Return the name of your server, e.g. 'Eclipse JDT' */
   protected getServerName(): string {
     throw Error('Must implement getServerName when extending AutoLanguageClient');
   }
 
-  /**
-   * Start your server process
-   */
+  /** Start your server process */
   protected startServerProcess(_projectPath: string): LanguageServerProcess | Promise<LanguageServerProcess> {
     throw Error('Must override startServerProcess to start language server process when extending AutoLanguageClient');
   }
@@ -120,16 +110,12 @@ export default class AutoLanguageClient {
   // You might want to override these for different behavior
   // ---------------------------------------------------------------------------
 
-  /**
-   * (Optional) Determine whether we should start a server for a given editor if we don't have one yet
-   */
+  /** (Optional) Determine whether we should start a server for a given editor if we don't have one yet */
   protected shouldStartForEditor(editor: TextEditor): boolean {
     return this.getGrammarScopes().includes(editor.getGrammar().scopeName);
   }
 
-  /**
-   * (Optional) Return the parameters used to initialize a client - you may want to extend capabilities
-   */
+  /** (Optional) Return the parameters used to initialize a client - you may want to extend capabilities */
   protected getInitializeParams(projectPath: string, process: LanguageServerProcess): ls.InitializeParams {
     return {
       processId: process.pid,
@@ -225,33 +211,23 @@ export default class AutoLanguageClient {
     };
   }
 
-  /**
-   * (Optional) Early wire-up of listeners before initialize method is sent
-   */
+  /** (Optional) Early wire-up of listeners before initialize method is sent */
   protected preInitialization(_connection: LanguageClientConnection): void { }
 
-  /**
-   * (Optional) Late wire-up of listeners after initialize method has been sent
-   */
+  /** (Optional) Late wire-up of listeners after initialize method has been sent */
   protected postInitialization(_server: ActiveServer): void { }
 
-  /**
-   * (Optional) Determine whether to use ipc, stdio or socket to connect to the server
-   */
+  /** (Optional) Determine whether to use ipc, stdio or socket to connect to the server */
   protected getConnectionType(): ConnectionType {
     return this.socket != null ? 'socket' : 'stdio';
   }
 
-  /**
-   * (Optional) Return the name of your root configuration key
-   */
+  /** (Optional) Return the name of your root configuration key */
   protected getRootConfigurationKey(): string {
     return '';
   }
 
-  /**
-   * (Optional) Transform the configuration object before it is sent to the server
-   */
+  /** (Optional) Transform the configuration object before it is sent to the server */
   protected mapConfigurationObject(configuration: any): any {
     return configuration;
   }
@@ -259,17 +235,13 @@ export default class AutoLanguageClient {
   // Helper methods that are useful for implementors
   // ---------------------------------------------------------------------------
 
-  /**
-   * Gets a LanguageClientConnection for a given TextEditor
-   */
+  /** Gets a LanguageClientConnection for a given TextEditor */
   protected async getConnectionForEditor(editor: TextEditor): Promise<LanguageClientConnection | null> {
     const server = await this._serverManager.getServer(editor);
     return server ? server.connection : null;
   }
 
-  /**
-   * Restart all active language servers for this language client in the workspace
-   */
+  /** Restart all active language servers for this language client in the workspace */
   protected async restartAllServers() {
     await this._serverManager.restartAllServers();
   }
@@ -277,9 +249,7 @@ export default class AutoLanguageClient {
   // Default implementation of the rest of the AutoLanguageClient
   // ---------------------------------------------------------------------------
 
-  /**
-   * Activate does very little for perf reasons - hooks in via ServerManager for later 'activation'
-   */
+  /** Activate does very little for perf reasons - hooks in via ServerManager for later 'activation' */
   public activate(): void {
     this._disposable = new CompositeDisposable();
     this.name = `${this.getLanguageName()} (${this.getServerName()})`;
@@ -300,9 +270,7 @@ export default class AutoLanguageClient {
     this._serverManager.terminate();
   }
 
-  /**
-   * Deactivate disposes the resources we're using
-   */
+  /** Deactivate disposes the resources we're using */
   public async deactivate(): Promise<any> {
     this._isDeactivating = true;
     this._disposable.dispose();
@@ -320,9 +288,7 @@ export default class AutoLanguageClient {
     return cp.spawn(process.execPath, args, options);
   }
 
-  /**
-   * LSP logging is only set for warnings & errors by default unless you turn on the core.debugLSP setting
-   */
+  /** LSP logging is only set for warnings & errors by default unless you turn on the core.debugLSP setting */
   protected getLogger(): Logger {
     const filter = atom.config.get('core.debugLSP')
       ? FilteredLogger.DeveloperLevelFilter
@@ -330,9 +296,7 @@ export default class AutoLanguageClient {
     return new FilteredLogger(new ConsoleLogger(this.name), filter);
   }
 
-  /**
-   * Starts the server by starting the process, then initializing the language server and starting adapters
-   */
+  /** Starts the server by starting the process, then initializing the language server and starting adapters */
   private async startServer(projectPath: string): Promise<ActiveServer> {
     const process = await this.reportBusyWhile(
       `Starting ${this.getServerName()} for ${path.basename(projectPath)}`,
@@ -414,9 +378,7 @@ export default class AutoLanguageClient {
     );
   }
 
-  /**
-   * Creates the RPC connection which can be ipc, socket or stdio
-   */
+  /** Creates the RPC connection which can be ipc, socket or stdio */
   private createRpcConnection(process: LanguageServerProcess): rpc.MessageConnection {
     let reader: rpc.MessageReader;
     let writer: rpc.MessageWriter;
@@ -448,9 +410,7 @@ export default class AutoLanguageClient {
     });
   }
 
-  /**
-   * Start adapters that are not shared between servers
-   */
+  /** Start adapters that are not shared between servers */
   private startExclusiveAdapters(server: ActiveServer): void {
     ApplyEditAdapter.attach(server.connection);
     NotificationsAdapter.attach(server.connection, this.name, server.projectPath);

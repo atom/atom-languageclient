@@ -33,7 +33,7 @@ export default class FindReferencesAdapter {
    * the {TextEditor} and {Point} within it via the language server.
    *
    * @param connection A {LanguageClientConnection} to the language server that will be queried
-   *                for the references.
+   *   for the references.
    * @param editor The Atom {TextEditor} containing the text the references should relate to.
    * @param point The Atom {Point} containing the point within the text the references should relate to.
    * @returns A {Promise} containing a {FindReferencesReturn} with all the references the language server
@@ -90,7 +90,7 @@ export default class FindReferencesAdapter {
     };
   }
 
-  /**  Public: Get a symbol name from a {TextEditor} for a specific {Point} in the document. */
+  /** Public: Get a symbol name from a {TextEditor} for a specific {Point} in the document. */
   public static getReferencedSymbolName(
     editor: TextEditor,
     point: Point,

@@ -19,7 +19,7 @@ import {
 export default class CodeActionAdapter {
   /**
    * @returns A {Boolean} indicating this adapter can adapt the server based on the
-   *    given serverCapabilities.
+   *   given serverCapabilities.
    */
   public static canAdapt(serverCapabilities: ServerCapabilities): boolean {
     return serverCapabilities.codeActionProvider === true;
@@ -34,7 +34,7 @@ export default class CodeActionAdapter {
    * @param editor The Atom {TextEditor} containing the diagnostics.
    * @param range The Atom {Range} to fetch code actions for.
    * @param diagnostics An {Array<atomIde$Diagnostic>} to fetch code actions for.
-   *                 This is typically a list of diagnostics intersecting `range`.
+   *   This is typically a list of diagnostics intersecting `range`.
    * @returns A {Promise} of an {Array} of {atomIde$CodeAction}s to display.
    */
   public static async getCodeActions(

@@ -27,7 +27,7 @@ export default class SignatureHelpAdapter {
 
   /**
    * @returns A {Boolean} indicating this adapter can adapt the server based on the
-   * given serverCapabilities.
+   *   given serverCapabilities.
    */
   public static canAdapt(serverCapabilities: ServerCapabilities): boolean {
     return serverCapabilities.signatureHelpProvider != null;
@@ -56,7 +56,7 @@ export default class SignatureHelpAdapter {
     );
   }
 
-  /**  Public: Retrieves signature help for a given editor and position. */
+  /** Public: Retrieves signature help for a given editor and position. */
   public getSignatureHelp(editor: TextEditor, point: Point): Promise<SignatureHelp | null> {
     return this._connection.signatureHelp(Convert.editorToTextDocumentPositionParams(editor, point));
   }

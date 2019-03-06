@@ -5,7 +5,7 @@ import {
   MessageType,
 } from '../languageclient';
 
-/**  Adapts Atom's user notifications to those of the language server protocol. */
+/** Adapts Atom's user notifications to those of the language server protocol. */
 export default class LoggingConsoleAdapter {
   private _consoles: Set<ConsoleApi> = new Set();
 
@@ -19,7 +19,7 @@ export default class LoggingConsoleAdapter {
     connection.onLogMessage(this.logMessage.bind(this));
   }
 
-  /**  Dispose this adapter ensuring any resources are freed and events unhooked. */
+  /** Dispose this adapter ensuring any resources are freed and events unhooked. */
   public dispose(): void {
     this.detachAll();
   }
@@ -33,7 +33,7 @@ export default class LoggingConsoleAdapter {
     this._consoles.add(console);
   }
 
-  /**  Public: Remove all {ConsoleApi}'s attached to this adapter. */
+  /** Public: Remove all {ConsoleApi}'s attached to this adapter. */
   public detachAll(): void {
     this._consoles.clear();
   }
@@ -42,7 +42,7 @@ export default class LoggingConsoleAdapter {
    * Log a message using the Atom IDE UI Console API.
    *
    * @param params The {LogMessageParams} received from the language server
-   *               indicating the details of the message to be loggedd.
+   *   indicating the details of the message to be loggedd.
    */
   private logMessage(params: LogMessageParams): void {
     switch (params.type) {

@@ -10,9 +10,9 @@ import {
   TextEditor,
 } from 'atom';
 
-/**  Public: Adapts workspace/applyEdit commands to editors. */
+/** Public: Adapts workspace/applyEdit commands to editors. */
 export default class ApplyEditAdapter {
-  /**  Public: Attach to a {LanguageClientConnection} to receive edit events. */
+  /** Public: Attach to a {LanguageClientConnection} to receive edit events. */
   public static attach(connection: LanguageClientConnection) {
     connection.onApplyEdit((m) => ApplyEditAdapter.onApplyEdit(m));
   }
@@ -94,7 +94,7 @@ export default class ApplyEditAdapter {
     return { applied };
   }
 
-  /**  Private: Do some basic sanity checking on the edit ranges. */
+  /** Private: Do some basic sanity checking on the edit ranges. */
   private static validateEdit(
     buffer: TextBuffer,
     edit: atomIde.TextEdit,

@@ -3,13 +3,13 @@ import * as fs from 'fs';
 /**
  * Public: Download a file and store it on a file system using streaming with appropriate progress callback.
  *
- * @param sourceUrl        Url to download from.
- * @param targetFile       File path to save to.
+ * @param sourceUrl Url to download from.
+ * @param targetFile File path to save to.
  * @param progressCallback Callback function that will be given a {ByteProgressCallback} object containing
- *                         both bytesDone and percent.
- * @param length           File length in bytes if you want percentage progress indication and the server is
- *                         unable to provide a Content-Length header and whitelist CORS access via a
- *                         `Access-Control-Expose-Headers "content-length"` header.
+ *   both bytesDone and percent.
+ * @param length File length in bytes if you want percentage progress indication and the server is
+ *   unable to provide a Content-Length header and whitelist CORS access via a
+ *   `Access-Control-Expose-Headers "content-length"` header.
  * @returns A {Promise} that will accept when complete.
  */
 export default (async function downloadFile(
@@ -43,11 +43,11 @@ export default (async function downloadFile(
 /**
  * Stream from a {ReadableStreamReader} to a {WriteStream} with progress callback.
  *
- * @param length           File length in bytes.
- * @param reader           A {ReadableStreamReader} to read from.
- * @param writer           A {WriteStream} to write to.
+ * @param length File length in bytes.
+ * @param reader A {ReadableStreamReader} to read from.
+ * @param writer A {WriteStream} to write to.
  * @param progressCallback Callback function that will be given a {ByteProgressCallback} object containing
- *                         both bytesDone and percent.
+ *   both bytesDone and percent.
  * @returns A {Promise} that will accept when complete.
  */
 async function streamWithProgress(

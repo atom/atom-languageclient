@@ -28,7 +28,7 @@ export default class LinterPushV2Adapter {
     connection.onPublishDiagnostics(this.captureDiagnostics.bind(this));
   }
 
-  /**  Dispose this adapter ensuring any resources are freed and events unhooked. */
+  /** Dispose this adapter ensuring any resources are freed and events unhooked. */
   public dispose(): void {
     this.detachAll();
   }
@@ -46,7 +46,7 @@ export default class LinterPushV2Adapter {
     });
   }
 
-  /**  Public: Remove all {V2IndieDelegate} registries attached to this adapter and clear them. */
+  /** Public: Remove all {V2IndieDelegate} registries attached to this adapter and clear them. */
   public detachAll(): void {
     this._indies.forEach((i) => i.clearMessages());
     this._indies.clear();
@@ -57,7 +57,7 @@ export default class LinterPushV2Adapter {
    * Linter V2 format and forward them on to any attached {V2IndieDelegate}s.
    *
    * @param params The {PublishDiagnosticsParams} received from the language server that should
-   *               be captured and forwarded on to any attached {V2IndieDelegate}s.
+   *   be captured and forwarded on to any attached {V2IndieDelegate}s.
    */
   public captureDiagnostics(params: PublishDiagnosticsParams): void {
     const path = Convert.uriToPath(params.uri);

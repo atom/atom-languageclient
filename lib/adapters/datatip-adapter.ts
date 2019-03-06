@@ -24,7 +24,7 @@ export default class DatatipAdapter {
    *
    * @param serverCapabilities The {ServerCapabilities} of the language server to consider.
    * @returns A {Boolean} indicating adapter can adapt the server based on the
-   * given serverCapabilities.
+   *   given serverCapabilities.
    */
   public static canAdapt(serverCapabilities: ServerCapabilities): boolean {
     return serverCapabilities.hoverProvider === true;
@@ -35,7 +35,7 @@ export default class DatatipAdapter {
    * the language server.
    *
    * @param connection A {LanguageClientConnection} to the language server that will be queried
-   *                for the hover text/datatip.
+   *   for the hover text/datatip.
    * @param editor The Atom {TextEditor} containing the text the Datatip should relate to.
    * @param point The Atom {Point} containing the point within the text the Datatip should relate to.
    * @returns A {Promise} containing the {Datatip} to display or {null} if no Datatip is available.

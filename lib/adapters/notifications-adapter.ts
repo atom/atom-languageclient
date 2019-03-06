@@ -11,7 +11,7 @@ import {
   NotificationExt,
 } from 'atom';
 
-/**  Public: Adapts Atom's user notifications to those of the language server protocol. */
+/** Public: Adapts Atom's user notifications to those of the language server protocol. */
 export default class NotificationsAdapter {
   /**
    * Public: Attach to a {LanguageClientConnection} to recieve events indicating
@@ -30,9 +30,9 @@ export default class NotificationsAdapter {
    * Public: Show a notification message with buttons using the Atom notifications API.
    *
    * @param params The {ShowMessageRequestParams} received from the language server
-   *               indicating the details of the notification to be displayed.
+   *   indicating the details of the notification to be displayed.
    * @param name   The name of the language server so the user can identify the
-   *               context of the message.
+   *   context of the message.
    * @param projectPath The path of the current project.
    */
   public static onShowMessageRequest(
@@ -74,9 +74,9 @@ export default class NotificationsAdapter {
    * Public: Show a notification message using the Atom notifications API.
    *
    * @param params The {ShowMessageParams} received from the language server
-   *               indicating the details of the notification to be displayed.
+   *   indicating the details of the notification to be displayed.
    * @param name   The name of the language server so the user can identify the
-   *               context of the message.
+   *   context of the message.
    * @param projectPath The path of the current project.
    */
   public static onShowMessage(

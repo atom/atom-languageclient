@@ -22,7 +22,7 @@ export default class Convert {
    * Public: Convert a path to a Uri.
    *
    * @param filePath A file path to convert to a Uri.
-   * @returns the Uri corresponding to the path. e.g. file:///a/b/c.txt
+   * @returns The Uri corresponding to the path. e.g. file:///a/b/c.txt
    */
   public static pathToUri(filePath: string): string {
     let newPath = filePath.replace(/\\/g, '/');
@@ -37,8 +37,8 @@ export default class Convert {
    *
    * @param uri A Uri to convert to a file path.
    * @returns A file path corresponding to the Uri. e.g. /a/b/c.txt
-   * If the Uri does not begin file: then it is returned as-is to allow Atom
-   * to deal with http/https sources in the future.
+   *   If the Uri does not begin file: then it is returned as-is to allow Atom
+   *   to deal with http/https sources in the future.
    */
   public static uriToPath(uri: string): string {
     const url = URL.parse(uri);
@@ -61,8 +61,7 @@ export default class Convert {
    * Public: Convert an Atom {Point} to a language server {Position}.
    *
    * @param point An Atom {Point} to convert from.
-   *
-   * Returns the {Position} representation of the Atom {PointObject}.
+   * @returns The {Position} representation of the Atom {PointObject}.
    */
   public static pointToPosition(point: Point): ls.Position {
     return { line: point.row, character: point.column };
@@ -106,7 +105,7 @@ export default class Convert {
    *
    * @param editor A {TextEditor} that will be used to form the uri property.
    * @returns A {TextDocumentIdentifier} that has a `uri` property with the Uri for the
-   * given editor's path.
+   *   given editor's path.
    */
   public static editorToTextDocumentIdentifier(editor: TextEditor): ls.TextDocumentIdentifier {
     return { uri: Convert.pathToUri(editor.getPath() || '') };
@@ -117,9 +116,9 @@ export default class Convert {
    *
    * @param editor A {TextEditor} that will be used to form the uri property.
    * @param point An optional {Point} that will supply the position property. If not specified
-   *            the current cursor position will be used.
+   *   the current cursor position will be used.
    * @returns A {TextDocumentPositionParams} that has textDocument property with the editors {TextDocumentIdentifier}
-   * and a position property with the supplied point (or current cursor position when not specified).
+   *   and a position property with the supplied point (or current cursor position when not specified).
    */
   public static editorToTextDocumentPositionParams(
     editor: TextEditor,
@@ -137,7 +136,8 @@ export default class Convert {
    *
    * @param grammarScopes An {Array} of grammar scope string to convert from.
    * @returns A single comma-separated list of CSS selectors targetting the grammars of Atom text editors.
-   * e.g. `['c', 'cpp']` => `'atom-text-editor[data-grammar='c'], atom-text-editor[data-grammar='cpp']`
+   *   e.g. `['c', 'cpp']` =>
+   *   `'atom-text-editor[data-grammar='c'], atom-text-editor[data-grammar='cpp']`
    */
   public static grammarScopesToTextEditorScopes(grammarScopes: string[]): string {
     return grammarScopes
@@ -146,12 +146,12 @@ export default class Convert {
   }
 
   /**
-   * Public: Encode a string so that it can be safely used within a HTML attribute - i.e. replacing all quoted
-   * values with their HTML entity encoded versions.  e.g. `Hello"` becomes `Hello&quot;`
+   * Public: Encode a string so that it can be safely used within a HTML attribute - i.e. replacing all
+   * quoted values with their HTML entity encoded versions.  e.g. `Hello"` becomes `Hello&quot;`
    *
    * @param s A string to be encoded.
    * @returns A string that is HTML attribute encoded by replacing &, <, >, " and ' with their HTML entity
-   * named equivalents.
+   *   named equivalents.
    */
   public static encodeHTMLAttribute(s: string): string {
     const attributeMap: { [key: string]: string } = {

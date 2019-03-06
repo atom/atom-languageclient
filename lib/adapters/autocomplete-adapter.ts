@@ -64,10 +64,10 @@ export default class AutocompleteAdapter {
    * @param server An {ActiveServer} pointing to the language server to query.
    * @param request The {atom$AutocompleteRequest} to satisfy.
    * @param onDidConvertCompletionItem An optional function that takes a {CompletionItem},
-   *     an {atom$AutocompleteSuggestion} and a {atom$AutocompleteRequest}
-   *     allowing you to adjust converted items.
+   *   an {atom$AutocompleteSuggestion} and a {atom$AutocompleteRequest}
+   *   allowing you to adjust converted items.
    * @returns A {Promise} of an {Array} of {atom$AutocompleteSuggestion}s containing the
-   *          AutoComplete+ suggestions to display.
+   *   AutoComplete+ suggestions to display.
    */
   public async getSuggestions(
     server: ActiveServer,
@@ -187,9 +187,9 @@ export default class AutocompleteAdapter {
    * @param request An {Array} of {atom$AutocompleteSuggestion}s to locate the prefix, editor, bufferPosition etc.
    * @param triggerChars The {Array} of {string}s that can be trigger characters.
    * @returns A [{string}, boolean] where the string is the matching trigger character or an empty string
-   * if one was not matched, and the boolean is true if the trigger character is in request.prefix, and false
-   * if it is in the word before request.prefix. The boolean return value has no meaning if the string return
-   * value is an empty string.
+   *   if one was not matched, and the boolean is true if the trigger character is in request.prefix, and false
+   *   if it is in the word before request.prefix. The boolean return value has no meaning if the string return
+   *   value is an empty string.
    */
   public static getTriggerCharacter(
     request: ac.SuggestionsRequestedEvent,
@@ -242,9 +242,9 @@ export default class AutocompleteAdapter {
    * @param triggerCharacter The {string} containing the trigger character (empty if none).
    * @param triggerOnly A {boolean} representing whether this completion is triggered right after a trigger character.
    * @returns A {CompletionParams} with the keys:
-   *  * `textDocument` the language server protocol textDocument identification.
-   *  * `position` the position within the text document to display completion request for.
-   *  * `context` containing the trigger character and kind.
+   *   * `textDocument` the language server protocol textDocument identification.
+   *   * `position` the position within the text document to display completion request for.
+   *   * `context` containing the trigger character and kind.
    */
   public static createCompletionParams(
     request: ac.SuggestionsRequestedEvent,
@@ -265,7 +265,7 @@ export default class AutocompleteAdapter {
    * @param triggerCharacter The {string} containing the trigger character or '' if none.
    * @param triggerOnly A {boolean} representing whether this completion is triggered right after a trigger character.
    * @returns An {CompletionContext} that specifies the triggerKind and the triggerCharacter
-   *          if there is one.
+   *   if there is one.
    */
   public static createCompletionContext(triggerCharacter: string, triggerOnly: boolean): CompletionContext {
     if (triggerCharacter === '') {
@@ -282,7 +282,7 @@ export default class AutocompleteAdapter {
    * an array of ordered AutoComplete+ suggestions.
    *
    * @param completionItems An {Array} of {CompletionItem} objects or a {CompletionList} containing completion
-   *           items to be converted.
+   *   items to be converted.
    * @param request The {atom$AutocompleteRequest} to satisfy.
    * @param onDidConvertCompletionItem A function that takes a {CompletionItem}, an {atom$AutocompleteSuggestion}
    *   and a {atom$AutocompleteRequest} allowing you to adjust converted items.

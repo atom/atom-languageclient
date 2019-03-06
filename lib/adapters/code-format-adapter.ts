@@ -188,8 +188,8 @@ export default class CodeFormatAdapter {
    * @param editor The Atom {TextEditor} containing the document to be formatted.
    * @param range The Atom {Range} containing the range of document that should be formatted.
    * @returns The {FormattingOptions} to be used containing the keys:
-   *  * `tabSize` The number of spaces a tab represents.
-   *  * `insertSpaces` {True} if spaces should be used, {False} for tab characters.
+   *   * `tabSize` The number of spaces a tab represents.
+   *   * `insertSpaces` {True} if spaces should be used, {False} for tab characters.
    */
   public static getFormatOptions(editor: TextEditor): FormattingOptions {
     return {

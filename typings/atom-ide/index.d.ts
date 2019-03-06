@@ -4,8 +4,10 @@ declare module 'atom-ide' {
 
   export interface OutlineProvider {
     name: string;
-    // If there are multiple providers for a given grammar, the one with the highest priority will be
-    // used.
+    /**
+     * If there are multiple providers for a given grammar, the one with the highest priority will be
+     * used.
+     */
     priority: number;
     grammarScopes: string[];
     updateOnEdit?: boolean;
@@ -13,10 +15,12 @@ declare module 'atom-ide' {
   }
 
   export interface OutlineTree {
-    icon?: string; // from atom$Octicon | atom$OcticonsPrivate (types not allowed over rpc so we use string)
+    /** from atom$Octicon | atom$OcticonsPrivate (types not allowed over rpc so we use string) */
+    icon?: string;
 
-    // Must be one or the other. If both are present, tokenizedText is preferred.
+    /** Must have `plainText` or the `tokenizedText` property. If both are present, `tokenizedText` is preferred. */
     plainText?: string;
+    /** Must have `plainText` or the `tokenizedText` property. If both are present, `tokenizedText` is preferred. */
     tokenizedText?: TokenizedText;
     representativeName?: string;
 
@@ -72,24 +76,20 @@ declare module 'atom-ide' {
   }
 
   export interface FindReferencesProvider {
-    /**
-     * Return true if your provider supports finding references for the provided TextEditor.
-     */
+    /** Return true if your provider supports finding references for the provided TextEditor. */
     isEditorSupported(editor: TextEditor): boolean | Promise<boolean>;
 
-    // `findReferences` will only be called if `isEditorSupported` previously returned true
-    // for the given TextEditor.
+    /**
+     * `findReferences` will only be called if `isEditorSupported` previously returned true
+     * for the given TextEditor.
+     */
     findReferences(editor: TextEditor, position: Point): Promise<FindReferencesReturn | null>;
   }
 
   export interface Reference {
-    /**
-     * URI of the file path
-     */
+    /** URI of the file path */
     uri: IdeUri;
-    /**
-     * Name of calling method/function/symbol
-     */
+    /** Name of calling method / function / symbol */
     name: string | null;
     range: Range;
   }
@@ -177,9 +177,7 @@ declare module 'atom-ide' {
   export interface TextEdit {
     oldRange: Range;
     newText: string;
-    /**
-     *  If included, this will be used to verify that the edit still applies cleanly.
-     */
+    /** If included, this will be used to verify that the edit still applies cleanly. */
     oldText?: string;
   }
 
@@ -227,9 +225,7 @@ declare module 'atom-ide' {
      * @defaultValue `'computer'`
      */
     waitingFor?: 'computer' | 'user';
-    /**
-     * Debounce it? default = true for busy-signal, and false for action-required.
-     */
+    /** Debounce it? default = true for busy-signal, and false for action-required. */
     debounce?: boolean;
     /**
      * If onClick is set, then the tooltip will be clickable.
@@ -265,13 +261,9 @@ declare module 'atom-ide' {
   }
 
   export interface BusyMessage {
-    /**
-     * You can set/update the title.
-     */
+    /** You can set/update the title. */
     setTitle(title: string): void;
-    /**
-     * Dispose of the signal when done to make it go away.
-     */
+    /** Dispose of the signal when done to make it go away. */
     dispose(): void;
   }
 
@@ -367,14 +359,12 @@ declare module 'atom-ide' {
 
   // Autocomplete service
 
-  /**
-   * Adds LSP specific properties to the Atom SuggestionBase type
-   */
+  /** Adds LSP specific properties to the Atom SuggestionBase type */
   interface SuggestionBase extends ac.SuggestionBase {
     /**
-     * A string that should be used when filtering a set of
-     * completion items. When `falsy` the [displayText](#ac.SuggestionBase.displayText)
-     * is used.
+     * A string that should be used when filtering and sorting a set of
+     * completion items when a prefix is present. When `falsy` the
+     * [displayText](#ac.SuggestionBase.displayText) is used.
      */
     filterText?: string;
   }

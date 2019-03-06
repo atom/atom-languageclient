@@ -66,7 +66,7 @@ export default class DocumentSyncAdapter {
    * @param connection A {LanguageClientConnection} to the language server to be kept in sync.
    * @param documentSync The document syncing options.
    * @param editorSelector A predicate function that takes a {TextEditor} and returns a {boolean}
-   *                    indicating whether this adapter should care about the contents of the editor.
+   *   indicating whether this adapter should care about the contents of the editor.
    */
   constructor(
     private _connection: LanguageClientConnection,
@@ -84,7 +84,7 @@ export default class DocumentSyncAdapter {
     this._disposable.add(atom.textEditors.observe(this.observeTextEditor.bind(this)));
   }
 
-  // Dispose this adapter ensuring any resources are freed and events unhooked.
+  /** Dispose this adapter ensuring any resources are freed and events unhooked. */
   public dispose(): void {
     this._disposable.dispose();
   }
@@ -148,7 +148,7 @@ export default class DocumentSyncAdapter {
   }
 }
 
-/**  Public: Keep a single {TextEditor} in sync with a given language server. */
+/** Public: Keep a single {TextEditor} in sync with a given language server. */
 export class TextEditorSyncAdapter {
   private _disposable = new CompositeDisposable();
   private _currentUri: string;
@@ -212,7 +212,7 @@ export class TextEditorSyncAdapter {
     return null;
   }
 
-  /**  Dispose this adapter ensuring any resources are freed and events unhooked. */
+  /** Dispose this adapter ensuring any resources are freed and events unhooked. */
   public dispose(): void {
     this._disposable.dispose();
   }
@@ -255,9 +255,9 @@ export class TextEditorSyncAdapter {
    * when operating in Incremental (2) sync mode.
    *
    * @param event The event fired by Atom to indicate the document has stopped changing
-   *              including a list of changes since the last time this event fired for this
-   *              text editor.
-   * Note: The order of changes in the event is guaranteed top to bottom.  Language server
+   *   including a list of changes since the last time this event fired for this
+   *   text editor.
+   * NOTE: The order of changes in the event is guaranteed top to bottom.  Language server
    * expects this in reverse.
    */
   public sendIncrementalChanges(event: BufferStoppedChangingEvent): void {
@@ -445,7 +445,7 @@ export class TextEditorSyncAdapter {
     }
   }
 
-  /**  Public: Obtain the current {TextEditor} path and convert it to a Uri. */
+  /** Public: Obtain the current {TextEditor} path and convert it to a Uri. */
   public getEditorUri(): string {
     return Convert.pathToUri(this._editor.getPath() || '');
   }

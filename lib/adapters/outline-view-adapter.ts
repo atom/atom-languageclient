@@ -39,7 +39,7 @@ export default class OutlineViewAdapter {
    * by the {TextEditor}.
    *
    * @param connection A {LanguageClientConnection} to the language server that will be queried
-   *                   for the outline.
+   *   for the outline.
    * @param editor The Atom {TextEditor} containing the text the Outline should represent.
    * @returns A {Promise} containing the {Outline} of this document.
    */
@@ -75,7 +75,7 @@ export default class OutlineViewAdapter {
    * hierarchy.
    *
    * @param symbols An {Array} of {DocumentSymbol}s received from the language server that
-   *                should be converted to an {Array} of {OutlineTree}.
+   *   should be converted to an {Array} of {OutlineTree}.
    * @returns An {Array} of {OutlineTree} containing the given symbols that the Outline View can display.
    */
   public static createHierarchicalOutlineTrees(symbols: DocumentSymbol[]): atomIde.OutlineTree[] {
@@ -114,7 +114,7 @@ export default class OutlineViewAdapter {
    * relationships for the hierarchy.
    *
    * @param symbols An {Array} of {SymbolInformation}s received from the language server that
-   *                should be converted to an {OutlineTree}.
+   *   should be converted to an {OutlineTree}.
    * @returns An {OutlineTree} containing the given symbols that the Outline View can display.
    */
   public static createOutlineTrees(symbols: SymbolInformation[]): atomIde.OutlineTree[] {
