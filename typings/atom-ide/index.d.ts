@@ -4,8 +4,10 @@ declare module 'atom-ide' {
 
   export interface OutlineProvider {
     name: string;
-    // If there are multiple providers for a given grammar, the one with the highest priority will be
-    // used.
+    /**
+     * If there are multiple providers for a given grammar, the one with the highest priority will be
+     * used.
+     */
     priority: number;
     grammarScopes: string[];
     updateOnEdit?: boolean;
@@ -13,10 +15,12 @@ declare module 'atom-ide' {
   }
 
   export interface OutlineTree {
-    icon?: string; // from atom$Octicon | atom$OcticonsPrivate (types not allowed over rpc so we use string)
+    /** from atom$Octicon | atom$OcticonsPrivate (types not allowed over rpc so we use string) */
+    icon?: string;
 
-    // Must be one or the other. If both are present, tokenizedText is preferred.
+    /** Must have `plainText` or the `tokenizedText` property. If both are present, `tokenizedText` is preferred. */
     plainText?: string;
+    /** Must have `plainText` or the `tokenizedText` property. If both are present, `tokenizedText` is preferred. */
     tokenizedText?: TokenizedText;
     representativeName?: string;
 
@@ -72,17 +76,21 @@ declare module 'atom-ide' {
   }
 
   export interface FindReferencesProvider {
-    // Return true if your provider supports finding references for the provided TextEditor.
+    /** Return true if your provider supports finding references for the provided TextEditor. */
     isEditorSupported(editor: TextEditor): boolean | Promise<boolean>;
 
-    // `findReferences` will only be called if `isEditorSupported` previously returned true
-    // for the given TextEditor.
+    /**
+     * `findReferences` will only be called if `isEditorSupported` previously returned true
+     * for the given TextEditor.
+     */
     findReferences(editor: TextEditor, position: Point): Promise<FindReferencesReturn | null>;
   }
 
   export interface Reference {
-    uri: IdeUri; // URI of the file path
-    name: string | null; // name of calling method/function/symbol
+    /** URI of the file path */
+    uri: IdeUri;
+    /** Name of calling method / function / symbol */
+    name: string | null;
     range: Range;
   }
 
@@ -122,13 +130,17 @@ declare module 'atom-ide' {
     datatip(
       editor: TextEditor,
       bufferPosition: Point,
-      // The mouse event that triggered the datatip.
-      // This is null for manually toggled datatips.
+      /**
+       * The mouse event that triggered the datatip.
+       * This is null for manually toggled datatips.
+       */
       mouseEvent: MouseEvent | null,
     ): Promise<Datatip>;
     validForScope(scopeName: string): boolean;
-    // A unique name for the provider to be used for analytics.
-    // It is recommended that it be the name of the provider's package.
+    /**
+     * A unique name for the provider to be used for analytics.
+     * It is recommended that it be the name of the provider's package.
+     */
     providerName: string;
     priority: number;
     grammarScopes: string[];
@@ -165,7 +177,7 @@ declare module 'atom-ide' {
   export interface TextEdit {
     oldRange: Range;
     newText: string;
-    // If included, this will be used to verify that the edit still applies cleanly.
+    /** If included, this will be used to verify that the edit still applies cleanly. */
     oldText?: string;
   }
 
@@ -202,43 +214,56 @@ declare module 'atom-ide' {
   }
 
   export interface BusySignalOptions {
-    // Can say that a busy signal will only appear when a given file is open.
-    // Default = null, meaning the busy signal applies to all files.
+    /**
+     * Can say that a busy signal will only appear when a given file is open.
+     * Default = null, meaning the busy signal applies to all files.
+     */
     onlyForFile?: IdeUri;
-    // Is user waiting for computer to finish a task? (traditional busy spinner)
-    // or is the computer waiting for user to finish a task? (action required)
-    // Default = spinner.
+    /**
+     * Is user waiting for computer to finish a task? (traditional busy spinner)
+     * or is the computer waiting for user to finish a task? (action required)
+     * @defaultValue `'computer'`
+     */
     waitingFor?: 'computer' | 'user';
-    // Debounce it? default = true for busy-signal, and false for action-required.
+    /** Debounce it? default = true for busy-signal, and false for action-required. */
     debounce?: boolean;
-    // If onClick is set, then the tooltip will be clickable. Default = null.
+    /**
+     * If onClick is set, then the tooltip will be clickable.
+     * @defaultValue `null`
+     */
     onDidClick?: () => void;
   }
 
   export interface BusySignalService {
-    // Activates the busy signal with the given title and returns the promise
-    // from the provided callback.
-    // The busy signal automatically deactivates when the returned promise
-    // either resolves or rejects.
+    /**
+     * Activates the busy signal with the given title and returns the promise
+     * from the provided callback.
+     * The busy signal automatically deactivates when the returned promise
+     * either resolves or rejects.
+     */
     reportBusyWhile<T>(
       title: string,
       f: () => Promise<T>,
       options?: BusySignalOptions,
     ): Promise<T>;
 
-    // Activates the busy signal. Set the title in the returned BusySignal
-    // object (you can update the title multiple times) and dispose it when done.
+    /**
+     * Activates the busy signal. Set the title in the returned BusySignal
+     * object (you can update the title multiple times) and dispose it when done.
+     */
     reportBusy(title: string, options?: BusySignalOptions): BusyMessage;
 
-    // This is a no-op. When someone consumes the busy service, they get back a
-    // reference to the single shared instance, so disposing of it would be wrong.
+    /**
+     * This is a no-op. When someone consumes the busy service, they get back a
+     * reference to the single shared instance, so disposing of it would be wrong.
+     */
     dispose(): void;
   }
 
   export interface BusyMessage {
-    // You can set/update the title.
+    /** You can set/update the title. */
     setTitle(title: string): void;
-    // Dispose of the signal when done to make it go away.
+    /** Dispose of the signal when done to make it go away. */
     dispose(): void;
   }
 
@@ -261,8 +286,10 @@ declare module 'atom-ide' {
     priority: number;
     grammarScopes: string[];
 
-    // A set of characters that will trigger signature help when typed.
-    // If a null/empty set is provided, only manual activation of the command works.
+    /**
+     * A set of characters that will trigger signature help when typed.
+     * If a null/empty set is provided, only manual activation of the command works.
+     */
     triggerCharacters?: Set<string>;
 
     getSignatureHelp(editor: TextEditor, point: Point): Promise<SignatureHelp | null>;
@@ -332,14 +359,13 @@ declare module 'atom-ide' {
 
   // Autocomplete service
 
-  /**
-   * Adds LSP specific properties to the Atom SuggestionBase type
-   */
+  /** Adds LSP specific properties to the Atom SuggestionBase type */
   interface SuggestionBase extends ac.SuggestionBase {
     /**
-     * A string that should be used when filtering a set of
-     * completion items. When `falsy` the [displayText](#ac.SuggestionBase.displayText)
-     * is used.
+     * A string that is used when filtering and sorting a set of
+     * completion items with a prefix present. When `falsy` the
+     * [displayText](#ac.SuggestionBase.displayText) is used. When
+     * no prefix, the `sortText` property is used.
      */
     filterText?: string;
   }

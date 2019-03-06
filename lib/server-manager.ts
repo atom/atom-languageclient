@@ -11,10 +11,12 @@ import {
 } from 'atom';
 import { ReportBusyWhile } from './utils';
 
-// Public: Defines the minimum surface area for an object that resembles a
-// ChildProcess.  This is used so that language packages with alternative
-// language server process hosting strategies can return something compatible
-// with AutoLanguageClient.startServerProcess.
+/**
+ * Public: Defines the minimum surface area for an object that resembles a
+ * ChildProcess.  This is used so that language packages with alternative
+ * language server process hosting strategies can return something compatible
+ * with AutoLanguageClient.startServerProcess.
+ */
 export interface LanguageServerProcess extends EventEmitter {
   stdin: stream.Writable;
   stdout: stream.Readable;
@@ -26,7 +28,7 @@ export interface LanguageServerProcess extends EventEmitter {
   on(event: 'exit', listener: (code: number, signal: string) => void): this;
 }
 
-// The necessary elements for a server that has started or is starting.
+/** The necessary elements for a server that has started or is starting. */
 export interface ActiveServer {
   disposable: CompositeDisposable;
   projectPath: string;
@@ -40,8 +42,10 @@ interface RestartCounter {
   timerId: NodeJS.Timer;
 }
 
-// Manages the language server lifecycles and their associated objects necessary
-// for adapting them to Atom IDE.
+/**
+ * Manages the language server lifecycles and their associated objects necessary
+ * for adapting them to Atom IDE.
+ */
 export class ServerManager {
   private _activeServers: ActiveServer[] = [];
   private _startingServerPromises: Map<string, Promise<ActiveServer>> = new Map();
