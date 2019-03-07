@@ -368,6 +368,16 @@ declare module 'atom-ide' {
      * no prefix, the `sortText` property is used.
      */
     filterText?: string;
+
+    /**
+     * Two numbers representing the offsets from the trigger column
+     * and the original request column respectively. If not present,
+     * then the offsets are taken to be [0, 0]
+     *
+     * A value greater than 0 represents shifting to the right. The
+     * end delta cannot be negative.
+     */
+    originalReplaceDeltas?: [number, number];
   }
 
   export type TextSuggestion = SuggestionBase & ac.TextSuggestion;

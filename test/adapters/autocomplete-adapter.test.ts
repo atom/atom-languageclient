@@ -5,12 +5,12 @@ import * as sinon from 'sinon';
 import {
   CompositeDisposable,
   Point,
-  Range,
   TextEditor,
 } from 'atom';
 import * as ac from 'atom/autocomplete-plus';
 import { expect } from 'chai';
 import { createSpyConnection, createFakeEditor } from '../helpers.js';
+import { TextSuggestion } from 'atom-ide';
 
 describe('AutoCompleteAdapter', () => {
   function createActiveServerSpy() {
@@ -163,7 +163,7 @@ describe('AutoCompleteAdapter', () => {
   describe('completionItemsToSuggestions', () => {
     it('converts LSP CompletionItem array to AutoComplete Suggestions array', () => {
       const autoCompleteAdapter = new AutoCompleteAdapter();
-      const results = Array.from(autoCompleteAdapter.completionItemsToSuggestions(completionItems, request));
+      const results = Array.from(autoCompleteAdapter.completionItemsToSuggestions(completionItems, request, [0, 0]));
       expect(results.length).equals(4);
       expect((results[0][0] as ac.TextSuggestion).text).equals('label2');
       expect(results[1][0].description).equals('a very exciting variable');
@@ -173,7 +173,7 @@ describe('AutoCompleteAdapter', () => {
     it('converts LSP CompletionList to AutoComplete Suggestions array', () => {
       const completionList = { items: completionItems, isIncomplete: false };
       const autoCompleteAdapter = new AutoCompleteAdapter();
-      const results = Array.from(autoCompleteAdapter.completionItemsToSuggestions(completionList, request));
+      const results = Array.from(autoCompleteAdapter.completionItemsToSuggestions(completionList, request, [0, 0]));
       expect(results.length).equals(4);
       expect(results[0][0].description).equals('a very exciting field');
       expect((results[1][0] as ac.TextSuggestion).text).equals('label3');
@@ -184,7 +184,7 @@ describe('AutoCompleteAdapter', () => {
       const autoCompleteAdapter = new AutoCompleteAdapter();
       const results =
         Array.from(
-          autoCompleteAdapter.completionItemsToSuggestions(completionList, request, (c, a, r) => {
+          autoCompleteAdapter.completionItemsToSuggestions(completionList, request, [0, 0], (c, a, r) => {
             (a as ac.TextSuggestion).text = c.label + ' ok';
             a.displayText = r.scopeDescriptor.getScopesArray()[0];
           }));
@@ -196,7 +196,7 @@ describe('AutoCompleteAdapter', () => {
 
     it('converts empty array into an empty AutoComplete Suggestions array', () => {
       const autoCompleteAdapter = new AutoCompleteAdapter();
-      const results = Array.from(autoCompleteAdapter.completionItemsToSuggestions([], request));
+      const results = Array.from(autoCompleteAdapter.completionItemsToSuggestions([], request, [0, 0]));
       expect(results.length).equals(0);
     });
   });
@@ -212,7 +212,7 @@ describe('AutoCompleteAdapter', () => {
         documentation: 'a truly useful keyword',
       };
       const result: ac.TextSuggestion = { text: '' };
-      AutoCompleteAdapter.completionItemToSuggestion(completionItem, result, request);
+      AutoCompleteAdapter.completionItemToSuggestion(completionItem, result, request, [0, 0]);
       expect(result.text).equals('insert');
       expect(result.displayText).equals('label');
       expect(result.type).equals('keyword');
@@ -246,18 +246,14 @@ describe('AutoCompleteAdapter', () => {
       };
       sinon.stub(autocompleteRequest.editor, 'getTextInBufferRange').returns('replacementPrefix');
       const result: any = {};
-      AutoCompleteAdapter.completionItemToSuggestion(completionItem, result, autocompleteRequest);
+      AutoCompleteAdapter.completionItemToSuggestion(completionItem, result, autocompleteRequest, [0, 0]);
       expect(result.displayText).equals('label');
       expect(result.type).equals('variable');
       expect(result.rightLabel).equals('number');
       expect(result.description).equals('a truly useful variable');
       expect(result.descriptionMarkdown).equals('a truly useful variable');
-      expect(result.replacementPrefix).equals('replacementPrefix');
+      // expect(result.replacementPrefix).equals('replacementPrefix');
       expect(result.text).equals('newText');
-      expect((autocompleteRequest as any).editor.getTextInBufferRange.calledOnce).equals(true);
-      expect((autocompleteRequest as any).editor.getTextInBufferRange.getCall(0).args).deep.equals([
-        new Range(new Point(10, 20), new Point(30, 40)),
-      ]);
     });
   });
 
@@ -358,28 +354,26 @@ describe('AutoCompleteAdapter', () => {
   describe('applyTextEditToSuggestion', () => {
     it('does not do anything if there is no textEdit', () => {
       const completionItem: ac.TextSuggestion = { text: '' };
-      AutoCompleteAdapter.applyTextEditToSuggestion(undefined, new TextEditor(), completionItem);
+      AutoCompleteAdapter.applyTextEditToSuggestion(undefined, new TextEditor(), [0, 0], completionItem);
       expect(completionItem).deep.equals({ text: '' });
     });
 
-    it('applies changes from TextEdit to replacementPrefix and text', () => {
+    it('applies changes from TextEdit to text', () => {
       const textEdit = {
         range: {
           start: { line: 1, character: 2 },
-          end: { line: 3, character: 4 },
+          end: { line: 1, character: 4 },
         },
         newText: 'newText',
       };
       const editor = new TextEditor();
       sinon.stub(editor, 'getTextInBufferRange').returns('replacementPrefix');
 
-      const completionItem: ac.TextSuggestion = { text: '' };
-      AutoCompleteAdapter.applyTextEditToSuggestion(textEdit, editor, completionItem);
-      expect(completionItem.replacementPrefix).equals('replacementPrefix');
+      const completionItem: TextSuggestion = { text: '' };
+      AutoCompleteAdapter.applyTextEditToSuggestion(textEdit, editor, [0, 0], completionItem);
       expect(completionItem.text).equals('newText');
-      expect((editor as any).getTextInBufferRange.calledOnce).equals(true);
-      expect((editor as any).getTextInBufferRange.getCall(0).args).deep.equals(
-        [new Range(new Point(1, 2), new Point(3, 4))]);
+      expect(completionItem.originalReplaceDeltas![0]).equals(2);
+      expect(completionItem.originalReplaceDeltas![1]).equals(4);
     });
   });
 
