@@ -151,8 +151,7 @@ export default class AutocompleteAdapter {
 
     // Do we have complete cached suggestions that are still valid for this request?
     if (cache && !cache.isIncomplete && cache.triggerChar === triggerChar
-      && cache.triggerPoint.isEqual(triggerPoint)
-      && cache.originalBufferPoint.isLessThanOrEqual(request.bufferPosition)) {
+      && cache.triggerPoint.isEqual(triggerPoint)) {
       return Array.from(cache.suggestionMap.keys());
     }
 
