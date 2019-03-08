@@ -105,13 +105,10 @@ export default class AutocompleteAdapter {
     const cache = this._suggestionCache.get(server)!;
     const replacementPrefix = request.editor.getTextInBufferRange([cache.triggerPoint, request.bufferPosition]);
     for (const suggestion of suggestions) {
-      if (suggestion.originalReplaceDeltas) { // having this property means a custom range was provided
-        const startDelta = suggestion.originalReplaceDeltas[0];
-        const preReplacementPrefix = startDelta >= 0
-          ? replacementPrefix.slice(startDelta)
-          : request.editor.getTextInBufferRange(
-              [cache.triggerPoint.translate([0, startDelta]), request.bufferPosition],
-            );
+      if (suggestion.customReplacmentPrefix) { // having this property means a custom range was provided
+        const len = replacementPrefix.length;
+        const preReplacementPrefix = suggestion.customReplacmentPrefix
+          + replacementPrefix.substring(len + cache.originalBufferPoint.column - request.bufferPosition.column, len);
         // we cannot replace text after the cursor with the current autocomplete-plus API
         // so we will simply ignore it for now
         suggestion.replacementPrefix = preReplacementPrefix;
@@ -151,7 +148,8 @@ export default class AutocompleteAdapter {
 
     // Do we have complete cached suggestions that are still valid for this request?
     if (cache && !cache.isIncomplete && cache.triggerChar === triggerChar
-      && cache.triggerPoint.isEqual(triggerPoint)) {
+      && cache.triggerPoint.isEqual(triggerPoint)
+      && cache.originalBufferPoint.isLessThanOrEqual(request.bufferPosition)) {
       return Array.from(cache.suggestionMap.keys());
     }
 
@@ -218,6 +216,7 @@ export default class AutocompleteAdapter {
     request: ac.SuggestionsRequestedEvent,
     onDidConvertCompletionItem?: CompletionItemAdjuster,
   ) {
+    // only the `documentation` and `detail` properties may change when resolving
     AutocompleteAdapter.applyDetailsToSuggestion(resolvedCompletionItem, suggestion);
     if (onDidConvertCompletionItem != null) {
       onDidConvertCompletionItem(resolvedCompletionItem, suggestion as ac.AnySuggestion, request);
@@ -370,7 +369,7 @@ export default class AutocompleteAdapter {
   ): Suggestion {
     AutocompleteAdapter.applyCompletionItemToSuggestion(item, suggestion as TextSuggestion);
     AutocompleteAdapter.applyTextEditToSuggestion(
-      item.textEdit, request.editor, triggerColumns, suggestion as TextSuggestion,
+      item.textEdit, request.editor, triggerColumns, request.bufferPosition, suggestion as TextSuggestion,
     );
     AutocompleteAdapter.applySnippetToSuggestion(item, suggestion as SnippetSuggestion);
     if (onDidConvertCompletionItem != null) {
@@ -432,14 +431,13 @@ export default class AutocompleteAdapter {
     textEdit: TextEdit | undefined,
     _editor: TextEditor,
     triggerColumns: [number, number],
+    originalBufferPosition: Point,
     suggestion: TextSuggestion,
   ): void {
     if (!textEdit) { return; }
-    if (textEdit.range.start.character !== triggerColumns[0] || textEdit.range.end.character !== triggerColumns[1]) {
-      suggestion.originalReplaceDeltas = [
-        textEdit.range.start.character - triggerColumns[0],
-        textEdit.range.end.character - triggerColumns[1],
-      ];
+    if (textEdit.range.start.character !== triggerColumns[0]) {
+      const range = Convert.lsRangeToAtomRange(textEdit.range);
+      suggestion.customReplacmentPrefix = _editor.getTextInBufferRange([range.start, originalBufferPosition]);
     }
     suggestion.text = textEdit.newText;
   }

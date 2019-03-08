@@ -354,7 +354,7 @@ describe('AutoCompleteAdapter', () => {
   describe('applyTextEditToSuggestion', () => {
     it('does not do anything if there is no textEdit', () => {
       const completionItem: ac.TextSuggestion = { text: '' };
-      AutoCompleteAdapter.applyTextEditToSuggestion(undefined, new TextEditor(), [0, 0], completionItem);
+      AutoCompleteAdapter.applyTextEditToSuggestion(undefined, new TextEditor(), [0, 0], new Point(0, 0), completionItem);
       expect(completionItem).deep.equals({ text: '' });
     });
 
@@ -370,10 +370,8 @@ describe('AutoCompleteAdapter', () => {
       sinon.stub(editor, 'getTextInBufferRange').returns('replacementPrefix');
 
       const completionItem: TextSuggestion = { text: '' };
-      AutoCompleteAdapter.applyTextEditToSuggestion(textEdit, editor, [0, 0], completionItem);
+      AutoCompleteAdapter.applyTextEditToSuggestion(textEdit, editor, [0, 0], new Point(1, 3), completionItem);
       expect(completionItem.text).equals('newText');
-      expect(completionItem.originalReplaceDeltas![0]).equals(2);
-      expect(completionItem.originalReplaceDeltas![1]).equals(4);
     });
   });
 
