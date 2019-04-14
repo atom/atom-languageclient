@@ -89,8 +89,8 @@ export default class AutocompleteAdapter {
       ? server.capabilities.completionProvider.triggerCharacters || []
       : [];
 
-    // triggerOnly is true if we have just typed in the trigger character, and is false if we
-    // have typed additional characters following the trigger character.
+    // triggerOnly is true if we have just typed in a trigger character, and is false if we
+    // have typed additional characters following a trigger character.
     const [triggerChar, triggerOnly] = AutocompleteAdapter.getTriggerCharacter(request, triggerChars);
 
     if (!this.shouldTrigger(request, triggerChar, minimumWordLength || 0)) {
@@ -347,7 +347,10 @@ export default class AutocompleteAdapter {
         (s) => [
           AutocompleteAdapter.completionItemToSuggestion(
             s, {} as Suggestion, request, triggerColumns, onDidConvertCompletionItem),
-          new PossiblyResolvedCompletionItem(s, false)]));
+          new PossiblyResolvedCompletionItem(s, false),
+        ],
+      ),
+    );
   }
 
   /**
@@ -429,7 +432,7 @@ export default class AutocompleteAdapter {
    */
   public static applyTextEditToSuggestion(
     textEdit: TextEdit | undefined,
-    _editor: TextEditor,
+    editor: TextEditor,
     triggerColumns: [number, number],
     originalBufferPosition: Point,
     suggestion: TextSuggestion,
@@ -437,7 +440,7 @@ export default class AutocompleteAdapter {
     if (!textEdit) { return; }
     if (textEdit.range.start.character !== triggerColumns[0]) {
       const range = Convert.lsRangeToAtomRange(textEdit.range);
-      suggestion.customReplacmentPrefix = _editor.getTextInBufferRange([range.start, originalBufferPosition]);
+      suggestion.customReplacmentPrefix = editor.getTextInBufferRange([range.start, originalBufferPosition]);
     }
     suggestion.text = textEdit.newText;
   }
