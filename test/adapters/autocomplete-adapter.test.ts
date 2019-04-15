@@ -451,6 +451,38 @@ describe('AutoCompleteAdapter', () => {
       expect((results[0] as TextSuggestion).text).equals('hello world');
       expect(results[0].replacementPrefix).equals('#align');
     });
+
+    it('updates the replacementPrefix when the editor text changes', async () => {
+      const customRequest = createRequest({prefix: '', position: new Point(0, 8)});
+      customRequest.editor.setText('foo #ali bar');
+      sinon.stub(server.connection, 'completion').resolves([
+        createCompletionItem('align', {
+          sortText: 'a',
+          textEdit: {
+            range: { start: { line: 0, character: 4 }, end: { line: 0,  character: 8 } },
+            newText: 'hello world',
+          },
+        }),
+      ]);
+
+      let result = (await autoCompleteAdapter.getSuggestions(server, customRequest))[0];
+      expect(result.replacementPrefix).equals('#ali');
+
+      customRequest.editor.setTextInBufferRange([[0, 8], [0, 8]], 'g');
+      customRequest.bufferPosition = new Point(0, 9);
+      result = (await autoCompleteAdapter.getSuggestions(server, customRequest))[0];
+      expect(result.replacementPrefix).equals('#alig');
+
+      customRequest.editor.setTextInBufferRange([[0, 9], [0, 9]], 'n');
+      customRequest.bufferPosition = new Point(0, 10);
+      result = (await autoCompleteAdapter.getSuggestions(server, customRequest))[0];
+      expect(result.replacementPrefix).equals('#align');
+
+      customRequest.editor.setTextInBufferRange([[0, 7], [0, 9]], '');
+      customRequest.bufferPosition = new Point(0, 7);
+      result = (await autoCompleteAdapter.getSuggestions(server, customRequest))[0];
+      expect(result.replacementPrefix).equals('#al');
+    });
   });
 
   describe('completionKindToSuggestionType', () => {
