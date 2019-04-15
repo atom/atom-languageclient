@@ -22,9 +22,19 @@ import {
 import * as ac from 'atom/autocomplete-plus';
 import { Suggestion, TextSuggestion, SnippetSuggestion } from 'atom-ide';
 
+/**
+ * Holds a list of suggestions generated from the CompletionItem[]
+ * list sent by the server, as well as metadata about the context
+ * it was collected in
+ */
 interface SuggestionCacheEntry {
+  /** If `true`, the server will send a list of suggestions to replace this one */
   isIncomplete: boolean;
+  /** The point left of the first character in the original prefix sent to the server */
   triggerPoint: Point;
+  /** The point right of the last character in the original prefix sent to the server */
+  originalBufferPoint: Point;
+  /** The trigger string that caused the autocomplete (if any) */
   triggerChar: string;
   suggestionMap: Map<Suggestion, PossiblyResolvedCompletionItem>;
 }
@@ -79,8 +89,8 @@ export default class AutocompleteAdapter {
       ? server.capabilities.completionProvider.triggerCharacters || []
       : [];
 
-    // triggerOnly is true if we have just typed in the trigger character, and is false if we
-    // have typed additional characters following the trigger character.
+    // triggerOnly is true if we have just typed in a trigger character, and is false if we
+    // have typed additional characters following a trigger character.
     const [triggerChar, triggerOnly] = AutocompleteAdapter.getTriggerCharacter(request, triggerChars);
 
     if (!this.shouldTrigger(request, triggerChar, minimumWordLength || 0)) {
@@ -91,10 +101,20 @@ export default class AutocompleteAdapter {
     const suggestions = await
       this.getOrBuildSuggestions(server, request, triggerChar, triggerOnly, onDidConvertCompletionItem);
 
-    // As the user types more characters to refine filter we must replace those characters on acceptance
-    const replacementPrefix = (triggerChar !== '' && triggerOnly) ? '' : request.prefix;
+    // We must update the replacement prefix as characters are added and removed
+    const cache = this._suggestionCache.get(server)!;
+    const replacementPrefix = request.editor.getTextInBufferRange([cache.triggerPoint, request.bufferPosition]);
     for (const suggestion of suggestions) {
-      suggestion.replacementPrefix = replacementPrefix;
+      if (suggestion.customReplacmentPrefix) { // having this property means a custom range was provided
+        const len = replacementPrefix.length;
+        const preReplacementPrefix = suggestion.customReplacmentPrefix
+          + replacementPrefix.substring(len + cache.originalBufferPoint.column - request.bufferPosition.column, len);
+        // we cannot replace text after the cursor with the current autocomplete-plus API
+        // so we will simply ignore it for now
+        suggestion.replacementPrefix = preReplacementPrefix;
+      } else {
+        suggestion.replacementPrefix = replacementPrefix;
+      }
     }
 
     const filtered = !(request.prefix === "" || (triggerChar !== '' && triggerOnly));
@@ -128,7 +148,8 @@ export default class AutocompleteAdapter {
 
     // Do we have complete cached suggestions that are still valid for this request?
     if (cache && !cache.isIncomplete && cache.triggerChar === triggerChar
-      && cache.triggerPoint.isEqual(triggerPoint)) {
+      && cache.triggerPoint.isEqual(triggerPoint)
+      && cache.originalBufferPoint.isLessThanOrEqual(request.bufferPosition)) {
       return Array.from(cache.suggestionMap.keys());
     }
 
@@ -138,10 +159,20 @@ export default class AutocompleteAdapter {
         AutocompleteAdapter.createCompletionParams(request, triggerChar, triggerOnly), cancellationToken),
     );
 
+    // spec guarantees all edits are on the same line, so we only need to check the columns
+    const triggerColumns: [number, number] = [triggerPoint.column, request.bufferPosition.column];
+
     // Setup the cache for subsequent filtered results
     const isComplete = completions === null || Array.isArray(completions) || completions.isIncomplete === false;
-    const suggestionMap = this.completionItemsToSuggestions(completions, request, onDidConvertCompletionItem);
-    this._suggestionCache.set(server, { isIncomplete: !isComplete, triggerChar, triggerPoint, suggestionMap });
+    const suggestionMap =
+      this.completionItemsToSuggestions(completions, request, triggerColumns, onDidConvertCompletionItem);
+    this._suggestionCache.set(server, {
+      isIncomplete: !isComplete,
+      triggerChar,
+      triggerPoint,
+      originalBufferPoint: request.bufferPosition,
+      suggestionMap,
+    });
 
     return Array.from(suggestionMap.keys());
   }
@@ -170,13 +201,26 @@ export default class AutocompleteAdapter {
         const resolvedCompletionItem = await
           server.connection.completionItemResolve(possiblyResolvedCompletionItem.completionItem);
         if (resolvedCompletionItem != null) {
-          AutocompleteAdapter.completionItemToSuggestion(
+          AutocompleteAdapter.resolveSuggestion(
             resolvedCompletionItem, suggestion, request, onDidConvertCompletionItem);
           possiblyResolvedCompletionItem.isResolved = true;
         }
       }
     }
     return suggestion;
+  }
+
+  public static resolveSuggestion(
+    resolvedCompletionItem: CompletionItem,
+    suggestion: ac.AnySuggestion,
+    request: ac.SuggestionsRequestedEvent,
+    onDidConvertCompletionItem?: CompletionItemAdjuster,
+  ) {
+    // only the `documentation` and `detail` properties may change when resolving
+    AutocompleteAdapter.applyDetailsToSuggestion(resolvedCompletionItem, suggestion);
+    if (onDidConvertCompletionItem != null) {
+      onDidConvertCompletionItem(resolvedCompletionItem, suggestion as ac.AnySuggestion, request);
+    }
   }
 
   /**
@@ -291,6 +335,7 @@ export default class AutocompleteAdapter {
   public completionItemsToSuggestions(
     completionItems: CompletionItem[] | CompletionList | null,
     request: ac.SuggestionsRequestedEvent,
+    triggerColumns: [number, number],
     onDidConvertCompletionItem?: CompletionItemAdjuster,
   ): Map<Suggestion, PossiblyResolvedCompletionItem> {
     const completionsArray = Array.isArray(completionItems)
@@ -301,8 +346,11 @@ export default class AutocompleteAdapter {
       .map<[Suggestion, PossiblyResolvedCompletionItem]>(
         (s) => [
           AutocompleteAdapter.completionItemToSuggestion(
-            s, {} as Suggestion, request, onDidConvertCompletionItem),
-          new PossiblyResolvedCompletionItem(s, false)]));
+            s, {} as Suggestion, request, triggerColumns, onDidConvertCompletionItem),
+          new PossiblyResolvedCompletionItem(s, false),
+        ],
+      ),
+    );
   }
 
   /**
@@ -319,10 +367,13 @@ export default class AutocompleteAdapter {
     item: CompletionItem,
     suggestion: Suggestion,
     request: ac.SuggestionsRequestedEvent,
+    triggerColumns: [number, number],
     onDidConvertCompletionItem?: CompletionItemAdjuster,
   ): Suggestion {
     AutocompleteAdapter.applyCompletionItemToSuggestion(item, suggestion as TextSuggestion);
-    AutocompleteAdapter.applyTextEditToSuggestion(item.textEdit, request.editor, suggestion as TextSuggestion);
+    AutocompleteAdapter.applyTextEditToSuggestion(
+      item.textEdit, request.editor, triggerColumns, request.bufferPosition, suggestion as TextSuggestion,
+    );
     AutocompleteAdapter.applySnippetToSuggestion(item, suggestion as SnippetSuggestion);
     if (onDidConvertCompletionItem != null) {
       onDidConvertCompletionItem(item, suggestion as ac.AnySuggestion, request);
@@ -346,6 +397,13 @@ export default class AutocompleteAdapter {
     suggestion.filterText = item.filterText || item.label;
     suggestion.displayText = item.label;
     suggestion.type = AutocompleteAdapter.completionKindToSuggestionType(item.kind);
+    AutocompleteAdapter.applyDetailsToSuggestion(item, suggestion);
+  }
+
+  public static applyDetailsToSuggestion(
+    item: CompletionItem,
+    suggestion: Suggestion,
+  ) {
     suggestion.rightLabel = item.detail;
 
     // Older format, can't know what it is so assign to both and hope for best
@@ -375,12 +433,16 @@ export default class AutocompleteAdapter {
   public static applyTextEditToSuggestion(
     textEdit: TextEdit | undefined,
     editor: TextEditor,
+    triggerColumns: [number, number],
+    originalBufferPosition: Point,
     suggestion: TextSuggestion,
   ): void {
-    if (textEdit) {
-      suggestion.replacementPrefix = editor.getTextInBufferRange(Convert.lsRangeToAtomRange(textEdit.range));
-      suggestion.text = textEdit.newText;
+    if (!textEdit) { return; }
+    if (textEdit.range.start.character !== triggerColumns[0]) {
+      const range = Convert.lsRangeToAtomRange(textEdit.range);
+      suggestion.customReplacmentPrefix = editor.getTextInBufferRange([range.start, originalBufferPosition]);
     }
+    suggestion.text = textEdit.newText;
   }
 
   /**

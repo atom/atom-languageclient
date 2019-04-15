@@ -368,6 +368,13 @@ declare module 'atom-ide' {
      * no prefix, the `sortText` property is used.
      */
     filterText?: string;
+
+    /**
+     * String representing the replacement prefix from the suggestion's
+     * custom start point to the original buffer position the suggestion
+     * was gathered from.
+     */
+    customReplacmentPrefix?: string;
   }
 
   export type TextSuggestion = SuggestionBase & ac.TextSuggestion;
