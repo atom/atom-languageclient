@@ -89,10 +89,20 @@ export default class CodeActionAdapter {
     connection: LanguageClientConnection,
   ): Promise<void> {
     if (Command.is(command)) {
-      await connection.executeCommand({
-        command: command.command,
-        arguments: command.arguments,
-      });
+      // eclipse.jdt.ls breaks with the spec and expects the client to handle the command
+      // https://github.com/eclipse/eclipse.jdt.ls/issues/376
+      if (command.command === 'java.apply.workspaceEdit') {
+        if (command.arguments) {
+          // Guaranteed only ever one element in the arguments array
+          const edit: WorkspaceEdit = command.arguments[0];
+          CodeActionAdapter.applyWorkspaceEdit(edit);
+        }
+      } else {
+        await connection.executeCommand({
+          command: command.command,
+          arguments: command.arguments,
+        });
+      }
     }
   }
 
