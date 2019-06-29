@@ -261,6 +261,7 @@ export default class AutoLanguageClient {
       (filepath) => this.filterChangeWatchedFiles(filepath),
       this.reportBusyWhile,
       this.getServerName(),
+      this.shutdownServersGracefully(),
     );
     this._serverManager.startListening();
     process.on('exit', () => this.exitCleanup.bind(this));
@@ -780,6 +781,11 @@ export default class AutoLanguageClient {
    * @returns `false` => message will not be sent to the language server
    */
   protected filterChangeWatchedFiles(_filePath: string): boolean {
+    return true;
+  }
+
+  /** @return false => servers will be killed without awaiting shutdown response. */
+  protected shutdownServersGracefully(): boolean {
     return true;
   }
 
