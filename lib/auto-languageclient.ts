@@ -18,6 +18,7 @@ import LinterPushV2Adapter from './adapters/linter-push-v2-adapter';
 import LoggingConsoleAdapter from './adapters/logging-console-adapter';
 import NotificationsAdapter from './adapters/notifications-adapter';
 import OutlineViewAdapter from './adapters/outline-view-adapter';
+import RenameAdapter from './adapters/rename-adapter';
 import SignatureHelpAdapter from './adapters/signature-help-adapter';
 import * as Utils from './utils';
 import { Socket } from 'net';
@@ -753,6 +754,28 @@ export default class AutoLanguageClient {
       editor,
       range,
       diagnostics,
+    );
+  }
+
+  public provideRefactor(): atomIde.RefactorProvider {
+    return {
+      grammarScopes: this.getGrammarScopes(),
+      priority: 1,
+      rename: this.getRename.bind(this),
+    };
+  }
+
+  protected async getRename(editor: TextEditor, position: Point, newName: string) {
+    const server = await this._serverManager.getServer(editor);
+    if (server == null || !RenameAdapter.canAdapt(server.capabilities)) {
+      return null;
+    }
+
+    return RenameAdapter.getRename(
+      server.connection,
+      editor,
+      position,
+      newName,
     );
   }
 
