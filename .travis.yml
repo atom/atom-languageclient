@@ -1,5 +1,5 @@
 language: node_js
-node_js: '8.9.3'
+node_js: '10.2.0'
 sudo: false
 os: osx
 
