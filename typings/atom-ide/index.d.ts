@@ -213,6 +213,12 @@ declare module 'atom-ide' {
     ): Promise<CodeAction[] | null>;
   }
 
+  export interface RefactorProvider {
+    grammarScopes: string[];
+    priority: number;
+    rename?(editor: TextEditor, position: Point, newName: string): Promise<Map<IdeUri, TextEdit[]> | null>;
+  }
+
   export interface BusySignalOptions {
     /**
      * Can say that a busy signal will only appear when a given file is open.
