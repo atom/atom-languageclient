@@ -7,7 +7,7 @@
   "main": "./build/lib/main",
   "types": "./build/lib/main.d.ts",
   "scripts": {
-    "clean": "rm -rf build",
+    "clean": "rimraf build",
     "compile": "tsc",
     "watch": "tsc -watch",
     "lint": "tslint -c tslint.json 'lib/**/*.ts' 'test/**/*.ts' 'typings/**/*.d.ts'",
@@ -32,6 +32,7 @@
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
     "mocha-appveyor-reporter": "^0.4.2",
+    "rimraf": "^3.0.0",
     "sinon": "^7.0.0",
     "tslint": "^5.11.0",
     "typescript": "~3.1.6"
