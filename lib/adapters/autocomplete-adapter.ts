@@ -142,8 +142,8 @@ export default class AutocompleteAdapter {
     const cache = this._suggestionCache.get(server);
 
     const triggerColumn = (triggerChar !== '' && triggerOnly)
-      ? request.bufferPosition.column - triggerChar.length
-      : request.bufferPosition.column - request.prefix.length - triggerChar.length;
+      ? request.bufferPosition.column
+      : request.bufferPosition.column - request.prefix.length;
     const triggerPoint = new Point(request.bufferPosition.row, triggerColumn);
 
     // Do we have complete cached suggestions that are still valid for this request?
