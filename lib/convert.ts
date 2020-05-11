@@ -225,7 +225,7 @@ export default class Convert {
    * @param textEdits The language server protocol {TextEdit} objects to convert.
    * @returns An {Array} of Atom {TextEdit} objects.
    */
-  public static convertLsTextEdits(textEdits: ls.TextEdit[] | null): TextEdit[] {
+  public static convertLsTextEdits(textEdits?: ls.TextEdit[] | null): TextEdit[] {
     return (textEdits || []).map(Convert.convertLsTextEdit);
   }
 

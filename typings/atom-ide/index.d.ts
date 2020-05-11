@@ -1,6 +1,7 @@
 declare module 'atom-ide' {
   import { Disposable, Grammar, Point, Range, TextEditor } from 'atom';
   import * as ac from 'atom/autocomplete-plus';
+  import { CompletionItem } from 'lib/languageclient';
 
   export interface OutlineProvider {
     name: string;
@@ -381,6 +382,9 @@ declare module 'atom-ide' {
      * was gathered from.
      */
     customReplacmentPrefix?: string;
+
+    /** Original completion item, if available */
+    completionItem?: CompletionItem;
   }
 
   export type TextSuggestion = SuggestionBase & ac.TextSuggestion;

@@ -379,6 +379,8 @@ export default class AutocompleteAdapter {
       onDidConvertCompletionItem(item, suggestion as ac.AnySuggestion, request);
     }
 
+    suggestion.completionItem = item;
+
     return suggestion;
   }
 
