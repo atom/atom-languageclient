@@ -14,7 +14,7 @@ import {
 
 export default class RenameAdapter {
   public static canAdapt(serverCapabilities: ServerCapabilities): boolean {
-    return serverCapabilities.renameProvider === true;
+    return !!serverCapabilities.renameProvider;
   }
 
   public static async getRename(
@@ -31,7 +31,7 @@ export default class RenameAdapter {
     }
 
     if (edit.documentChanges) {
-      return RenameAdapter.convertDocumentChanges(edit.documentChanges);
+      return RenameAdapter.convertDocumentChanges(edit.documentChanges as TextDocumentEdit[]);
     } else if (edit.changes) {
       return RenameAdapter.convertChanges(edit.changes);
     } else {

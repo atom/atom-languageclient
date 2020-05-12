@@ -16,6 +16,9 @@ export function createSpyConnection(): rpc.MessageConnection {
     sendNotification: sinon.spy(),
     trace: sinon.spy(),
     inspect: sinon.spy(),
+    onProgress: sinon.spy(),
+    sendProgress: sinon.spy(),
+    onUnhandledProgress: sinon.spy(),
   };
 }
 

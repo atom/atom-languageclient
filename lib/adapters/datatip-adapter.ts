@@ -27,7 +27,7 @@ export default class DatatipAdapter {
    *   given serverCapabilities.
    */
   public static canAdapt(serverCapabilities: ServerCapabilities): boolean {
-    return serverCapabilities.hoverProvider === true;
+    return !!serverCapabilities.hoverProvider;
   }
 
   /**

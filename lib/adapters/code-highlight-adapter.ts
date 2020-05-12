@@ -16,7 +16,7 @@ export default class CodeHighlightAdapter {
    * given serverCapabilities.
    */
   public static canAdapt(serverCapabilities: ServerCapabilities): boolean {
-    return serverCapabilities.documentHighlightProvider === true;
+    return !!serverCapabilities.documentHighlightProvider;
   }
 
   /**

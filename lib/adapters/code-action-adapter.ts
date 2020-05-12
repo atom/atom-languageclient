@@ -22,7 +22,7 @@ export default class CodeActionAdapter {
    *   given serverCapabilities.
    */
   public static canAdapt(serverCapabilities: ServerCapabilities): boolean {
-    return serverCapabilities.codeActionProvider === true;
+    return !!serverCapabilities.codeActionProvider;
   }
 
   /**

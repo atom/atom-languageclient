@@ -1,6 +1,7 @@
 declare module 'atom-ide' {
   import { Disposable, Grammar, Point, Range, TextEditor } from 'atom';
   import * as ac from 'atom/autocomplete-plus';
+  import { CompletionItem, MarkupContent } from 'lib/languageclient';
 
   export interface OutlineProvider {
     name: string;
@@ -135,7 +136,7 @@ declare module 'atom-ide' {
        * This is null for manually toggled datatips.
        */
       mouseEvent: MouseEvent | null,
-    ): Promise<Datatip>;
+    ): Promise<Datatip | null>;
     validForScope(scopeName: string): boolean;
     /**
      * A unique name for the provider to be used for analytics.
@@ -303,19 +304,19 @@ declare module 'atom-ide' {
 
   export interface SignatureHelp {
     signatures: Signature[];
-    activeSignature?: number;
-    activeParameter?: number;
+    activeSignature?: number | null;
+    activeParameter?: number | null;
   }
 
   export interface Signature {
-    label: string;
-    documentation?: string;
+    label: string | [number, number];
+    documentation?: string | MarkupContent;
     parameters?: SignatureParameter[];
   }
 
   export interface SignatureParameter {
-    label: string;
-    documentation?: string;
+    label: string | [number, number];
+    documentation?: string | MarkupContent;
   }
 
   export interface SourceInfo {

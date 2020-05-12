@@ -25,7 +25,7 @@ export default class FindReferencesAdapter {
    *   given serverCapabilities.
    */
   public static canAdapt(serverCapabilities: ServerCapabilities): boolean {
-    return serverCapabilities.referencesProvider === true;
+    return !!serverCapabilities.referencesProvider;
   }
 
   /**

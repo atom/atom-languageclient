@@ -4,6 +4,7 @@ import {
   LanguageClientConnection,
   ApplyWorkspaceEditParams,
   ApplyWorkspaceEditResponse,
+  TextDocumentEdit,
 } from '../languageclient';
 import {
   TextBuffer,
@@ -49,8 +50,9 @@ export default class ApplyEditAdapter {
     if (params.edit.documentChanges) {
       changes = {};
       params.edit.documentChanges.forEach((change) => {
-        if (change && change.textDocument) {
-          changes[change.textDocument.uri] = change.edits;
+        const edit = change as TextDocumentEdit;
+        if (edit) {
+          changes[edit.textDocument.uri] = edit.edits;
         }
       });
     }
@@ -58,7 +60,7 @@ export default class ApplyEditAdapter {
     const uris = Object.keys(changes);
 
     // Keep checkpoints from all successful buffer edits
-    const checkpoints: Array<{ buffer: TextBuffer, checkpoint: number }> = [];
+    const checkpoints: { buffer: TextBuffer, checkpoint: number }[] = [];
 
     const promises = uris.map(async (uri) => {
       const path = Convert.uriToPath(uri);

@@ -313,7 +313,7 @@ export default class AutoLanguageClient {
       () => initialization,
     );
     const initializeResponse = await initialization;
-    const newServer = {
+    const newServer: ActiveServer = {
       projectPath,
       process,
       connection,
