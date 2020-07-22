@@ -135,7 +135,7 @@ declare module 'atom-ide' {
        * This is null for manually toggled datatips.
        */
       mouseEvent: MouseEvent | null,
-    ): Promise<Datatip>;
+    ): Promise<Datatip | null>;
     validForScope(scopeName: string): boolean;
     /**
      * A unique name for the provider to be used for analytics.
@@ -302,20 +302,27 @@ declare module 'atom-ide' {
   }
 
   export interface SignatureHelp {
-    signatures: Signature[];
-    activeSignature?: number;
-    activeParameter?: number;
+    signatures: SignatureInformation[];
+    activeSignature: number | null;
+    activeParameter: number | null;
   }
 
-  export interface Signature {
+  export interface SignatureInformation {
     label: string;
-    documentation?: string;
-    parameters?: SignatureParameter[];
+    documentation?: string | MarkupContent;
+    parameters?: ParameterInformation[];
   }
 
-  export interface SignatureParameter {
+  export interface MarkupContent {
+      kind: MarkupKind;
+      value: string;
+  }
+
+  export type MarkupKind = 'plaintext' | 'markdown';
+
+  export interface ParameterInformation {
     label: string;
-    documentation?: string;
+    documentation?: string | MarkupContent;
   }
 
   export interface SourceInfo {

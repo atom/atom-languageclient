@@ -42,7 +42,7 @@ export default class Convert {
    */
   public static uriToPath(uri: string): string {
     const url = URL.parse(uri);
-    if (url.protocol !== 'file:' || url.path === undefined) {
+    if (url.protocol !== 'file:' || url.path === undefined || url.path === null) {
       return uri;
     }
 
