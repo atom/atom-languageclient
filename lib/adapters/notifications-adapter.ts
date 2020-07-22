@@ -9,8 +9,10 @@ import {
   Notification,
   NotificationOptions,
   NotificationExt,
-  NotificationButton,
 } from 'atom';
+import {
+  NotificationButton,
+} from 'atom-ide'
 
 /** Public: Adapts Atom's user notifications to those of the language server protocol. */
 export default class NotificationsAdapter {

@@ -395,4 +395,9 @@ declare module 'atom-ide' {
   export type SnippetSuggestion = SuggestionBase & ac.SnippetSuggestion;
 
   export type Suggestion =  TextSuggestion | SnippetSuggestion;
+
+
+  export interface NotificationButton {
+    text: string
+  }
 }

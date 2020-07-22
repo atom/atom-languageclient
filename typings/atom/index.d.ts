@@ -9,8 +9,4 @@ declare module 'atom' {
     isDismissed?: () => boolean;
     getOptions?: () => NotificationOptions | null;
   }
-
-  interface NotificationButton {
-    text: string
-  }
 }
