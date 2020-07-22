@@ -10,7 +10,7 @@
     "clean": "rimraf build",
     "compile": "tsc",
     "watch": "tsc -watch",
-    "lint": "tslint -c tslint.json 'lib/**/*.ts' 'test/**/*.ts' 'typings/**/*.d.ts'",
+    "lint": "eslint . --ext .ts",
     "prepare": "npm run clean && npm run compile",
     "test": "npm run compile && atom --test build/test"
   },
@@ -30,11 +30,13 @@
     "@types/mocha": "^5.2.5",
     "@types/node": "14.0.24",
     "@types/sinon": "^4.1.3",
+    "@typescript-eslint/eslint-plugin": "^3.7.0",
+    "@typescript-eslint/parser": "^3.7.0",
     "chai": "^4.2.0",
+    "eslint": "^7.5.0",
     "mocha": "^5.2.0",
     "mocha-appveyor-reporter": "^0.4.2",
     "sinon": "^7.0.0",
-    "tslint": "^5.11.0",
     "typescript": "~3.9.7"
   }
 }

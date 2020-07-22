@@ -66,7 +66,7 @@ function _getRegexpRangeAtPosition(buffer: TextBuffer, position: Point, wordRege
  * CancellationToken for that connection then create and store a new
  * CancellationToken to be used for the current request.
  */
-export function cancelAndRefreshCancellationToken<T extends object>(
+export function cancelAndRefreshCancellationToken<T extends Record<string, unknown>>(
   key: T,
   cancellationTokens: WeakMap<T, CancellationTokenSource>): CancellationToken {
 
@@ -80,7 +80,7 @@ export function cancelAndRefreshCancellationToken<T extends object>(
   return cancellationToken.token;
 }
 
-export async function doWithCancellationToken<T1 extends object, T2>(
+export async function doWithCancellationToken<T1 extends Record<string, unknown>, T2>(
   key: T1,
   cancellationTokens: WeakMap<T1, CancellationTokenSource>,
   work: (token: CancellationToken) => Promise<T2>,

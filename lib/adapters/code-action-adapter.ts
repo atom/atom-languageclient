@@ -71,7 +71,6 @@ export default class CodeActionAdapter {
       getTitle(): Promise<string> {
         return Promise.resolve(action.title);
       },
-      // tslint:disable-next-line:no-empty
       dispose(): void { },
     };
   }

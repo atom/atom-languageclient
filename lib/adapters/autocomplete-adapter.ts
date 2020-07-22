@@ -215,7 +215,7 @@ export default class AutocompleteAdapter {
     suggestion: ac.AnySuggestion,
     request: ac.SuggestionsRequestedEvent,
     onDidConvertCompletionItem?: CompletionItemAdjuster,
-  ) {
+  ): void {
     // only the `documentation` and `detail` properties may change when resolving
     AutocompleteAdapter.applyDetailsToSuggestion(resolvedCompletionItem, suggestion);
     if (onDidConvertCompletionItem != null) {
@@ -392,7 +392,7 @@ export default class AutocompleteAdapter {
   public static applyCompletionItemToSuggestion(
     item: CompletionItem,
     suggestion: TextSuggestion,
-  ) {
+  ): void {
     suggestion.text = item.insertText || item.label;
     suggestion.filterText = item.filterText || item.label;
     suggestion.displayText = item.label;
@@ -403,7 +403,7 @@ export default class AutocompleteAdapter {
   public static applyDetailsToSuggestion(
     item: CompletionItem,
     suggestion: Suggestion,
-  ) {
+  ): void {
     suggestion.rightLabel = item.detail;
 
     // Older format, can't know what it is so assign to both and hope for best

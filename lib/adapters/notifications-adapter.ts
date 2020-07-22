@@ -9,6 +9,7 @@ import {
   Notification,
   NotificationOptions,
   NotificationExt,
+  NotificationButton,
 } from 'atom';
 
 /** Public: Adapts Atom's user notifications to those of the language server protocol. */
@@ -21,7 +22,7 @@ export default class NotificationsAdapter {
     connection: LanguageClientConnection,
     name: string,
     projectPath: string,
-  ) {
+  ): void {
     connection.onShowMessage((m) => NotificationsAdapter.onShowMessage(m, name, projectPath));
     connection.onShowMessageRequest((m) => NotificationsAdapter.onShowMessageRequest(m, name, projectPath));
   }
@@ -99,7 +100,7 @@ export default class NotificationsAdapter {
    */
   public static actionItemToNotificationButton(
     actionItem: MessageActionItem,
-  ) {
+  ): NotificationButton {
     return {
       text: actionItem.title,
     };

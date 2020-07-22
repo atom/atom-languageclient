@@ -14,7 +14,7 @@ export interface KnownNotifications {
   'window/logMessage': lsp.LogMessageParams;
   'window/showMessageRequest': lsp.ShowMessageRequestParams;
   'window/showMessage': lsp.ShowMessageParams;
-  [custom: string]: object;
+  [custom: string]: Record<string, unknown>;
 }
 
 export interface KnownRequests {
@@ -103,7 +103,7 @@ export class LanguageClientConnection extends EventEmitter {
    * @param callback The function to be called when the message is received.
    *   The payload from the message is passed to the function.
    */
-  public onCustom(method: string, callback: (obj: object) => void): void {
+  public onCustom(method: string, callback: (obj: Record<string, unknown>) => void): void {
     this._onNotification({ method }, callback);
   }
 
@@ -113,7 +113,7 @@ export class LanguageClientConnection extends EventEmitter {
    * @param method A string containing the name of the request message.
    * @param params The method's parameters
    */
-  public sendCustomRequest(method: string, params?: any[] | object): Promise<any | null> {
+  public sendCustomRequest(method: string, params?: any[] | Record<string, unknown>): Promise<any | null> {
     return this._sendRequest(method, params);
   }
 
@@ -123,7 +123,7 @@ export class LanguageClientConnection extends EventEmitter {
    * @param method A string containing the name of the notification message.
    * @param params The method's parameters
    */
-  public sendCustomNotification(method: string, params?: any[] | object): void {
+  public sendCustomNotification(method: string, params?: any[] | Record<string, unknown>): void {
     this._sendNotification(method, params);
   }
 
@@ -507,14 +507,14 @@ export class LanguageClientConnection extends EventEmitter {
     });
   }
 
-  private _sendNotification(method: string, args?: object): void {
+  private _sendNotification(method: string, args?: Record<string, unknown>): void {
     this._log.debug(`rpc.sendNotification ${method}`, args);
     this._rpc.sendNotification(method, args);
   }
 
   private async _sendRequest(
     method: string,
-    args?: object,
+    args?: Record<string, unknown>,
     cancellationToken?: jsonrpc.CancellationToken,
   ): Promise<any> {
     this._log.debug(`rpc.sendRequest ${method} sending`, args);

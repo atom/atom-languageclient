@@ -1,4 +1,4 @@
-// tslint:disable:no-console
+/* eslint-disable no-console */
 
 export interface Logger {
   warn(...args: any[]): void;
@@ -63,8 +63,8 @@ export class FilteredLogger {
   private _logger: Logger;
   private _predicate: (level: string, args: any[]) => boolean;
 
-  public static UserLevelFilter = (level: string, _args: any[]) => level === 'warn' || level === 'error';
-  public static DeveloperLevelFilter = (_level: string, _args: any[]) => true;
+  public static UserLevelFilter = (level: string, _args: any[]): boolean => level === 'warn' || level === 'error';
+  public static DeveloperLevelFilter = (_level: string, _args: any[]): true => true;
 
   constructor(logger: Logger, predicate?: (level: string, args: any[]) => boolean) {
     this._logger = logger;

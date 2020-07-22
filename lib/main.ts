@@ -1,7 +1,7 @@
-// tslint:disable:no-reference
+/* eslint-disable @typescript-eslint/triple-slash-reference */
 /// <reference path="../typings/atom/index.d.ts"/>
 /// <reference path="../typings/atom-ide/index.d.ts"/>
-// tslint:enable:no-reference
+/* eslint-enable @typescript-eslint/triple-slash-reference */
 
 import AutoLanguageClient from './auto-languageclient';
 import Convert from './convert';

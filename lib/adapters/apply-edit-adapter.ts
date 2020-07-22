@@ -13,7 +13,7 @@ import {
 /** Public: Adapts workspace/applyEdit commands to editors. */
 export default class ApplyEditAdapter {
   /** Public: Attach to a {LanguageClientConnection} to receive edit events. */
-  public static attach(connection: LanguageClientConnection) {
+  public static attach(connection: LanguageClientConnection): void {
     connection.onApplyEdit((m) => ApplyEditAdapter.onApplyEdit(m));
   }
 

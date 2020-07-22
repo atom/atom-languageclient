@@ -58,6 +58,7 @@ async function streamWithProgress(
 ): Promise<void> {
   let bytesDone = 0;
 
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     const result = await reader.read();
     if (result.done) {

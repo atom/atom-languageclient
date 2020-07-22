@@ -156,7 +156,6 @@ describe('OutlineViewAdapter', () => {
       expect(result[0].children).to.deep.equal([expected]);
     });
 
-    // tslint:disable-next-line:max-line-length
     it('creates an empty root container with a single source item when containerName is missing and matches own name', () => {
       const sourceItem: ls.SymbolInformation = {
         kind: ls.SymbolKind.Class,

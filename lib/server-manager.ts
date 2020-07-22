@@ -195,7 +195,7 @@ export class ServerManager {
     this.startListening();
   }
 
-  public hasServerReachedRestartLimit(server: ActiveServer) {
+  public hasServerReachedRestartLimit(server: ActiveServer): boolean {
     let restartCounter = this._restartCounterPerProject.get(server.projectPath);
 
     if (!restartCounter) {

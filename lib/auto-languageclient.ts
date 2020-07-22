@@ -41,6 +41,7 @@ import {
   TextEditor,
 } from 'atom';
 import * as ac from 'atom/autocomplete-plus';
+import { TextEdit, CodeAction } from 'atom-ide';
 
 export { ActiveServer, LanguageClientConnection, LanguageServerProcess };
 export type ConnectionType = 'stdio' | 'socket' | 'ipc';
@@ -243,7 +244,7 @@ export default class AutoLanguageClient {
   }
 
   /** Restart all active language servers for this language client in the workspace */
-  protected async restartAllServers() {
+  protected async restartAllServers(): Promise<void> {
     await this._serverManager.restartAllServers();
   }
 
@@ -331,7 +332,6 @@ export default class AutoLanguageClient {
         } else {
           this.logger.warn(`Language server has exceeded auto-restart limit for project '${newServer.projectPath}'`);
           atom.notifications.addError(
-            // tslint:disable-next-line:max-line-length
             `The ${this.name} language server has exited and exceeded the restart limit for project '${newServer.projectPath}'`);
         }
       }
@@ -741,7 +741,11 @@ export default class AutoLanguageClient {
     };
   }
 
-  protected async getCodeActions(editor: TextEditor, range: Range, diagnostics: atomIde.Diagnostic[]) {
+  protected async getCodeActions(
+    editor: TextEditor,
+    range: Range,
+    diagnostics: atomIde.Diagnostic[]
+  ): Promise<CodeAction[] | null> {
     const server = await this._serverManager.getServer(editor);
     if (server == null || !CodeActionAdapter.canAdapt(server.capabilities)) {
       return null;
@@ -765,7 +769,11 @@ export default class AutoLanguageClient {
     };
   }
 
-  protected async getRename(editor: TextEditor, position: Point, newName: string) {
+  protected async getRename(
+    editor: TextEditor,
+    position: Point,
+    newName: string
+  ): Promise<Map<string, TextEdit[]> | null> {
     const server = await this._serverManager.getServer(editor);
     if (server == null || !RenameAdapter.canAdapt(server.capabilities)) {
       return null;
@@ -810,7 +818,7 @@ export default class AutoLanguageClient {
    * Called on language server stderr output.
    * @param stderr A chunk of stderr from a language server instance
    */
-  protected handleServerStderr(stderr: string, _projectPath: string) {
+  protected handleServerStderr(stderr: string, _projectPath: string): void {
     stderr.split('\n').filter((l) => l).forEach((line) => this.logger.warn(`stderr ${line}`));
   }
 

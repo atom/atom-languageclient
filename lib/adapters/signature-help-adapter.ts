@@ -33,7 +33,7 @@ export default class SignatureHelpAdapter {
     return serverCapabilities.signatureHelpProvider != null;
   }
 
-  public dispose() {
+  public dispose(): void {
     this._disposables.dispose();
   }
 
