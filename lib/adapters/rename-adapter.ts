@@ -31,7 +31,7 @@ export default class RenameAdapter {
     }
 
     if (edit.documentChanges) {
-      return RenameAdapter.convertDocumentChanges(edit.documentChanges);
+      return RenameAdapter.convertDocumentChanges(<TextDocumentEdit[]>edit.documentChanges);
     } else if (edit.changes) {
       return RenameAdapter.convertChanges(edit.changes);
     } else {

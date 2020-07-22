@@ -321,7 +321,7 @@ declare module 'atom-ide' {
   export type MarkupKind = 'plaintext' | 'markdown';
 
   export interface ParameterInformation {
-    label: string;
+    label: string | [number, number];
     documentation?: string | MarkupContent;
   }
 

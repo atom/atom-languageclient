@@ -49,7 +49,7 @@ export default class ApplyEditAdapter {
     if (params.edit.documentChanges) {
       changes = {};
       params.edit.documentChanges.forEach((change) => {
-        if (change && change.textDocument) {
+        if (change && "textDocument" in change && change.textDocument) {
           changes[change.textDocument.uri] = change.edits;
         }
       });
