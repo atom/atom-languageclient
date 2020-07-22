@@ -10,6 +10,14 @@
     "plugin:@typescript-eslint/recommended"
   ],
   "rules": {
+    "@typescript-eslint/ban-types": [
+      "error",
+      {
+        "types": {
+          "object": false
+        }
+      }
+    ],
     "@typescript-eslint/explicit-module-boundary-types": [
       "error",
       {
