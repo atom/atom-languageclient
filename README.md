@@ -1,5 +1,11 @@
 # Atom Language Server Protocol Client
 
+:warning: Development of atom-languageclient has officially moved to [atom-ide-community/atom-languageclient](https://github.com/atom-ide-community/atom-languageclient) :warning: 
+
+:warning: Submit your issues or pull requests in that repository. :warning:
+
+--------------------
+
 [![macOS Build Status](https://travis-ci.org/atom/atom-languageclient.svg?branch=master)](https://travis-ci.org/atom/atom-languageclient) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/xibqpw9h3lya87xs/branch/master?svg=true
 )](https://ci.appveyor.com/project/Atom/atom-languageclient/branch/master) [![Dependency Status](https://david-dm.org/atom/atom-languageclient.svg)](https://david-dm.org/atom/atom-languageclient)
 
