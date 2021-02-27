@@ -1,6 +1,6 @@
 # Atom Language Server Protocol Client
 
-:warning: Development of atom-languageclient has officially moved to [atom-ide-community/atom-languageclient](https://github.com/atom-ide-community/atom-languageclient) :warning: 
+:warning: Development of atom-languageclient has officially moved to [atom-community/atom-languageclient](https://github.com/atom-community/atom-languageclient) :warning: 
 
 :warning: Submit your issues or pull requests in that repository. :warning:
 
