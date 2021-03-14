@@ -1,6 +1,4 @@
 node_modules
 npm-debug.log
 build/
-flow-typed/
-package-lock.json
 yarn.lock

@@ -4,7 +4,7 @@ declare module 'atom' {
     getNonWordCharacters(position: Point): string;
   }
 
-  // Non-public Notification api
+  /** Non-public Notification api */
   interface NotificationExt extends Notification {
     isDismissed?: () => boolean;
     getOptions?: () => NotificationOptions | null;

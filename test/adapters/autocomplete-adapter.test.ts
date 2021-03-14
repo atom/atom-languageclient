@@ -5,15 +5,52 @@ import * as sinon from 'sinon';
 import {
   CompositeDisposable,
   Point,
-  Range,
-  TextEditor,
 } from 'atom';
 import * as ac from 'atom/autocomplete-plus';
 import { expect } from 'chai';
 import { createSpyConnection, createFakeEditor } from '../helpers.js';
+import { TextSuggestion, SnippetSuggestion } from 'atom-ide';
+import { CompletionItem, MarkupContent, InsertTextFormat, TextEdit, Command } from '../../lib/languageclient';
+
+function createRequest({
+  prefix = "",
+  position = new Point(123, 456),
+  activatedManually = true,
+}): ac.SuggestionsRequestedEvent {
+  return {
+    editor: createFakeEditor(),
+    bufferPosition: position,
+    prefix,
+    scopeDescriptor: { getScopesArray() { return ['some.scope']; } },
+    activatedManually,
+  };
+}
+
+// Required and optional properties as of LSP 3.14.0
+function createCompletionItem(label: string, optional: {
+  kind?: number,
+  detail?: string,
+  documentation?: string | MarkupContent,
+  deprecated?: boolean,
+  preselect?: boolean,
+  sortText?: string,
+  filterText?: string,
+  insertText?: string,
+  insertTextFormat?: InsertTextFormat,
+  textEdit?: TextEdit,
+  additionalTextEdits?: TextEdit[],
+  commitCharacters?: string[]
+  command?: Command,
+  data?: any,
+} = {}): CompletionItem {
+  return {
+    label,
+    ...optional,
+  } as CompletionItem;
+}
 
 describe('AutoCompleteAdapter', () => {
-  function createActiveServerSpy() {
+  function createActiveServerSpy(): ActiveServer {
     return {
       capabilities: { completionProvider: {} },
       connection: new ls.LanguageClientConnection(createSpyConnection()),
@@ -23,97 +60,107 @@ describe('AutoCompleteAdapter', () => {
     };
   }
 
-  beforeEach(() => {
-    (global as any).sinon = sinon.sandbox.create();
-  });
-  afterEach(() => {
-    (global as any).sinon.restore();
-  });
-
-  const request: ac.SuggestionsRequestedEvent = {
-    editor: createFakeEditor(),
-    bufferPosition: new Point(123, 456),
-    prefix: 'lab',
-    scopeDescriptor: { getScopesArray() { return ['some.scope']; } },
-    activatedManually: true,
-  };
-
   const completionItems = [
-    {
-      label: 'label1',
+    createCompletionItem('thisHasFiltertext', {
       kind: ls.CompletionItemKind.Keyword,
       detail: 'description1',
       documentation: 'a very exciting keyword',
+      filterText: 'labrador',
       sortText: 'z',
-    },
-    {
-      label: 'label2',
+    }),
+    createCompletionItem('label2', {
       kind: ls.CompletionItemKind.Field,
       detail: 'description2',
       documentation: 'a very exciting field',
+      filterText: 'rabbit',
       sortText: 'a',
-    },
-    {
-      label: 'label3',
+    }),
+    createCompletionItem('label3', {
       kind: ls.CompletionItemKind.Variable,
       detail: 'description3',
       documentation: 'a very exciting variable',
-    },
-    {
-      label: 'filteredout',
+    }),
+    createCompletionItem('filteredout', {
       kind: ls.CompletionItemKind.Snippet,
       detail: 'description4',
       documentation: 'should not appear',
       sortText: 'zzz',
-    },
+    }),
   ];
 
+  const request = createRequest({prefix: 'lab'});
+
   describe('getSuggestions', () => {
-    const server: ActiveServer = createActiveServerSpy();
-    sinon.stub(server.connection, 'completion').resolves(completionItems);
+    let server: ActiveServer;
+    let autoCompleteAdapter: AutoCompleteAdapter;
+
+    async function getResults(
+      items: CompletionItem[],
+      requestParams: {prefix?: string, point?: Point},
+    ): Promise<ac.AnySuggestion[]> {
+      sinon.stub(server.connection, 'completion').resolves(items);
+      return autoCompleteAdapter.getSuggestions(server, createRequest(requestParams));
+    }
+
+    beforeEach(() => {
+      server = createActiveServerSpy();
+      autoCompleteAdapter = new AutoCompleteAdapter();
+    });
 
     it('gets AutoComplete suggestions via LSP given an AutoCompleteRequest', async () => {
-      const autoCompleteAdapter = new AutoCompleteAdapter();
-      const results = await autoCompleteAdapter.getSuggestions(server, request);
-      expect(results.length).equals(3);
-      expect((results[0] as ac.TextSuggestion).text).equals('label2');
-      expect(results[1].description).equals('a very exciting variable');
-      expect(results[2].type).equals('keyword');
+      const results = await getResults(completionItems, {prefix: ''});
+      expect(results.length).equals(completionItems.length);
+    });
+
+    it('provides a filtered selection based on the filterKey', async () => {
+      const results = await getResults(completionItems, {prefix: 'lab'});
+      expect(results.length).equals(2);
+      expect(results.some((r) => r.displayText === 'thisHasFiltertext')).to.be.true;
+      expect(results.some((r) => r.displayText === 'label3')).to.be.true;
+    });
+
+    it('uses the sortText property to arrange completions when there is no prefix', async () => {
+      const sortedItems = [
+        createCompletionItem('a', {sortText: 'c'}),
+        createCompletionItem('b'),
+        createCompletionItem('c', {sortText: 'a'}),
+      ];
+      const results = await getResults(sortedItems, {prefix: ''});
+
+      expect(results.length).equals(sortedItems.length);
+      expect(results[0].displayText).equals('c');
+      expect(results[1].displayText).equals('b');
+      expect(results[2].displayText).equals('a');
+    });
+
+    it('uses the filterText property to arrange completions when there is a prefix', async () => {
+      const results = await getResults(completionItems, {prefix: 'lab'});
+      expect(results.length).equals(2);
+      expect(results[0].displayText).equals('label3'); // shorter than 'labrador', so expected to be first
+      expect(results[1].displayText).equals('thisHasFiltertext');
     });
   });
 
   describe('completeSuggestion', () => {
     const partialItems = [
-      {
-        label: 'label1',
-        kind: ls.CompletionItemKind.Keyword,
-        sortText: 'z',
-      },
-      {
-        label: 'label2',
-        kind: ls.CompletionItemKind.Field,
-        sortText: 'a',
-      },
-      {
-        label: 'label3',
-        kind: ls.CompletionItemKind.Variable,
-      },
+      createCompletionItem('label1'),
+      createCompletionItem('label2'),
+      createCompletionItem('label3'),
     ];
 
     const server: ActiveServer = createActiveServerSpy();
     sinon.stub(server.connection, 'completion').resolves(partialItems);
-    sinon.stub(server.connection, 'completionItemResolve').resolves({
-      label: 'label3',
-      kind: ls.CompletionItemKind.Variable,
-      detail: 'description3',
-      documentation: 'a very exciting variable',
-    });
+    sinon.stub(server.connection, 'completionItemResolve').resolves(createCompletionItem(
+      'label3', {detail: 'description3', documentation: 'a very exciting variable'},
+    ));
 
     it('resolves suggestions via LSP given an AutoCompleteRequest', async () => {
       const autoCompleteAdapter = new AutoCompleteAdapter();
       const results: ac.AnySuggestion[] = await autoCompleteAdapter.getSuggestions(server, request);
-      expect(results[2].description).equals(undefined);
-      const resolvedItem = await autoCompleteAdapter.completeSuggestion(server, results[2], request);
+      const result = results.find((r) => r.displayText === 'label3')!;
+      expect(result).not.to.be.undefined;
+      expect(result.description).to.be.undefined;
+      const resolvedItem = await autoCompleteAdapter.completeSuggestion(server, result, request);
       expect(resolvedItem && resolvedItem.description).equals('a very exciting variable');
     });
   });
@@ -123,81 +170,135 @@ describe('AutoCompleteAdapter', () => {
       const result = AutoCompleteAdapter.createCompletionParams(request, '', true);
       expect(result.textDocument.uri).equals('file:///a/b/c/d.js');
       expect(result.position).deep.equals({ line: 123, character: 456 });
-      expect(result.context && result.context.triggerKind === ls.CompletionTriggerKind.Invoked);
-      expect(result.context && result.context.triggerCharacter === undefined);
+      expect(result.context && result.context.triggerKind).equals(ls.CompletionTriggerKind.Invoked);
+      expect(result.context && result.context.triggerCharacter).to.be.undefined;
     });
 
     it('creates CompletionParams from an AutocompleteRequest with a trigger', () => {
       const result = AutoCompleteAdapter.createCompletionParams(request, '.', true);
       expect(result.textDocument.uri).equals('file:///a/b/c/d.js');
       expect(result.position).deep.equals({ line: 123, character: 456 });
-      expect(result.context && result.context.triggerKind === ls.CompletionTriggerKind.TriggerCharacter);
-      expect(result.context && result.context.triggerCharacter === '.');
+      expect(result.context && result.context.triggerKind).equals(ls.CompletionTriggerKind.TriggerCharacter);
+      expect(result.context && result.context.triggerCharacter).equals('.');
     });
 
     it('creates CompletionParams from an AutocompleteRequest for a follow-up request', () => {
       const result = AutoCompleteAdapter.createCompletionParams(request, '.', false);
       expect(result.textDocument.uri).equals('file:///a/b/c/d.js');
       expect(result.position).deep.equals({ line: 123, character: 456 });
-      expect(result.context && result.context.triggerKind === ls.CompletionTriggerKind.TriggerForIncompleteCompletions);
-      expect(result.context && result.context.triggerCharacter === '.');
+      expect(result.context && result.context.triggerKind)
+        .equals(ls.CompletionTriggerKind.TriggerForIncompleteCompletions);
+      expect(result.context && result.context.triggerCharacter).equals('.');
     });
   });
 
-  describe('completionItemsToSuggestions', () => {
-    it('converts LSP CompletionItem array to AutoComplete Suggestions array', () => {
-      const autoCompleteAdapter = new AutoCompleteAdapter();
-      const results = Array.from(autoCompleteAdapter.completionItemsToSuggestions(completionItems, request));
-      expect(results.length).equals(4);
-      expect((results[0][0] as ac.TextSuggestion).text).equals('label2');
-      expect(results[1][0].description).equals('a very exciting variable');
-      expect(results[2][0].type).equals('keyword');
+  describe('conversion of LSP completion to autocomplete+ completion', () => {
+    const items = [
+      createCompletionItem('align', {
+        sortText: 'a',
+        kind: ls.CompletionItemKind.Snippet,
+        textEdit: {
+          range: { start: { line: 0, character: 4 }, end: { line: 0,  character: 10 } },
+          newText: 'hello world',
+        },
+      }),
+      createCompletionItem('list', {
+        sortText: 'b',
+        kind: ls.CompletionItemKind.Constant,
+        textEdit: {
+          range: { start: { line: 0, character: 8 }, end: { line: 0, character: 13 } },
+          newText: 'shifted',
+        },
+      }),
+      createCompletionItem('minimal', {
+        sortText: 'c',
+      }),
+      createCompletionItem('old', {
+        sortText: 'd',
+        documentation: 'doc string',
+        insertText: 'inserted',
+        insertTextFormat: ls.InsertTextFormat.Snippet,
+      }),
+      createCompletionItem('documented', {
+        sortText: 'e',
+        detail: 'details',
+        documentation:  {
+          kind: 'markdown',
+          value: 'documentation',
+        },
+      }),
+    ];
+
+    let server: ActiveServer;
+    let autoCompleteAdapter: AutoCompleteAdapter;
+
+    beforeEach(() => {
+      server = createActiveServerSpy();
+      autoCompleteAdapter = new AutoCompleteAdapter();
     });
 
-    it('converts LSP CompletionList to AutoComplete Suggestions array', () => {
-      const completionList = { items: completionItems, isIncomplete: false };
-      const autoCompleteAdapter = new AutoCompleteAdapter();
-      const results = Array.from(autoCompleteAdapter.completionItemsToSuggestions(completionList, request));
-      expect(results.length).equals(4);
-      expect(results[0][0].description).equals('a very exciting field');
-      expect((results[1][0] as ac.TextSuggestion).text).equals('label3');
+    it('converts LSP CompletionItem array to AutoComplete Suggestions array', async () => {
+      const customRequest = createRequest({prefix: '', position: new Point(0, 10)});
+      customRequest.editor.setText('foo #align bar');
+      sinon.stub(server.connection, 'completion').resolves(items);
+      const results = await autoCompleteAdapter.getSuggestions(server, customRequest);
+
+      expect(results.length).equals(items.length);
+      expect(results[0].displayText).equals('align');
+      expect((results[0] as TextSuggestion).text).equals('hello world');
+      expect(results[0].replacementPrefix).equals('#align');
+      expect(results[0].type).equals('snippet');
+
+      expect(results[1].displayText).equals('list');
+      expect((results[1] as TextSuggestion).text).equals('shifted');
+      expect(results[1].replacementPrefix).equals('gn'); // TODO: support post replacement too
+      expect(results[1].type).equals('constant');
+
+      expect(results[2].displayText).equals('minimal');
+      expect((results[2] as TextSuggestion).text).equals('minimal');
+      expect(results[2].replacementPrefix).equals(''); // we sent an empty prefix
+
+      expect(results[3].displayText).equals('old');
+      expect((results[3] as SnippetSuggestion).snippet).equals('inserted');
+      expect(results[3].description).equals('doc string');
+      expect(results[3].descriptionMarkdown).equals('doc string');
+
+      expect(results[4].displayText).equals('documented');
+      expect(results[4].description).is.undefined;
+      expect(results[4].descriptionMarkdown).equals('documentation');
+      expect(results[4].rightLabel).equals('details');
     });
 
-    it('converts LSP CompletionList to AutoComplete Suggestions array using the onDidConvertCompletionItem', () => {
-      const completionList = { items: completionItems, isIncomplete: false };
-      const autoCompleteAdapter = new AutoCompleteAdapter();
-      const results =
-        Array.from(
-          autoCompleteAdapter.completionItemsToSuggestions(completionList, request, (c, a, r) => {
-            (a as ac.TextSuggestion).text = c.label + ' ok';
-            a.displayText = r.scopeDescriptor.getScopesArray()[0];
-          }));
+    it('respects onDidConvertCompletionItem', async () => {
+      sinon.stub(server.connection, 'completion').resolves([createCompletionItem('label')]);
+      const results = await autoCompleteAdapter.getSuggestions(server, createRequest({}), (c, a, r) => {
+        (a as ac.TextSuggestion).text = c.label + ' ok';
+        a.displayText = r.scopeDescriptor.getScopesArray()[0];
+      });
 
-      expect(results.length).equals(4);
-      expect(results[0][0].displayText).equals('some.scope');
-      expect((results[1][0] as ac.TextSuggestion).text).equals('label3 ok');
+      expect(results.length).equals(1);
+      expect(results[0].displayText).equals('some.scope');
+      expect((results[0] as ac.TextSuggestion).text).equals('label ok');
     });
 
-    it('converts empty array into an empty AutoComplete Suggestions array', () => {
-      const autoCompleteAdapter = new AutoCompleteAdapter();
-      const results = Array.from(autoCompleteAdapter.completionItemsToSuggestions([], request));
+    it('converts empty array into an empty AutoComplete Suggestions array', async () => {
+      sinon.stub(server.connection, 'completion').resolves([]);
+      const results = await autoCompleteAdapter.getSuggestions(server, createRequest({}));
       expect(results.length).equals(0);
     });
-  });
 
-  describe('completionItemToSuggestion', () => {
-    it('converts LSP CompletionItem to AutoComplete Suggestion without textEdit', () => {
-      const completionItem = {
-        insertText: 'insert',
-        label: 'label',
-        filterText: 'filter',
-        kind: ls.CompletionItemKind.Keyword,
-        detail: 'keyword',
-        documentation: 'a truly useful keyword',
-      };
-      const result: ac.TextSuggestion = { text: '' };
-      AutoCompleteAdapter.completionItemToSuggestion(completionItem, result, request);
-      expect(result.text).equals('insert');
+    it('converts LSP CompletionItem to AutoComplete Suggestion without textEdit', async () => {
+      sinon.stub(server.connection, 'completion').resolves([
+        createCompletionItem('label', {
+         insertText: 'insert',
+         filterText: 'filter',
+         kind: ls.CompletionItemKind.Keyword,
+         detail: 'keyword',
+         documentation: 'a truly useful keyword',
+       }),
+      ]);
+      const result = (await autoCompleteAdapter.getSuggestions(server, createRequest({})))[0];
+      expect((result as TextSuggestion).text).equals('insert');
       expect(result.displayText).equals('label');
       expect(result.type).equals('keyword');
       expect(result.rightLabel).equals('keyword');
@@ -205,59 +306,56 @@ describe('AutoCompleteAdapter', () => {
       expect(result.descriptionMarkdown).equals('a truly useful keyword');
     });
 
-    it('converts LSP CompletionItem to AutoComplete Suggestion with textEdit', () => {
-      const completionItem: ls.CompletionItem = {
-        insertText: 'insert',
-        label: 'label',
-        filterText: 'filter',
-        kind: ls.CompletionItemKind.Variable,
-        detail: 'number',
-        documentation: 'a truly useful variable',
-        textEdit: {
-          range: {
-            start: { line: 10, character: 20 },
-            end: { line: 30, character: 40 },
-          },
-          newText: 'newText',
-        },
-      };
-      const autocompleteRequest: ac.SuggestionsRequestedEvent = {
-        editor: createFakeEditor(),
-        bufferPosition: new Point(123, 456),
-        prefix: 'def',
-        scopeDescriptor: { getScopesArray() { return ['some.scope']; } },
+    it('converts LSP CompletionItem to AutoComplete Suggestion with textEdit', async () => {
+      const customRequest = createRequest({
+        prefix: '',
+        position: new Point(0, 10),
         activatedManually: false,
-      };
-      sinon.stub(autocompleteRequest.editor, 'getTextInBufferRange').returns('replacementPrefix');
-      const result: any = {};
-      AutoCompleteAdapter.completionItemToSuggestion(completionItem, result, autocompleteRequest);
+      });
+      customRequest.editor.setText('foo #label bar');
+      sinon.stub(server.connection, 'completion').resolves([
+        createCompletionItem('label', {
+          insertText: 'insert',
+          filterText: 'filter',
+          kind: ls.CompletionItemKind.Variable,
+          detail: 'number',
+          documentation: 'a truly useful variable',
+          textEdit: {
+            range: { start: { line: 0, character: 4 }, end: { line: 0,  character: 10 } },
+            newText: 'newText',
+          },
+        }),
+      ]);
+
+      const result = (await autoCompleteAdapter.getSuggestions(server, customRequest))[0];
       expect(result.displayText).equals('label');
       expect(result.type).equals('variable');
       expect(result.rightLabel).equals('number');
       expect(result.description).equals('a truly useful variable');
       expect(result.descriptionMarkdown).equals('a truly useful variable');
-      expect(result.replacementPrefix).equals('replacementPrefix');
-      expect(result.text).equals('newText');
-      expect((autocompleteRequest as any).editor.getTextInBufferRange.calledOnce).equals(true);
-      expect((autocompleteRequest as any).editor.getTextInBufferRange.getCall(0).args).deep.equals([
-        new Range(new Point(10, 20), new Point(30, 40)),
-      ]);
+      expect(result.replacementPrefix).equals('#label');
+      expect((result as TextSuggestion).text).equals('newText');
     });
-  });
 
-  describe('applyCompletionItemToSuggestion', () => {
-    it('converts LSP CompletionItem with insertText and filterText to AutoComplete Suggestion', () => {
-      const completionItem: ls.CompletionItem = {
-        insertText: 'insert',
-        label: 'label',
-        filterText: 'filter',
-        kind: ls.CompletionItemKind.Keyword,
-        detail: 'detail',
-        documentation: 'a very exciting keyword',
-      };
-      const result: any = {};
-      AutoCompleteAdapter.applyCompletionItemToSuggestion(completionItem, result);
-      expect(result.text).equals('insert');
+    it('converts LSP CompletionItem with insertText and filterText to AutoComplete Suggestion', async () => {
+      sinon.stub(server.connection, 'completion').resolves([
+        createCompletionItem('label', {
+          insertText: 'insert',
+          filterText: 'filter',
+          kind: ls.CompletionItemKind.Keyword,
+          detail: 'detail',
+          documentation: 'a very exciting keyword',
+        }),
+        createCompletionItem('filteredOut', {
+          filterText: 'nop',
+        }),
+      ]);
+
+      const results = await autoCompleteAdapter.getSuggestions(server, createRequest({prefix: 'fil'}));
+      expect(results.length).equals(1);
+
+      const result = results[0];
+      expect((result as TextSuggestion).text).equals('insert');
       expect(result.displayText).equals('label');
       expect(result.type).equals('keyword');
       expect(result.rightLabel).equals('detail');
@@ -265,105 +363,125 @@ describe('AutoCompleteAdapter', () => {
       expect(result.descriptionMarkdown).equals('a very exciting keyword');
     });
 
-    it('converts LSP CompletionItem with missing documentation to AutoComplete Suggestion', () => {
-      const completionItem: ls.CompletionItem = {
-        insertText: 'insert',
-        label: 'label',
-        filterText: 'filter',
-        kind: ls.CompletionItemKind.Keyword,
-        detail: 'detail',
-      };
-      const result: any = {};
-      AutoCompleteAdapter.applyCompletionItemToSuggestion(completionItem, result);
-      expect(result.text).equals('insert');
-      expect(result.displayText).equals('label');
-      expect(result.type).equals('keyword');
+    it('converts LSP CompletionItem with missing documentation to AutoComplete Suggestion', async () => {
+      sinon.stub(server.connection, 'completion').resolves([
+        createCompletionItem('label', {
+          detail: 'detail',
+        }),
+      ]);
+
+      const result = (await autoCompleteAdapter.getSuggestions(server, createRequest({})))[0];
       expect(result.rightLabel).equals('detail');
       expect(result.description).equals(undefined);
       expect(result.descriptionMarkdown).equals(undefined);
     });
 
-    it('converts LSP CompletionItem with markdown documentation to AutoComplete Suggestion', () => {
-      const completionItem: ls.CompletionItem = {
-        insertText: 'insert',
-        label: 'label',
-        filterText: 'filter',
-        kind: ls.CompletionItemKind.Keyword,
-        detail: 'detail',
-        documentation: { value: 'Some *markdown*', kind: 'markdown' },
-      };
-      const result: any = {};
-      AutoCompleteAdapter.applyCompletionItemToSuggestion(completionItem, result);
-      expect(result.text).equals('insert');
-      expect(result.displayText).equals('label');
-      expect(result.type).equals('keyword');
+    it('converts LSP CompletionItem with markdown documentation to AutoComplete Suggestion', async () => {
+      sinon.stub(server.connection, 'completion').resolves([
+        createCompletionItem('label', {
+          detail: 'detail',
+          documentation: { value: 'Some *markdown*', kind: 'markdown' },
+        }),
+      ]);
+
+      const result = (await autoCompleteAdapter.getSuggestions(server, createRequest({})))[0];
       expect(result.rightLabel).equals('detail');
       expect(result.description).equals(undefined);
       expect(result.descriptionMarkdown).equals('Some *markdown*');
     });
 
-    it('converts LSP CompletionItem with plaintext documentation to AutoComplete Suggestion', () => {
-      const completionItem: ls.CompletionItem = {
-        insertText: 'insert',
-        label: 'label',
-        filterText: 'filter',
-        kind: ls.CompletionItemKind.Keyword,
-        detail: 'detail',
-        documentation: { value: 'Some plain text', kind: 'plaintext' },
-      };
-      const result: any = {};
-      AutoCompleteAdapter.applyCompletionItemToSuggestion(completionItem, result);
-      expect(result.text).equals('insert');
-      expect(result.displayText).equals('label');
-      expect(result.type).equals('keyword');
+    it('converts LSP CompletionItem with plaintext documentation to AutoComplete Suggestion', async () => {
+      sinon.stub(server.connection, 'completion').resolves([
+        createCompletionItem('label', {
+          detail: 'detail',
+          documentation: { value: 'Some plain text', kind: 'plaintext' },
+        }),
+      ]);
+
+      const result = (await autoCompleteAdapter.getSuggestions(server, createRequest({})))[0];
       expect(result.rightLabel).equals('detail');
       expect(result.description).equals('Some plain text');
       expect(result.descriptionMarkdown).equals(undefined);
     });
 
-    it('converts LSP CompletionItem without insertText or filterText to AutoComplete Suggestion', () => {
-      const completionItem: ls.CompletionItem = {
-        label: 'label',
-        kind: ls.CompletionItemKind.Keyword,
-        detail: 'detail',
-        documentation: 'A very useful keyword',
-      };
-      const result: any = {};
-      AutoCompleteAdapter.applyCompletionItemToSuggestion(completionItem, result);
-      expect(result.text).equals('label');
+    it('converts LSP CompletionItem without insertText or filterText to AutoComplete Suggestion', async () => {
+      sinon.stub(server.connection, 'completion').resolves([
+        createCompletionItem('label', {
+          kind: ls.CompletionItemKind.Keyword,
+          detail: 'detail',
+          documentation: 'A very useful keyword',
+        }),
+      ]);
+
+      const result = (await autoCompleteAdapter.getSuggestions(server, createRequest({})))[0];
+      expect((result as TextSuggestion).text).equals('label');
       expect(result.displayText).equals('label');
       expect(result.type).equals('keyword');
       expect(result.rightLabel).equals('detail');
       expect(result.description).equals('A very useful keyword');
-      // expect(result.descriptionMarkdown).equals('A very useful keyword');
-    });
-  });
-
-  describe('applyTextEditToSuggestion', () => {
-    it('does not do anything if there is no textEdit', () => {
-      const completionItem: ac.TextSuggestion = { text: '' };
-      AutoCompleteAdapter.applyTextEditToSuggestion(undefined, new TextEditor(), completionItem);
-      expect(completionItem).deep.equals({ text: '' });
+      expect(result.descriptionMarkdown).equals('A very useful keyword');
     });
 
-    it('applies changes from TextEdit to replacementPrefix and text', () => {
-      const textEdit = {
-        range: {
-          start: { line: 1, character: 2 },
-          end: { line: 3, character: 4 },
-        },
-        newText: 'newText',
-      };
-      const editor = new TextEditor();
-      sinon.stub(editor, 'getTextInBufferRange').returns('replacementPrefix');
+    it('does not do anything if there is no textEdit', async () => {
+      sinon.stub(server.connection, 'completion').resolves([
+        createCompletionItem('', {filterText: 'rep'}),
+      ]);
 
-      const completionItem: ac.TextSuggestion = { text: '' };
-      AutoCompleteAdapter.applyTextEditToSuggestion(textEdit, editor, completionItem);
-      expect(completionItem.replacementPrefix).equals('replacementPrefix');
-      expect(completionItem.text).equals('newText');
-      expect((editor as any).getTextInBufferRange.calledOnce).equals(true);
-      expect((editor as any).getTextInBufferRange.getCall(0).args).deep.equals(
-        [new Range(new Point(1, 2), new Point(3, 4))]);
+      const result = (await autoCompleteAdapter.getSuggestions(server, createRequest({prefix: 'rep'})))[0];
+      expect((result as TextSuggestion).text).equals('');
+      expect(result.displayText).equals('');
+      expect(result.replacementPrefix).equals('');
+    });
+
+    it('applies changes from TextEdit to text', async () => {
+      const customRequest = createRequest({prefix: '', position: new Point(0, 10)});
+      customRequest.editor.setText('foo #align bar');
+      sinon.stub(server.connection, 'completion').resolves([
+        createCompletionItem('align', {
+          sortText: 'a',
+          textEdit: {
+            range: { start: { line: 0, character: 4 }, end: { line: 0,  character: 10 } },
+            newText: 'hello world',
+          },
+        }),
+      ]);
+      const results = await autoCompleteAdapter.getSuggestions(server, customRequest);
+
+      expect(results[0].displayText).equals('align');
+      expect((results[0] as TextSuggestion).text).equals('hello world');
+      expect(results[0].replacementPrefix).equals('#align');
+    });
+
+    it('updates the replacementPrefix when the editor text changes', async () => {
+      const customRequest = createRequest({prefix: '', position: new Point(0, 8)});
+      customRequest.editor.setText('foo #ali bar');
+      sinon.stub(server.connection, 'completion').resolves([
+        createCompletionItem('align', {
+          sortText: 'a',
+          textEdit: {
+            range: { start: { line: 0, character: 4 }, end: { line: 0,  character: 8 } },
+            newText: 'hello world',
+          },
+        }),
+      ]);
+
+      let result = (await autoCompleteAdapter.getSuggestions(server, customRequest))[0];
+      expect(result.replacementPrefix).equals('#ali');
+
+      customRequest.editor.setTextInBufferRange([[0, 8], [0, 8]], 'g');
+      customRequest.bufferPosition = new Point(0, 9);
+      result = (await autoCompleteAdapter.getSuggestions(server, customRequest))[0];
+      expect(result.replacementPrefix).equals('#alig');
+
+      customRequest.editor.setTextInBufferRange([[0, 9], [0, 9]], 'n');
+      customRequest.bufferPosition = new Point(0, 10);
+      result = (await autoCompleteAdapter.getSuggestions(server, customRequest))[0];
+      expect(result.replacementPrefix).equals('#align');
+
+      customRequest.editor.setTextInBufferRange([[0, 7], [0, 9]], '');
+      customRequest.bufferPosition = new Point(0, 7);
+      result = (await autoCompleteAdapter.getSuggestions(server, customRequest))[0];
+      expect(result.replacementPrefix).equals('#al');
     });
   });
 

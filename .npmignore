@@ -6,7 +6,3 @@ appveyor.ps1
 lib/
 test/
 script/
-flow-libs/
-.flowconfig
-.babelrc
-.eslintrc.js

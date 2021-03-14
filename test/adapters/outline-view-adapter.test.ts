@@ -1,6 +1,5 @@
 import OutlineViewAdapter from '../../lib/adapters/outline-view-adapter';
 import * as ls from '../../lib/languageclient';
-import * as sinon from 'sinon';
 import { expect } from 'chai';
 import { Point } from 'atom';
 
@@ -12,13 +11,6 @@ describe('OutlineViewAdapter', () => {
   const createLocation = (a: any, b: any, c: any, d: any) => ({
     uri: '',
     range: createRange(a, b, c, d),
-  });
-
-  beforeEach(() => {
-    (global as any).sinon = sinon.sandbox.create();
-  });
-  afterEach(() => {
-    (global as any).sinon.restore();
   });
 
   describe('canAdapt', () => {

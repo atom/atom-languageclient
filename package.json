@@ -11,9 +11,10 @@
     "compile": "tsc",
     "watch": "tsc -watch",
     "lint": "tslint -c tslint.json 'lib/**/*.ts' 'test/**/*.ts' 'typings/**/*.d.ts'",
-    "prepublish": "npm run clean && npm run compile",
+    "prepare": "npm run clean && npm run compile",
     "test": "npm run compile && npm run lint && atom --test build/test"
   },
+  "atomTestRunner": "./test/runner",
   "dependencies": {
     "fuzzaldrin-plus": "^0.6.0",
     "vscode-jsonrpc": "4.0.0",
@@ -21,6 +22,7 @@
     "vscode-languageserver-types": "3.12.0"
   },
   "devDependencies": {
+    "@atom/mocha-test-runner": "^1.5.0",
     "@types/atom": "^1.31.0",
     "@types/chai": "^4.1.7",
     "@types/fuzzaldrin-plus": "0.6.0",
