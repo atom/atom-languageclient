@@ -1,13 +1,11 @@
 # Atom Language Server Protocol Client
 
-:warning: Development of atom-languageclient has officially moved to [atom-community/atom-languageclient](https://github.com/atom-community/atom-languageclient) :warning: 
+:warning: Development of atom-languageclient has officially moved to [atom-community/atom-languageclient](https://github.com/atom-community/atom-languageclient) :warning:
 
 :warning: Submit your issues or pull requests in that repository. :warning:
 
 --------------------
-
-[![macOS Build Status](https://travis-ci.org/atom/atom-languageclient.svg?branch=master)](https://travis-ci.org/atom/atom-languageclient) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/xibqpw9h3lya87xs/branch/master?svg=true
-)](https://ci.appveyor.com/project/Atom/atom-languageclient/branch/master) [![Dependency Status](https://david-dm.org/atom/atom-languageclient.svg)](https://david-dm.org/atom/atom-languageclient)
+![CI Status](https://github.com/atom/atom-languageclient/actions/workflows/main.yml/badge.svg)
 
 Provide integration support for adding Language Server Protocol servers to Atom.
 
@@ -164,7 +162,7 @@ If you want to switch back to the production version of atom-languageclient type
 
 We have various unit tests and some linter rules - you can run both of these locally using `npm test` to ensure your CI will get a clean build.
 
-### Guidance 
+### Guidance
 
 Always feel free to help out!  Whether it's [filing bugs and feature requests](https://github.com/atom/atom-languageclient/issues/new) or working on some of the [open issues](https://github.com/atom/atom-languageclient/issues), Atom's [contributing guide](https://github.com/atom/atom/blob/master/CONTRIBUTING.md) will help get you started while the [guide for contributing to packages](https://github.com/atom/atom/blob/master/docs/contributing-to-packages.md) has some extra information.
 
