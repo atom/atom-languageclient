@@ -1,3 +1,4 @@
+import * as path from 'path';
 import {
   Point,
   TextBuffer,
@@ -110,4 +111,8 @@ export function promiseWithTimeout<T>(ms: number, promise: Promise<T>): Promise<
       reject(err);
     });
   });
+}
+
+export function normalizePath(p: string): string {
+  return !p.endsWith(path.sep) ? path.join(p, path.sep) : p;
 }

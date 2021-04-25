@@ -4,6 +4,7 @@ import {
   LanguageClientConnection,
   ApplyWorkspaceEditParams,
   ApplyWorkspaceEditResponse,
+  TextDocumentEdit,
 } from '../languageclient';
 import {
   TextBuffer,
@@ -49,7 +50,7 @@ export default class ApplyEditAdapter {
     if (params.edit.documentChanges) {
       changes = {};
       params.edit.documentChanges.forEach((change) => {
-        if (change && change.textDocument) {
+        if (TextDocumentEdit.is(change) && change.textDocument) {
           changes[change.textDocument.uri] = change.edits;
         }
       });
