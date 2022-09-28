@@ -1,4 +1,5 @@
-# Atom Language Server Protocol Client
+##### Atom and all repositories under Atom will be archived on December 15, 2022. Learn more in our [official announcement](https://github.blog/2022-06-08-sunsetting-atom/)
+ # Atom Language Server Protocol Client
 
 :warning: Development of atom-languageclient has officially moved to [atom-community/atom-languageclient](https://github.com/atom-community/atom-languageclient) :warning:
 
