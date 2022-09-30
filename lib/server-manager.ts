@@ -9,7 +9,7 @@ import {
   FilesystemChangeEvent,
   TextEditor,
 } from 'atom';
-import { ReportBusyWhile } from './utils';
+import { normalizePath, ReportBusyWhile } from './utils';
 
 /**
  * Public: Defines the minimum surface area for an object that resembles a
@@ -53,7 +53,6 @@ export class ServerManager {
   private _stoppingServers: ActiveServer[] = [];
   private _disposable: CompositeDisposable = new CompositeDisposable();
   private _editorToServer: Map<TextEditor, ActiveServer> = new Map();
-  private _normalizedProjectPaths: string[] = [];
   private _isStarted = false;
 
   constructor(
@@ -63,8 +62,8 @@ export class ServerManager {
     private _changeWatchedFileFilter: (filePath: string) => boolean,
     private _reportBusyWhile: ReportBusyWhile,
     private _languageServerName: string,
+    private _determineProjectPath: (editor: TextEditor) => Promise<string | null>,
   ) {
-    this.updateNormalizedProjectPaths();
   }
 
   public startListening(): void {
@@ -135,7 +134,7 @@ export class ServerManager {
     textEditor: TextEditor,
     { shouldStart }: { shouldStart?: boolean } = { shouldStart: false },
   ): Promise<ActiveServer | null> {
-    const finalProjectPath = this.determineProjectPath(textEditor);
+    const finalProjectPath = await this._determineProjectPath(textEditor);
     if (finalProjectPath == null) {
       // Files not yet saved have no path
       return null;
@@ -258,27 +257,10 @@ export class ServerManager {
     });
   }
 
-  public determineProjectPath(textEditor: TextEditor): string | null {
-    const filePath = textEditor.getPath();
-    if (filePath == null) {
-      return null;
-    }
-    return this._normalizedProjectPaths.find((d) => filePath.startsWith(d)) || null;
-  }
-
-  public updateNormalizedProjectPaths(): void {
-    this._normalizedProjectPaths = atom.project.getDirectories().map((d) => this.normalizePath(d.getPath()));
-  }
-
-  public normalizePath(projectPath: string): string {
-    return !projectPath.endsWith(path.sep) ? path.join(projectPath, path.sep) : projectPath;
-  }
-
   public async projectPathsChanged(projectPaths: string[]): Promise<void> {
-    const pathsSet = new Set(projectPaths.map(this.normalizePath));
+    const pathsSet = new Set(projectPaths.map(normalizePath));
     const serversToStop = this._activeServers.filter((s) => !pathsSet.has(s.projectPath));
     await Promise.all(serversToStop.map((s) => this.stopServer(s)));
-    this.updateNormalizedProjectPaths();
   }
 
   public projectFilesChanged(fileEvents: FilesystemChangeEvent): void {
